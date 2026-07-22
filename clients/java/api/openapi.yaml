@@ -1,0 +1,3853 @@
+openapi: 3.1.0
+info:
+  description: "Define, evaluate, and enforce data retention policies"
+  title: DRPE — Data Retention Policy Engine
+  version: 0.1.0
+servers:
+- description: Local DRPE API
+  url: http://localhost:8000
+paths:
+  /api/v1/policies/validate:
+    post:
+      operationId: validate_policy_api_v1_policies_validate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidateResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Validate Policy
+      tags:
+      - policies
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/policies/import:
+    post:
+      operationId: import_policies_api_v1_policies_import_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Import Policies
+      tags:
+      - policies
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/policies:
+    get:
+      operationId: list_policies_api_v1_policies_get
+      parameters:
+      - explode: true
+        in: query
+        name: status_filter
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: policy_kind
+        required: false
+        schema:
+          $ref: "#/components/schemas/PolicyKind"
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/PolicyListItem"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Policies
+      tags:
+      - policies
+      x-accepts:
+      - application/json
+    post:
+      operationId: create_policy_api_v1_policies_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyCreateRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Create Policy
+      tags:
+      - policies
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/policies/{policy_id}:
+    delete:
+      operationId: delete_policy_api_v1_policies__policy_id__delete
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Delete Policy
+      tags:
+      - policies
+      x-accepts:
+      - application/json
+    get:
+      operationId: get_policy_api_v1_policies__policy_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get Policy
+      tags:
+      - policies
+      x-accepts:
+      - application/json
+    put:
+      operationId: update_policy_api_v1_policies__policy_id__put
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyCreateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Update Policy
+      tags:
+      - policies
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/policies/{policy_id}/status:
+    post:
+      operationId: change_policy_status_api_v1_policies__policy_id__status_post
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyStatusChangeRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Change Policy Status
+      tags:
+      - policies
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/policies/{policy_id}/versions:
+    get:
+      operationId: list_policy_versions_api_v1_policies__policy_id__versions_get
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/PolicyVersionInfo"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Policy Versions
+      tags:
+      - policies
+      x-accepts:
+      - application/json
+  /api/v1/policies/{policy_id}/versions/{ver}:
+    get:
+      operationId: get_policy_version_api_v1_policies__policy_id__versions__ver__get
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: ver
+        required: true
+        schema:
+          title: Ver
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get Policy Version
+      tags:
+      - policies
+      x-accepts:
+      - application/json
+  /api/v1/policies/{policy_id}/versions/{ver}/activate:
+    post:
+      operationId: activate_policy_version_api_v1_policies__policy_id__versions__ver__activate_post
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: ver
+        required: true
+        schema:
+          title: Ver
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Activate Policy Version
+      tags:
+      - policies
+      x-accepts:
+      - application/json
+  /api/v1/policies/{policy_id}/diff:
+    post:
+      operationId: diff_policy_versions_api_v1_policies__policy_id__diff_post
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyDiffRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PolicyDiffResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Diff Policy Versions
+      tags:
+      - policies
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/classify:
+    post:
+      operationId: classify_one_api_v1_classify_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClassificationRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClassificationResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Classify One
+      tags:
+      - classify
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/classify/batch:
+    post:
+      operationId: classify_batch_api_v1_classify_batch_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchClassificationRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ClassificationResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Classify Batch
+      tags:
+      - classify
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/classify/dry-run:
+    post:
+      operationId: classify_dry_run_api_v1_classify_dry_run_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClassificationRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClassificationResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Classify Dry Run
+      tags:
+      - classify
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/evaluate:
+    post:
+      operationId: evaluate_one_api_v1_evaluate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Evaluate One
+      tags:
+      - evaluate
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/evaluate/batch:
+    post:
+      operationId: evaluate_batch_api_v1_evaluate_batch_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchEvaluateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/EvaluationResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Evaluate Batch
+      tags:
+      - evaluate
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/evaluate/dry-run:
+    post:
+      operationId: evaluate_dry_run_api_v1_evaluate_dry_run_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Evaluate Dry Run
+      tags:
+      - evaluate
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/enforce:
+    post:
+      operationId: trigger_enforce_api_v1_enforce_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnforceRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnforceResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Trigger Enforce
+      tags:
+      - enforce
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/enforce/jobs:
+    get:
+      operationId: list_jobs_api_v1_enforce_jobs_get
+      parameters:
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/JobStatus"
+        style: form
+      - explode: true
+        in: query
+        name: policy_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/EnforcementJob"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Jobs
+      tags:
+      - enforce
+      x-accepts:
+      - application/json
+  /api/v1/enforce/jobs/{job_id}:
+    get:
+      operationId: get_job_api_v1_enforce_jobs__job_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          title: Job Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnforcementJob"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get Job
+      tags:
+      - enforce
+      x-accepts:
+      - application/json
+  /api/v1/dsar/access:
+    post:
+      operationId: submit_access_api_v1_dsar_access_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DsarSubmitRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DsarRequest"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Submit Access
+      tags:
+      - dsar
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/dsar/erasure:
+    post:
+      operationId: submit_erasure_api_v1_dsar_erasure_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DsarSubmitRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DsarRequest"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Submit Erasure
+      tags:
+      - dsar
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/dsar/requests:
+    get:
+      operationId: list_requests_api_v1_dsar_requests_get
+      parameters:
+      - explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          $ref: "#/components/schemas/DsarRequestType"
+        style: form
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/DsarRequestStatus"
+        style: form
+      - explode: true
+        in: query
+        name: subject_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: policy_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/DsarRequest"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Requests
+      tags:
+      - dsar
+      x-accepts:
+      - application/json
+  /api/v1/dsar/requests/{request_id}:
+    get:
+      operationId: get_request_api_v1_dsar_requests__request_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: request_id
+        required: true
+        schema:
+          title: Request Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DsarRequest"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get Request
+      tags:
+      - dsar
+      x-accepts:
+      - application/json
+  /api/v1/webhooks:
+    get:
+      operationId: list_webhooks_api_v1_webhooks_get
+      parameters:
+      - explode: true
+        in: query
+        name: active
+        required: false
+        schema:
+          nullable: true
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/WebhookResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Webhooks
+      tags:
+      - webhooks
+      x-accepts:
+      - application/json
+    post:
+      operationId: create_webhook_api_v1_webhooks_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookCreateRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookCreateResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Create Webhook
+      tags:
+      - webhooks
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/webhooks/{webhook_id}:
+    delete:
+      operationId: delete_webhook_api_v1_webhooks__webhook_id__delete
+      parameters:
+      - explode: false
+        in: path
+        name: webhook_id
+        required: true
+        schema:
+          title: Webhook Id
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Delete Webhook
+      tags:
+      - webhooks
+      x-accepts:
+      - application/json
+    get:
+      operationId: get_webhook_api_v1_webhooks__webhook_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: webhook_id
+        required: true
+        schema:
+          title: Webhook Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get Webhook
+      tags:
+      - webhooks
+      x-accepts:
+      - application/json
+    patch:
+      operationId: update_webhook_api_v1_webhooks__webhook_id__patch
+      parameters:
+      - explode: false
+        in: path
+        name: webhook_id
+        required: true
+        schema:
+          title: Webhook Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Update Webhook
+      tags:
+      - webhooks
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/audit/logs:
+    get:
+      operationId: list_audit_logs_api_v1_audit_logs_get
+      parameters:
+      - explode: true
+        in: query
+        name: policy_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: record_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: job_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: event_type
+        required: false
+        schema:
+          $ref: "#/components/schemas/AuditEventType"
+        style: form
+      - explode: true
+        in: query
+        name: since
+        required: false
+        schema:
+          format: date-time
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: until
+        required: false
+        schema:
+          format: date-time
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/AuditEntry"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Audit Logs
+      tags:
+      - audit
+      x-accepts:
+      - application/json
+  /api/v1/health:
+    get:
+      operationId: health_api_v1_health_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+          description: Successful Response
+      summary: Health
+      tags:
+      - health
+      x-accepts:
+      - application/json
+  /api/v1/health/ready:
+    get:
+      operationId: ready_api_v1_health_ready_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadyResponse"
+          description: Successful Response
+      summary: Ready
+      tags:
+      - health
+      x-accepts:
+      - application/json
+  /api/v1/jurisdictions:
+    get:
+      operationId: list_all_api_v1_jurisdictions_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                type: array
+          description: Successful Response
+      security:
+      - BearerAuth: []
+      summary: List All
+      tags:
+      - jurisdictions
+      x-accepts:
+      - application/json
+  /api/v1/jurisdictions/{code}:
+    get:
+      operationId: get_one_api_v1_jurisdictions__code__get
+      parameters:
+      - explode: false
+        in: path
+        name: code
+        required: true
+        schema:
+          title: Code
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Get One Api V1 Jurisdictions  Code  Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get One
+      tags:
+      - jurisdictions
+      x-accepts:
+      - application/json
+  /api/v1/privacy/status:
+    get:
+      operationId: privacy_status_api_v1_privacy_status_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacyStatusResponse"
+          description: Successful Response
+      security:
+      - BearerAuth: []
+      summary: Privacy Status
+      tags:
+      - privacy
+      x-accepts:
+      - application/json
+  /api/v1/privacy/mask:
+    post:
+      operationId: privacy_mask_api_v1_privacy_mask_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaskRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaskResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Privacy Mask
+      tags:
+      - privacy
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/privacy/unmask:
+    post:
+      operationId: privacy_unmask_api_v1_privacy_unmask_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnmaskRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnmaskResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Privacy Unmask
+      tags:
+      - privacy
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+components:
+  schemas:
+    Action:
+      enum:
+      - retain
+      - archive
+      - anonymize
+      - pseudonymize
+      - delete
+      - notify
+      - flag
+      title: Action
+      type: string
+    AuditConfig:
+      example:
+        log_evaluations: true
+        retention_of_audit_logs: retention_of_audit_logs
+        log_actions: true
+      properties:
+        log_evaluations:
+          default: true
+          title: Log Evaluations
+          type: boolean
+        log_actions:
+          default: true
+          title: Log Actions
+          type: boolean
+        retention_of_audit_logs:
+          nullable: true
+          type: string
+      title: AuditConfig
+    AuditEntry:
+      description: Immutable audit log entry.
+      example:
+        rule_id: rule_id
+        record_id: record_id
+        evaluation_id: evaluation_id
+        event_type: evaluation
+        policy_id: policy_id
+        payload:
+          key: ""
+        job_id: job_id
+        created_at: 2000-01-23T04:56:07.000+00:00
+        action: action
+        id: id
+      properties:
+        id:
+          title: Id
+          type: string
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        event_type:
+          $ref: "#/components/schemas/AuditEventType"
+        policy_id:
+          nullable: true
+          type: string
+        rule_id:
+          nullable: true
+          type: string
+        record_id:
+          nullable: true
+          type: string
+        action:
+          nullable: true
+          type: string
+        payload:
+          additionalProperties: true
+          title: Payload
+          type: object
+        job_id:
+          nullable: true
+          type: string
+        evaluation_id:
+          nullable: true
+          type: string
+      required:
+      - created_at
+      - event_type
+      - id
+      title: AuditEntry
+    AuditEventType:
+      enum:
+      - evaluation
+      - action
+      - notify
+      - pending_grace
+      - flag
+      - dsar_access
+      - dsar_erasure
+      title: AuditEventType
+      type: string
+    BatchClassificationRequest:
+      example:
+        records:
+        - record_id: record_id
+          metadata:
+            key: ""
+          policy_id: policy_id
+          jurisdiction: jurisdiction
+          text_fields:
+          - text_fields
+          - text_fields
+          data_type: data_type
+          source: source
+        - record_id: record_id
+          metadata:
+            key: ""
+          policy_id: policy_id
+          jurisdiction: jurisdiction
+          text_fields:
+          - text_fields
+          - text_fields
+          data_type: data_type
+          source: source
+      properties:
+        records:
+          items:
+            $ref: "#/components/schemas/ClassificationRequest"
+          type: array
+      required:
+      - records
+      title: BatchClassificationRequest
+    BatchEvaluateRequest:
+      example:
+        records:
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          context:
+            key: ""
+          source: source
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          context:
+            key: ""
+          source: source
+      properties:
+        records:
+          items:
+            $ref: "#/components/schemas/EvaluationRequest"
+          type: array
+      required:
+      - records
+      title: BatchEvaluateRequest
+    ClassificationAction:
+      enum:
+      - flag
+      - mask
+      - block
+      - review
+      - allow
+      title: ClassificationAction
+      type: string
+    ClassificationDiagnostics:
+      description: Why a policy did or did not apply to this request.
+      example:
+        selected_policy_applied: false
+        applicable_policy_count: 6
+        out_of_scope_reason: none
+        policy_scope_summary:
+          sources:
+          - sources
+          - sources
+          jurisdiction: jurisdiction
+          excluded_data_types:
+          - excluded_data_types
+          - excluded_data_types
+          excluded_sources:
+          - excluded_sources
+          - excluded_sources
+          data_types:
+          - data_types
+          - data_types
+      properties:
+        applicable_policy_count:
+          default: 0
+          title: Applicable Policy Count
+          type: integer
+        selected_policy_applied:
+          default: false
+          title: Selected Policy Applied
+          type: boolean
+        out_of_scope_reason:
+          default: none
+          enum:
+          - none
+          - jurisdiction
+          - data_type
+          - source
+          title: Out Of Scope Reason
+          type: string
+        policy_scope_summary:
+          $ref: "#/components/schemas/ClassificationPolicyScopeSummary"
+      title: ClassificationDiagnostics
+    ClassificationEntity:
+      description: A detectable PII / sensitive data entity definition.
+      example:
+        detection:
+          catalog_ref: catalog_ref
+          regex: regex
+          field_names:
+          - field_names
+          - field_names
+          ner_types:
+          - ner_types
+          - ner_types
+        regulatory_refs:
+        - regulatory_refs
+        - regulatory_refs
+        id: id
+        label: label
+        sensitivity: low
+        classification: null
+      properties:
+        id:
+          title: Id
+          type: string
+        label:
+          title: Label
+          type: string
+        classification:
+          $ref: "#/components/schemas/DataClassification"
+        sensitivity:
+          $ref: "#/components/schemas/Sensitivity"
+        regulatory_refs:
+          items:
+            type: string
+          type: array
+        detection:
+          $ref: "#/components/schemas/EntityDetection"
+      required:
+      - classification
+      - id
+      - label
+      title: ClassificationEntity
+    ClassificationPolicy:
+      description: Full classification policy definition.
+      example:
+        owner: owner
+        jurisdiction: jurisdiction
+        text_fields:
+        - text_fields
+        - text_fields
+        rules:
+        - condition:
+            all:
+            - field: field
+              value: ""
+              operator: eq
+            - field: field
+              value: ""
+              operator: eq
+            any:
+            - field: field
+              value: ""
+              operator: eq
+            - field: field
+              value: ""
+              operator: eq
+          description: description
+          action: flag
+          handling: handling
+          id: id
+          priority: 1
+        - condition:
+            all:
+            - field: field
+              value: ""
+              operator: eq
+            - field: field
+              value: ""
+              operator: eq
+            any:
+            - field: field
+              value: ""
+              operator: eq
+            - field: field
+              value: ""
+              operator: eq
+          description: description
+          action: flag
+          handling: handling
+          id: id
+          priority: 1
+        version: 1
+        tags:
+        - tags
+        - tags
+        policy_kind: null
+        expires_at: null
+        entities:
+        - detection:
+            catalog_ref: catalog_ref
+            regex: regex
+            field_names:
+            - field_names
+            - field_names
+            ner_types:
+            - ner_types
+            - ner_types
+          regulatory_refs:
+          - regulatory_refs
+          - regulatory_refs
+          id: id
+          label: label
+          sensitivity: low
+          classification: null
+        - detection:
+            catalog_ref: catalog_ref
+            regex: regex
+            field_names:
+            - field_names
+            - field_names
+            ner_types:
+            - ner_types
+            - ner_types
+          regulatory_refs:
+          - regulatory_refs
+          - regulatory_refs
+          id: id
+          label: label
+          sensitivity: low
+          classification: null
+        scope:
+          sources:
+          - sources
+          - sources
+          exclude:
+            sources:
+            - sources
+            - sources
+            data_types:
+            - data_types
+            - data_types
+          data_types:
+          - data_types
+          - data_types
+        name: name
+        id: id
+        effective_from: null
+        status: null
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        version:
+          default: 1
+          title: Version
+          type: integer
+        status:
+          $ref: "#/components/schemas/PolicyStatus"
+        jurisdiction:
+          title: Jurisdiction
+          type: string
+        policy_kind:
+          $ref: "#/components/schemas/PolicyKind"
+        owner:
+          nullable: true
+          type: string
+        effective_from:
+          $ref: "#/components/schemas/Effective_From"
+        expires_at:
+          $ref: "#/components/schemas/Expires_At"
+        tags:
+          items:
+            type: string
+          type: array
+        scope:
+          $ref: "#/components/schemas/PolicyScope"
+        entities:
+          items:
+            $ref: "#/components/schemas/ClassificationEntity"
+          minItems: 1
+          type: array
+        rules:
+          items:
+            $ref: "#/components/schemas/ClassificationRule"
+          minItems: 1
+          type: array
+        text_fields:
+          description: Metadata field paths scanned with NER when privalyse is available
+          items:
+            type: string
+          type: array
+      required:
+      - entities
+      - id
+      - jurisdiction
+      - name
+      - rules
+      title: ClassificationPolicy
+    ClassificationPolicyScopeSummary:
+      description: Subset of selected policy scope echoed for UI diagnostics.
+      example:
+        sources:
+        - sources
+        - sources
+        jurisdiction: jurisdiction
+        excluded_data_types:
+        - excluded_data_types
+        - excluded_data_types
+        excluded_sources:
+        - excluded_sources
+        - excluded_sources
+        data_types:
+        - data_types
+        - data_types
+      properties:
+        jurisdiction:
+          title: Jurisdiction
+          type: string
+        data_types:
+          items:
+            type: string
+          type: array
+        sources:
+          items:
+            type: string
+          type: array
+        excluded_data_types:
+          items:
+            type: string
+          type: array
+        excluded_sources:
+          items:
+            type: string
+          type: array
+      required:
+      - jurisdiction
+      title: ClassificationPolicyScopeSummary
+    ClassificationRequest:
+      description: Request to classify a record against classification policies.
+      example:
+        record_id: record_id
+        metadata:
+          key: ""
+        policy_id: policy_id
+        jurisdiction: jurisdiction
+        text_fields:
+        - text_fields
+        - text_fields
+        data_type: data_type
+        source: source
+      properties:
+        data_type:
+          title: Data Type
+          type: string
+        record_id:
+          title: Record Id
+          type: string
+        metadata:
+          additionalProperties: true
+          title: Metadata
+          type: object
+        source:
+          nullable: true
+          type: string
+        jurisdiction:
+          nullable: true
+          type: string
+        text_fields:
+          items:
+            type: string
+          nullable: true
+          type: array
+        policy_id:
+          nullable: true
+          type: string
+      required:
+      - data_type
+      - record_id
+      title: ClassificationRequest
+    ClassificationResponse:
+      example:
+        result:
+          matched_policy: matched_policy
+          policy_version: 0
+          max_classification: null
+          max_sensitivity: null
+          action: flag
+          handling: handling
+          matched_rule: matched_rule
+        record_id: record_id
+        diagnostics:
+          selected_policy_applied: false
+          applicable_policy_count: 6
+          out_of_scope_reason: none
+          policy_scope_summary:
+            sources:
+            - sources
+            - sources
+            jurisdiction: jurisdiction
+            excluded_data_types:
+            - excluded_data_types
+            - excluded_data_types
+            excluded_sources:
+            - excluded_sources
+            - excluded_sources
+            data_types:
+            - data_types
+            - data_types
+        jurisdiction_applied: jurisdiction_applied
+        classification_id: classification_id
+        detected_entities:
+        - snippet: snippet
+          field: field
+          regulatory_refs:
+          - regulatory_refs
+          - regulatory_refs
+          confidence: definitive
+          label: label
+          sensitivity: low
+          entity_id: entity_id
+          classification: PII
+          detector: detector
+        - snippet: snippet
+          field: field
+          regulatory_refs:
+          - regulatory_refs
+          - regulatory_refs
+          confidence: definitive
+          label: label
+          sensitivity: low
+          entity_id: entity_id
+          classification: PII
+          detector: detector
+        audit_ref: audit_ref
+        classified_at: classified_at
+      properties:
+        record_id:
+          title: Record Id
+          type: string
+        classification_id:
+          title: Classification Id
+          type: string
+        detected_entities:
+          items:
+            $ref: "#/components/schemas/DetectedEntity"
+          type: array
+        result:
+          $ref: "#/components/schemas/ClassificationResultDetail"
+        diagnostics:
+          $ref: "#/components/schemas/ClassificationDiagnostics"
+        jurisdiction_applied:
+          nullable: true
+          type: string
+        classified_at:
+          title: Classified At
+          type: string
+        audit_ref:
+          nullable: true
+          type: string
+      required:
+      - classification_id
+      - classified_at
+      - record_id
+      - result
+      title: ClassificationResponse
+    ClassificationResultDetail:
+      example:
+        matched_policy: matched_policy
+        policy_version: 0
+        max_classification: null
+        max_sensitivity: null
+        action: flag
+        handling: handling
+        matched_rule: matched_rule
+      properties:
+        action:
+          $ref: "#/components/schemas/ClassificationAction"
+        handling:
+          nullable: true
+          type: string
+        matched_policy:
+          nullable: true
+          type: string
+        matched_rule:
+          nullable: true
+          type: string
+        policy_version:
+          nullable: true
+          type: integer
+        max_classification:
+          $ref: "#/components/schemas/DataClassification"
+        max_sensitivity:
+          $ref: "#/components/schemas/Sensitivity"
+      required:
+      - action
+      title: ClassificationResultDetail
+    ClassificationRule:
+      description: Rule fired after entity detection to recommend handling.
+      example:
+        condition:
+          all:
+          - field: field
+            value: ""
+            operator: eq
+          - field: field
+            value: ""
+            operator: eq
+          any:
+          - field: field
+            value: ""
+            operator: eq
+          - field: field
+            value: ""
+            operator: eq
+        description: description
+        action: flag
+        handling: handling
+        id: id
+        priority: 1
+      properties:
+        id:
+          title: Id
+          type: string
+        description:
+          nullable: true
+          type: string
+        priority:
+          minimum: 1.0
+          title: Priority
+          type: integer
+        condition:
+          $ref: "#/components/schemas/ConditionGroup"
+        action:
+          $ref: "#/components/schemas/ClassificationAction"
+        handling:
+          nullable: true
+          type: string
+      required:
+      - action
+      - condition
+      - id
+      - priority
+      title: ClassificationRule
+    ConditionGroup:
+      description: "Compound condition: all (AND) or any (OR) of field conditions."
+      example:
+        all:
+        - field: field
+          value: ""
+          operator: eq
+        - field: field
+          value: ""
+          operator: eq
+        any:
+        - field: field
+          value: ""
+          operator: eq
+        - field: field
+          value: ""
+          operator: eq
+      properties:
+        all:
+          items:
+            $ref: "#/components/schemas/FieldCondition"
+          nullable: true
+          type: array
+        any:
+          items:
+            $ref: "#/components/schemas/FieldCondition"
+          nullable: true
+          type: array
+      title: ConditionGroup
+    ConflictingPolicy:
+      example:
+        rule_id: rule_id
+        policy_id: policy_id
+        action: null
+        priority: 6
+      properties:
+        policy_id:
+          title: Policy Id
+          type: string
+        rule_id:
+          title: Rule Id
+          type: string
+        action:
+          $ref: "#/components/schemas/Action"
+        priority:
+          title: Priority
+          type: integer
+      required:
+      - action
+      - policy_id
+      - priority
+      - rule_id
+      title: ConflictingPolicy
+    DataClassification:
+      enum:
+      - PII
+      - SPII
+      - financial
+      - operational
+      - public
+      title: DataClassification
+      type: string
+    DetectedEntity:
+      description: A single entity hit from classification.
+      example:
+        snippet: snippet
+        field: field
+        regulatory_refs:
+        - regulatory_refs
+        - regulatory_refs
+        confidence: definitive
+        label: label
+        sensitivity: low
+        entity_id: entity_id
+        classification: PII
+        detector: detector
+      properties:
+        entity_id:
+          title: Entity Id
+          type: string
+        label:
+          title: Label
+          type: string
+        field:
+          title: Field
+          type: string
+        classification:
+          $ref: "#/components/schemas/DataClassification"
+        sensitivity:
+          $ref: "#/components/schemas/Sensitivity"
+        confidence:
+          default: definitive
+          title: Confidence
+          type: string
+        snippet:
+          nullable: true
+          type: string
+        detector:
+          title: Detector
+          type: string
+        regulatory_refs:
+          items:
+            type: string
+          type: array
+      required:
+      - classification
+      - detector
+      - entity_id
+      - field
+      - label
+      - sensitivity
+      title: DetectedEntity
+    DsarConfig:
+      example:
+        erasure_exceptions:
+        - erasure_exceptions
+        - erasure_exceptions
+        response_deadline: response_deadline
+        right_to_access: true
+        right_to_erasure: true
+      properties:
+        right_to_access:
+          default: true
+          title: Right To Access
+          type: boolean
+        right_to_erasure:
+          default: true
+          title: Right To Erasure
+          type: boolean
+        erasure_exceptions:
+          items:
+            type: string
+          type: array
+        response_deadline:
+          nullable: true
+          type: string
+      title: DsarConfig
+    DsarDeniedRecord:
+      example:
+        record_id: record_id
+        reason: reason
+      properties:
+        record_id:
+          title: Record Id
+          type: string
+        reason:
+          title: Reason
+          type: string
+      required:
+      - reason
+      - record_id
+      title: DsarDeniedRecord
+    DsarError:
+      example:
+        record_id: record_id
+        detail: detail
+      properties:
+        record_id:
+          nullable: true
+          type: string
+        detail:
+          title: Detail
+          type: string
+      required:
+      - detail
+      title: DsarError
+    DsarRequest:
+      example:
+        subject_id: subject_id
+        result:
+          erased:
+          - erased
+          - erased
+          records:
+          - record_id: record_id
+            metadata:
+              key: ""
+            jurisdiction: jurisdiction
+            data_type: data_type
+            source: source
+          - record_id: record_id
+            metadata:
+              key: ""
+            jurisdiction: jurisdiction
+            data_type: data_type
+            source: source
+          denied:
+          - record_id: record_id
+            reason: reason
+          - record_id: record_id
+            reason: reason
+          errors:
+          - record_id: record_id
+            detail: detail
+          - record_id: record_id
+            detail: detail
+        completed_at: 2000-01-23T04:56:07.000+00:00
+        policy_id: policy_id
+        inline_records:
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        identity:
+          key: ""
+        due_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        type: access
+        error: error
+        status: received
+        requested_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          title: Id
+          type: string
+        type:
+          $ref: "#/components/schemas/DsarRequestType"
+        status:
+          $ref: "#/components/schemas/DsarRequestStatus"
+        subject_id:
+          title: Subject Id
+          type: string
+        policy_id:
+          title: Policy Id
+          type: string
+        identity:
+          additionalProperties: true
+          nullable: true
+          type: object
+        requested_at:
+          format: date-time
+          title: Requested At
+          type: string
+        due_at:
+          format: date-time
+          nullable: true
+          type: string
+        completed_at:
+          format: date-time
+          nullable: true
+          type: string
+        inline_records:
+          items:
+            $ref: "#/components/schemas/RecordRef"
+          nullable: true
+          type: array
+        result:
+          $ref: "#/components/schemas/DsarResult"
+        error:
+          nullable: true
+          type: string
+      required:
+      - id
+      - policy_id
+      - requested_at
+      - subject_id
+      - type
+      title: DsarRequest
+    DsarRequestStatus:
+      enum:
+      - received
+      - in_progress
+      - completed
+      - partial
+      - denied
+      - failed
+      title: DsarRequestStatus
+      type: string
+    DsarRequestType:
+      enum:
+      - access
+      - erasure
+      title: DsarRequestType
+      type: string
+    DsarResult:
+      description: Outcome payload stored on a DSAR request after processing.
+      example:
+        erased:
+        - erased
+        - erased
+        records:
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        denied:
+        - record_id: record_id
+          reason: reason
+        - record_id: record_id
+          reason: reason
+        errors:
+        - record_id: record_id
+          detail: detail
+        - record_id: record_id
+          detail: detail
+      properties:
+        records:
+          items:
+            $ref: "#/components/schemas/RecordRef"
+          type: array
+        erased:
+          items:
+            type: string
+          type: array
+        denied:
+          items:
+            $ref: "#/components/schemas/DsarDeniedRecord"
+          type: array
+        errors:
+          items:
+            $ref: "#/components/schemas/DsarError"
+          type: array
+      title: DsarResult
+    DsarSubmitRequest:
+      description: POST /api/v1/dsar/access|erasure body.
+      example:
+        subject_id: subject_id
+        policy_id: policy_id
+        records:
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        identity:
+          key: ""
+      properties:
+        subject_id:
+          title: Subject Id
+          type: string
+        policy_id:
+          title: Policy Id
+          type: string
+        identity:
+          additionalProperties: true
+          nullable: true
+          type: object
+        records:
+          items:
+            $ref: "#/components/schemas/RecordRef"
+          nullable: true
+          type: array
+      required:
+      - policy_id
+      - subject_id
+      title: DsarSubmitRequest
+    EnforceRequest:
+      description: POST /api/v1/enforce body.
+      example:
+        policy_id: policy_id
+        records:
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+      properties:
+        policy_id:
+          nullable: true
+          type: string
+        records:
+          items:
+            $ref: "#/components/schemas/RecordRef"
+          nullable: true
+          type: array
+      title: EnforceRequest
+    EnforceResponse:
+      example:
+        job_id: job_id
+        status: queued
+      properties:
+        job_id:
+          title: Job Id
+          type: string
+        status:
+          $ref: "#/components/schemas/JobStatus"
+      required:
+      - job_id
+      - status
+      title: EnforceResponse
+    EnforcementJob:
+      example:
+        policy_id: policy_id
+        finished_at: 2000-01-23T04:56:07.000+00:00
+        inline_records:
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        - record_id: record_id
+          metadata:
+            key: ""
+          jurisdiction: jurisdiction
+          data_type: data_type
+          source: source
+        started_at: 2000-01-23T04:56:07.000+00:00
+        progress:
+          dispatched: 6
+          scanned: 0
+          notified: 5
+          errors: 5
+          pending_grace: 1
+        id: id
+        trigger: schedule
+        error: error
+        status: queued
+        requested_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          title: Id
+          type: string
+        policy_id:
+          nullable: true
+          type: string
+        status:
+          $ref: "#/components/schemas/JobStatus"
+        trigger:
+          $ref: "#/components/schemas/JobTrigger"
+        requested_at:
+          format: date-time
+          title: Requested At
+          type: string
+        started_at:
+          format: date-time
+          nullable: true
+          type: string
+        finished_at:
+          format: date-time
+          nullable: true
+          type: string
+        progress:
+          $ref: "#/components/schemas/JobProgress"
+        error:
+          nullable: true
+          type: string
+        inline_records:
+          items:
+            $ref: "#/components/schemas/RecordRef"
+          nullable: true
+          type: array
+      required:
+      - id
+      - requested_at
+      title: EnforcementJob
+    EntityDetection:
+      description: How to detect an entity in record metadata or text.
+      example:
+        catalog_ref: catalog_ref
+        regex: regex
+        field_names:
+        - field_names
+        - field_names
+        ner_types:
+        - ner_types
+        - ner_types
+      properties:
+        field_names:
+          items:
+            type: string
+          type: array
+        regex:
+          nullable: true
+          type: string
+        ner_types:
+          items:
+            type: string
+          type: array
+        catalog_ref:
+          nullable: true
+          type: string
+      title: EntityDetection
+    EvaluationRequest:
+      description: Request to evaluate a record against policies.
+      example:
+        record_id: record_id
+        metadata:
+          key: ""
+        jurisdiction: jurisdiction
+        data_type: data_type
+        context:
+          key: ""
+        source: source
+      properties:
+        data_type:
+          title: Data Type
+          type: string
+        record_id:
+          title: Record Id
+          type: string
+        metadata:
+          additionalProperties: true
+          title: Metadata
+          type: object
+        source:
+          nullable: true
+          type: string
+        jurisdiction:
+          nullable: true
+          type: string
+        context:
+          additionalProperties: true
+          nullable: true
+          type: object
+      required:
+      - data_type
+      - record_id
+      title: EvaluationRequest
+    EvaluationResponse:
+      description: Full evaluation response (API + SDK).
+      example:
+        result:
+          matched_policy: matched_policy
+          policy_version: 0
+          requires_approval: false
+          retain_until: retain_until
+          archive_target: archive_target
+          notify_at: notify_at
+          confidence: none
+          action: retain
+          matched_rule: matched_rule
+          grace_period_ends: grace_period_ends
+        record_id: record_id
+        evaluation_id: evaluation_id
+        conflicting_policies:
+        - rule_id: rule_id
+          policy_id: policy_id
+          action: null
+          priority: 6
+        - rule_id: rule_id
+          policy_id: policy_id
+          action: null
+          priority: 6
+        jurisdiction_applied: jurisdiction_applied
+        audit_ref: audit_ref
+        evaluated_at: evaluated_at
+      properties:
+        record_id:
+          title: Record Id
+          type: string
+        evaluation_id:
+          title: Evaluation Id
+          type: string
+        result:
+          $ref: "#/components/schemas/EvaluationResultDetail"
+        conflicting_policies:
+          items:
+            $ref: "#/components/schemas/ConflictingPolicy"
+          type: array
+        jurisdiction_applied:
+          nullable: true
+          type: string
+        evaluated_at:
+          title: Evaluated At
+          type: string
+        audit_ref:
+          nullable: true
+          type: string
+      required:
+      - evaluated_at
+      - evaluation_id
+      - record_id
+      - result
+      title: EvaluationResponse
+    EvaluationResultDetail:
+      example:
+        matched_policy: matched_policy
+        policy_version: 0
+        requires_approval: false
+        retain_until: retain_until
+        archive_target: archive_target
+        notify_at: notify_at
+        confidence: none
+        action: retain
+        matched_rule: matched_rule
+        grace_period_ends: grace_period_ends
+      properties:
+        action:
+          $ref: "#/components/schemas/Action"
+        matched_policy:
+          nullable: true
+          type: string
+        matched_rule:
+          nullable: true
+          type: string
+        policy_version:
+          nullable: true
+          type: integer
+        grace_period_ends:
+          nullable: true
+          type: string
+        notify_at:
+          nullable: true
+          type: string
+        requires_approval:
+          default: false
+          title: Requires Approval
+          type: boolean
+        confidence:
+          default: none
+          enum:
+          - definitive
+          - partial
+          - none
+          title: Confidence
+          type: string
+        archive_target:
+          nullable: true
+          type: string
+        retain_until:
+          nullable: true
+          type: string
+      required:
+      - action
+      title: EvaluationResultDetail
+    FieldCondition:
+      description: A single field comparison in a rule condition.
+      example:
+        field: field
+        value: ""
+        operator: eq
+      properties:
+        field:
+          title: Field
+          type: string
+        operator:
+          $ref: "#/components/schemas/Operator"
+        value: {}
+      required:
+      - field
+      - operator
+      title: FieldCondition
+    HTTPValidationError:
+      example:
+        detail:
+        - msg: msg
+          loc:
+          - ValidationError_loc_inner
+          - ValidationError_loc_inner
+          input: ""
+          ctx: "{}"
+          type: type
+        - msg: msg
+          loc:
+          - ValidationError_loc_inner
+          - ValidationError_loc_inner
+          input: ""
+          ctx: "{}"
+          type: type
+      properties:
+        detail:
+          items:
+            $ref: "#/components/schemas/ValidationError"
+          type: array
+      title: HTTPValidationError
+    HealthResponse:
+      example:
+        version: 0.1.0
+        status: status
+      properties:
+        status:
+          title: Status
+          type: string
+        version:
+          default: 0.1.0
+          title: Version
+          type: string
+      required:
+      - status
+      title: HealthResponse
+    ImportRequest:
+      example:
+        yaml: yaml
+      properties:
+        yaml:
+          title: Yaml
+          type: string
+      required:
+      - yaml
+      title: ImportRequest
+    ImportResponse:
+      example:
+        imported:
+        - imported
+        - imported
+        count: 0
+      properties:
+        imported:
+          items:
+            type: string
+          type: array
+        count:
+          title: Count
+          type: integer
+      required:
+      - count
+      - imported
+      title: ImportResponse
+    JobProgress:
+      example:
+        dispatched: 6
+        scanned: 0
+        notified: 5
+        errors: 5
+        pending_grace: 1
+      properties:
+        scanned:
+          default: 0
+          title: Scanned
+          type: integer
+        dispatched:
+          default: 0
+          title: Dispatched
+          type: integer
+        pending_grace:
+          default: 0
+          title: Pending Grace
+          type: integer
+        errors:
+          default: 0
+          title: Errors
+          type: integer
+        notified:
+          default: 0
+          title: Notified
+          type: integer
+      title: JobProgress
+    JobStatus:
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      title: JobStatus
+      type: string
+    JobTrigger:
+      enum:
+      - schedule
+      - api
+      title: JobTrigger
+      type: string
+    MaskRequest:
+      example:
+        messages:
+        - key: messages
+        - key: messages
+        text: text
+      properties:
+        text:
+          nullable: true
+          type: string
+        messages:
+          items:
+            additionalProperties:
+              type: string
+          nullable: true
+          type: array
+      title: MaskRequest
+    MaskResponse:
+      example:
+        entity_count: 0
+        masked_messages:
+        - key: masked_messages
+        - key: masked_messages
+        mapping_token: mapping_token
+        masked_text: masked_text
+      properties:
+        masked_text:
+          nullable: true
+          type: string
+        masked_messages:
+          items:
+            additionalProperties:
+              type: string
+          nullable: true
+          type: array
+        mapping_token:
+          title: Mapping Token
+          type: string
+        entity_count:
+          title: Entity Count
+          type: integer
+      required:
+      - entity_count
+      - mapping_token
+      title: MaskResponse
+    Operator:
+      enum:
+      - eq
+      - neq
+      - gt
+      - gte
+      - lt
+      - lte
+      - in
+      - not_in
+      - contains
+      - older_than
+      - newer_than
+      - is_null
+      - regex
+      title: Operator
+      type: string
+    Policy:
+      description: Full retention policy definition.
+      example:
+        owner: owner
+        jurisdiction: jurisdiction
+        rules:
+        - requires_approval: false
+          retain_until: retain_until
+          condition:
+            all:
+            - field: field
+              value: ""
+              operator: eq
+            - field: field
+              value: ""
+              operator: eq
+            any:
+            - field: field
+              value: ""
+              operator: eq
+            - field: field
+              value: ""
+              operator: eq
+          archive_target: archive_target
+          notify_before: notify_before
+          description: description
+          action: retain
+          id: id
+          priority: 1
+          grace_period: grace_period
+        - requires_approval: false
+          retain_until: retain_until
+          condition:
+            all:
+            - field: field
+              value: ""
+              operator: eq
+            - field: field
+              value: ""
+              operator: eq
+            any:
+            - field: field
+              value: ""
+              operator: eq
+            - field: field
+              value: ""
+              operator: eq
+          archive_target: archive_target
+          notify_before: notify_before
+          description: description
+          action: retain
+          id: id
+          priority: 1
+          grace_period: grace_period
+        version: 0
+        tags:
+        - tags
+        - tags
+        dsar:
+          erasure_exceptions:
+          - erasure_exceptions
+          - erasure_exceptions
+          response_deadline: response_deadline
+          right_to_access: true
+          right_to_erasure: true
+        policy_kind: retention
+        data_classification: PII
+        expires_at: 2000-01-23
+        audit:
+          log_evaluations: true
+          retention_of_audit_logs: retention_of_audit_logs
+          log_actions: true
+        scope:
+          sources:
+          - sources
+          - sources
+          exclude:
+            sources:
+            - sources
+            - sources
+            data_types:
+            - data_types
+            - data_types
+          data_types:
+          - data_types
+          - data_types
+        name: name
+        id: id
+        effective_from: 2000-01-23
+        status: draft
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        version:
+          default: 1
+          title: Version
+          type: integer
+        status:
+          $ref: "#/components/schemas/PolicyStatus"
+        jurisdiction:
+          title: Jurisdiction
+          type: string
+        policy_kind:
+          $ref: "#/components/schemas/PolicyKind"
+        data_classification:
+          $ref: "#/components/schemas/DataClassification"
+        owner:
+          nullable: true
+          type: string
+        effective_from:
+          $ref: "#/components/schemas/Effective_From"
+        expires_at:
+          $ref: "#/components/schemas/Expires_At"
+        tags:
+          items:
+            type: string
+          type: array
+        scope:
+          $ref: "#/components/schemas/PolicyScope"
+        rules:
+          items:
+            $ref: "#/components/schemas/PolicyRule"
+          minItems: 1
+          type: array
+        dsar:
+          $ref: "#/components/schemas/DsarConfig"
+        audit:
+          $ref: "#/components/schemas/AuditConfig"
+      required:
+      - data_classification
+      - id
+      - jurisdiction
+      - name
+      - rules
+      title: Policy
+    PolicyCreateRequest:
+      description: Create from YAML string or JSON policy object.
+      example:
+        yaml: yaml
+        policy:
+          key: ""
+      properties:
+        yaml:
+          nullable: true
+          type: string
+        policy:
+          additionalProperties: true
+          nullable: true
+          type: object
+      title: PolicyCreateRequest
+    PolicyDiffChange:
+      description: A single structural change between two policy versions.
+      example:
+        path: path
+        op: add
+        new: ""
+        old: ""
+      properties:
+        path:
+          title: Path
+          type: string
+        op:
+          enum:
+          - add
+          - remove
+          - replace
+          title: Op
+          type: string
+        old: {}
+        new: {}
+      required:
+      - op
+      - path
+      title: PolicyDiffChange
+    PolicyDiffRequest:
+      example:
+        from_version: 1
+        to_version: 1
+      properties:
+        from_version:
+          minimum: 1.0
+          title: From Version
+          type: integer
+        to_version:
+          minimum: 1.0
+          title: To Version
+          type: integer
+      required:
+      - from_version
+      - to_version
+      title: PolicyDiffRequest
+    PolicyDiffResponse:
+      example:
+        policy_id: policy_id
+        changes:
+        - path: path
+          op: add
+          new: ""
+          old: ""
+        - path: path
+          op: add
+          new: ""
+          old: ""
+        from_version: 0
+        to_version: 6
+      properties:
+        policy_id:
+          title: Policy Id
+          type: string
+        from_version:
+          title: From Version
+          type: integer
+        to_version:
+          title: To Version
+          type: integer
+        changes:
+          items:
+            $ref: "#/components/schemas/PolicyDiffChange"
+          type: array
+      required:
+      - from_version
+      - policy_id
+      - to_version
+      title: PolicyDiffResponse
+    PolicyKind:
+      enum:
+      - retention
+      - classification
+      title: PolicyKind
+      type: string
+    PolicyListItem:
+      example:
+        entity_count: 6
+        scope_data_types:
+        - scope_data_types
+        - scope_data_types
+        jurisdiction: jurisdiction
+        scope_sources:
+        - scope_sources
+        - scope_sources
+        version: 0
+        policy_kind: retention
+        data_classification: data_classification
+        excluded_data_types:
+        - excluded_data_types
+        - excluded_data_types
+        name: name
+        excluded_sources:
+        - excluded_sources
+        - excluded_sources
+        id: id
+        status: draft
+        rule_count: 1
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        version:
+          title: Version
+          type: integer
+        status:
+          $ref: "#/components/schemas/PolicyStatus"
+        jurisdiction:
+          title: Jurisdiction
+          type: string
+        policy_kind:
+          $ref: "#/components/schemas/PolicyKind"
+        data_classification:
+          nullable: true
+          type: string
+        entity_count:
+          nullable: true
+          type: integer
+        scope_data_types:
+          items:
+            type: string
+          type: array
+        scope_sources:
+          items:
+            type: string
+          type: array
+        excluded_data_types:
+          items:
+            type: string
+          type: array
+        excluded_sources:
+          items:
+            type: string
+          type: array
+        rule_count:
+          title: Rule Count
+          type: integer
+      required:
+      - id
+      - jurisdiction
+      - name
+      - policy_kind
+      - rule_count
+      - status
+      - version
+      title: PolicyListItem
+    PolicyRule:
+      description: A single retention rule within a policy.
+      example:
+        requires_approval: false
+        retain_until: retain_until
+        condition:
+          all:
+          - field: field
+            value: ""
+            operator: eq
+          - field: field
+            value: ""
+            operator: eq
+          any:
+          - field: field
+            value: ""
+            operator: eq
+          - field: field
+            value: ""
+            operator: eq
+        archive_target: archive_target
+        notify_before: notify_before
+        description: description
+        action: retain
+        id: id
+        priority: 1
+        grace_period: grace_period
+      properties:
+        id:
+          title: Id
+          type: string
+        description:
+          nullable: true
+          type: string
+        priority:
+          minimum: 1.0
+          title: Priority
+          type: integer
+        condition:
+          $ref: "#/components/schemas/ConditionGroup"
+        action:
+          $ref: "#/components/schemas/Action"
+        grace_period:
+          nullable: true
+          type: string
+        notify_before:
+          nullable: true
+          type: string
+        requires_approval:
+          default: false
+          title: Requires Approval
+          type: boolean
+        archive_target:
+          nullable: true
+          type: string
+        retain_until:
+          nullable: true
+          type: string
+      required:
+      - action
+      - condition
+      - id
+      - priority
+      title: PolicyRule
+    PolicyScope:
+      example:
+        sources:
+        - sources
+        - sources
+        exclude:
+          sources:
+          - sources
+          - sources
+          data_types:
+          - data_types
+          - data_types
+        data_types:
+        - data_types
+        - data_types
+      properties:
+        data_types:
+          items:
+            type: string
+          type: array
+        sources:
+          items:
+            type: string
+          type: array
+        exclude:
+          $ref: "#/components/schemas/ScopeExclude"
+      title: PolicyScope
+    PolicyStatus:
+      enum:
+      - draft
+      - active
+      - deprecated
+      - archived
+      title: PolicyStatus
+      type: string
+    PolicyStatusChangeRequest:
+      example:
+        status: draft
+      properties:
+        status:
+          $ref: "#/components/schemas/PolicyStatus"
+      required:
+      - status
+      title: PolicyStatusChangeRequest
+    PolicyVersionInfo:
+      description: Lightweight metadata for a stored policy version snapshot.
+      example:
+        policy_id: policy_id
+        name: name
+        created_at: 2000-01-23T04:56:07.000+00:00
+        version: 0
+        status: status
+      properties:
+        policy_id:
+          title: Policy Id
+          type: string
+        version:
+          title: Version
+          type: integer
+        created_at:
+          format: date-time
+          nullable: true
+          type: string
+        name:
+          nullable: true
+          type: string
+        status:
+          nullable: true
+          type: string
+      required:
+      - policy_id
+      - version
+      title: PolicyVersionInfo
+    PrivacyStatusResponse:
+      example:
+        languages:
+        - languages
+        - languages
+        available: true
+        enabled: true
+        model_size: model_size
+      properties:
+        available:
+          title: Available
+          type: boolean
+        enabled:
+          title: Enabled
+          type: boolean
+        model_size:
+          nullable: true
+          type: string
+        languages:
+          items:
+            type: string
+          type: array
+      required:
+      - available
+      - enabled
+      title: PrivacyStatusResponse
+    ReadyResponse:
+      example:
+        policies_loaded: 0
+        status: status
+      properties:
+        status:
+          title: Status
+          type: string
+        policies_loaded:
+          title: Policies Loaded
+          type: integer
+      required:
+      - policies_loaded
+      - status
+      title: ReadyResponse
+    RecordRef:
+      description: A record reference for enforcement scans.
+      example:
+        record_id: record_id
+        metadata:
+          key: ""
+        jurisdiction: jurisdiction
+        data_type: data_type
+        source: source
+      properties:
+        record_id:
+          title: Record Id
+          type: string
+        data_type:
+          title: Data Type
+          type: string
+        metadata:
+          additionalProperties: true
+          title: Metadata
+          type: object
+        source:
+          nullable: true
+          type: string
+        jurisdiction:
+          nullable: true
+          type: string
+      required:
+      - data_type
+      - record_id
+      title: RecordRef
+    ScopeExclude:
+      example:
+        sources:
+        - sources
+        - sources
+        data_types:
+        - data_types
+        - data_types
+      properties:
+        data_types:
+          items:
+            type: string
+          type: array
+        sources:
+          items:
+            type: string
+          type: array
+      title: ScopeExclude
+    Sensitivity:
+      enum:
+      - low
+      - medium
+      - high
+      - critical
+      title: Sensitivity
+      type: string
+    UnmaskRequest:
+      example:
+        consume_token: true
+        mapping_token: mapping_token
+        text: text
+      properties:
+        text:
+          title: Text
+          type: string
+        mapping_token:
+          title: Mapping Token
+          type: string
+        consume_token:
+          default: true
+          title: Consume Token
+          type: boolean
+      required:
+      - mapping_token
+      - text
+      title: UnmaskRequest
+    UnmaskResponse:
+      example:
+        text: text
+      properties:
+        text:
+          title: Text
+          type: string
+      required:
+      - text
+      title: UnmaskResponse
+    ValidateRequest:
+      example:
+        yaml: yaml
+        policy:
+          key: ""
+      properties:
+        yaml:
+          nullable: true
+          type: string
+        policy:
+          additionalProperties: true
+          nullable: true
+          type: object
+      title: ValidateRequest
+    ValidateResponse:
+      example:
+        valid: true
+        policy_kind: null
+        classification_policy:
+          owner: owner
+          jurisdiction: jurisdiction
+          text_fields:
+          - text_fields
+          - text_fields
+          rules:
+          - condition:
+              all:
+              - field: field
+                value: ""
+                operator: eq
+              - field: field
+                value: ""
+                operator: eq
+              any:
+              - field: field
+                value: ""
+                operator: eq
+              - field: field
+                value: ""
+                operator: eq
+            description: description
+            action: flag
+            handling: handling
+            id: id
+            priority: 1
+          - condition:
+              all:
+              - field: field
+                value: ""
+                operator: eq
+              - field: field
+                value: ""
+                operator: eq
+              any:
+              - field: field
+                value: ""
+                operator: eq
+              - field: field
+                value: ""
+                operator: eq
+            description: description
+            action: flag
+            handling: handling
+            id: id
+            priority: 1
+          version: 1
+          tags:
+          - tags
+          - tags
+          policy_kind: null
+          expires_at: null
+          entities:
+          - detection:
+              catalog_ref: catalog_ref
+              regex: regex
+              field_names:
+              - field_names
+              - field_names
+              ner_types:
+              - ner_types
+              - ner_types
+            regulatory_refs:
+            - regulatory_refs
+            - regulatory_refs
+            id: id
+            label: label
+            sensitivity: low
+            classification: null
+          - detection:
+              catalog_ref: catalog_ref
+              regex: regex
+              field_names:
+              - field_names
+              - field_names
+              ner_types:
+              - ner_types
+              - ner_types
+            regulatory_refs:
+            - regulatory_refs
+            - regulatory_refs
+            id: id
+            label: label
+            sensitivity: low
+            classification: null
+          scope:
+            sources:
+            - sources
+            - sources
+            exclude:
+              sources:
+              - sources
+              - sources
+              data_types:
+              - data_types
+              - data_types
+            data_types:
+            - data_types
+            - data_types
+          name: name
+          id: id
+          effective_from: null
+          status: null
+        errors:
+        - errors
+        - errors
+        policy:
+          owner: owner
+          jurisdiction: jurisdiction
+          rules:
+          - requires_approval: false
+            retain_until: retain_until
+            condition:
+              all:
+              - field: field
+                value: ""
+                operator: eq
+              - field: field
+                value: ""
+                operator: eq
+              any:
+              - field: field
+                value: ""
+                operator: eq
+              - field: field
+                value: ""
+                operator: eq
+            archive_target: archive_target
+            notify_before: notify_before
+            description: description
+            action: retain
+            id: id
+            priority: 1
+            grace_period: grace_period
+          - requires_approval: false
+            retain_until: retain_until
+            condition:
+              all:
+              - field: field
+                value: ""
+                operator: eq
+              - field: field
+                value: ""
+                operator: eq
+              any:
+              - field: field
+                value: ""
+                operator: eq
+              - field: field
+                value: ""
+                operator: eq
+            archive_target: archive_target
+            notify_before: notify_before
+            description: description
+            action: retain
+            id: id
+            priority: 1
+            grace_period: grace_period
+          version: 0
+          tags:
+          - tags
+          - tags
+          dsar:
+            erasure_exceptions:
+            - erasure_exceptions
+            - erasure_exceptions
+            response_deadline: response_deadline
+            right_to_access: true
+            right_to_erasure: true
+          policy_kind: retention
+          data_classification: PII
+          expires_at: 2000-01-23
+          audit:
+            log_evaluations: true
+            retention_of_audit_logs: retention_of_audit_logs
+            log_actions: true
+          scope:
+            sources:
+            - sources
+            - sources
+            exclude:
+              sources:
+              - sources
+              - sources
+              data_types:
+              - data_types
+              - data_types
+            data_types:
+            - data_types
+            - data_types
+          name: name
+          id: id
+          effective_from: 2000-01-23
+          status: draft
+      properties:
+        valid:
+          title: Valid
+          type: boolean
+        policy:
+          $ref: "#/components/schemas/Policy"
+        classification_policy:
+          $ref: "#/components/schemas/ClassificationPolicy"
+        policy_kind:
+          $ref: "#/components/schemas/PolicyKind"
+        errors:
+          items:
+            type: string
+          type: array
+      required:
+      - valid
+      title: ValidateResponse
+    ValidationError:
+      example:
+        msg: msg
+        loc:
+        - ValidationError_loc_inner
+        - ValidationError_loc_inner
+        input: ""
+        ctx: "{}"
+        type: type
+      properties:
+        loc:
+          items:
+            $ref: "#/components/schemas/ValidationError_loc_inner"
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+        input: {}
+        ctx:
+          title: Context
+          type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    WebhookCreateRequest:
+      description: POST /api/v1/webhooks body.
+      example:
+        description: description
+        active: true
+        secret: secret
+        url: https://openapi-generator.tech
+        events:
+        - events
+        - events
+      properties:
+        url:
+          format: uri
+          minLength: 1
+          title: Url
+          type: string
+        events:
+          items:
+            type: string
+          minItems: 1
+          type: array
+        secret:
+          maxLength: 256
+          minLength: 8
+          nullable: true
+          type: string
+        description:
+          maxLength: 512
+          nullable: true
+          type: string
+        active:
+          default: true
+          title: Active
+          type: boolean
+      required:
+      - events
+      - url
+      title: WebhookCreateRequest
+    WebhookCreateResponse:
+      description: Create response includes secret once for the client to store.
+      example:
+        secret_set: false
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        description: description
+        active: true
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        secret: secret
+        url: url
+        events:
+        - events
+        - events
+      properties:
+        id:
+          title: Id
+          type: string
+        url:
+          title: Url
+          type: string
+        events:
+          items:
+            type: string
+          type: array
+        description:
+          nullable: true
+          type: string
+        active:
+          default: true
+          title: Active
+          type: boolean
+        secret_set:
+          default: false
+          title: Secret Set
+          type: boolean
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+        secret:
+          title: Secret
+          type: string
+      required:
+      - created_at
+      - events
+      - id
+      - secret
+      - updated_at
+      - url
+      title: WebhookCreateResponse
+    WebhookResponse:
+      description: Public webhook view (secret omitted).
+      example:
+        secret_set: false
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        description: description
+        active: true
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        url: url
+        events:
+        - events
+        - events
+      properties:
+        id:
+          title: Id
+          type: string
+        url:
+          title: Url
+          type: string
+        events:
+          items:
+            type: string
+          type: array
+        description:
+          nullable: true
+          type: string
+        active:
+          default: true
+          title: Active
+          type: boolean
+        secret_set:
+          default: false
+          title: Secret Set
+          type: boolean
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - created_at
+      - events
+      - id
+      - updated_at
+      - url
+      title: WebhookResponse
+    WebhookUpdateRequest:
+      description: "PATCH /api/v1/webhooks/{id} body."
+      example:
+        description: description
+        active: true
+        secret: secret
+        url: https://openapi-generator.tech
+        events:
+        - events
+        - events
+      properties:
+        url:
+          format: uri
+          minLength: 1
+          nullable: true
+          type: string
+        events:
+          items:
+            type: string
+          minItems: 1
+          nullable: true
+          type: array
+        secret:
+          maxLength: 256
+          minLength: 8
+          nullable: true
+          type: string
+        description:
+          maxLength: 512
+          nullable: true
+          type: string
+        active:
+          nullable: true
+          type: boolean
+      title: WebhookUpdateRequest
+    Effective_From:
+      anyOf:
+      - format: date
+        type: string
+      - type: string
+      nullable: true
+      title: Effective From
+    Expires_At:
+      anyOf:
+      - format: date
+        type: string
+      - type: string
+      nullable: true
+      title: Expires At
+    ValidationError_loc_inner:
+      anyOf:
+      - type: string
+      - type: integer
+  securitySchemes:
+    BearerAuth:
+      description: API key as Bearer token (DRPE_API_KEY)
+      scheme: bearer
+      type: http
+

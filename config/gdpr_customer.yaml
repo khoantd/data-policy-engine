@@ -1,0 +1,80 @@
+policy:
+  id: pol_gdpr_customer
+  name: "GDPR Customer Data Retention"
+  version: 3
+  status: active
+  jurisdiction: EU_GDPR
+  data_classification: PII
+  owner: "dpo@company.com"
+  effective_from: "2025-01-01"
+  expires_at: null
+  tags: ["gdpr", "customer", "pii"]
+
+  scope:
+    data_types:
+      - customer_profile
+      - customer_contact
+    sources:
+      - crm_system
+      - marketing_platform
+    exclude:
+      data_types:
+        - anonymized_analytics
+
+  rules:
+    - id: rule_inactive_delete
+      description: "Delete inactive customer profiles after 2 years"
+      priority: 100
+      condition:
+        all:
+          - field: "status"
+            operator: "eq"
+            value: "inactive"
+          - field: "last_activity_at"
+            operator: "older_than"
+            value: "730d"
+      action: delete
+      grace_period: "30d"
+      notify_before: "7d"
+      requires_approval: false
+
+    - id: rule_active_archive
+      description: "Archive active records older than 5 years"
+      priority: 200
+      condition:
+        all:
+          - field: "status"
+            operator: "eq"
+            value: "active"
+          - field: "created_at"
+            operator: "older_than"
+            value: "1825d"
+      action: archive
+      archive_target: "cold_storage"
+
+    - id: rule_legal_hold
+      description: "Legal hold overrides all other rules"
+      priority: 1
+      condition:
+        any:
+          - field: "legal_hold"
+            operator: "eq"
+            value: true
+          - field: "tags"
+            operator: "contains"
+            value: "litigation"
+      action: retain
+      retain_until: "legal_hold_released"
+
+  dsar:
+    right_to_access: true
+    right_to_erasure: true
+    erasure_exceptions:
+      - "legal_obligation"
+      - "public_interest"
+    response_deadline: "30d"
+
+  audit:
+    log_evaluations: true
+    log_actions: true
+    retention_of_audit_logs: "3650d"

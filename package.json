@@ -1,0 +1,24 @@
+{
+  "name": "drpe",
+  "private": true,
+  "description": "DRPE tooling — OpenAPI export and multi-language client generation",
+  "scripts": {
+    "openapi:export": "python scripts/export_openapi.py",
+    "openapi:generate:typescript": "openapi-generator-cli generate -i openapi/openapi.json -g typescript-fetch -o clients/typescript --additional-properties=npmName=drpe-api-client,supportsES6=true,typescriptThreePlus=true,withoutRuntimeChecks=true --skip-validate-spec",
+    "openapi:generate:go": "openapi-generator-cli generate -i openapi/openapi.json -g go -o clients/go --additional-properties=packageName=drpe,moduleName=github.com/drpe/drpe/clients/go,isGoSubmodule=true --git-repo-id=drpe --git-user-id=drpe --skip-validate-spec",
+    "openapi:generate:java": "openapi-generator-cli generate -i openapi/openapi.json -g java -o clients/java --additional-properties=groupId=com.drpe,artifactId=drpe-api-client,apiPackage=com.drpe.client.api,modelPackage=com.drpe.client.model,invokerPackage=com.drpe.client,library=okhttp-gson,dateLibrary=java8 --skip-validate-spec",
+    "openapi:generate:admin": "npm --prefix admin run openapi",
+    "openapi:generate": "npm run openapi:generate:typescript && npm run openapi:generate:go && npm run openapi:generate:java && npm run openapi:generate:admin",
+    "openapi": "npm run openapi:export && npm run openapi:generate"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.23.1",
+    "@types/node": "^26.1.1",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^3.0.86",
+    "ai": "^6.0.233",
+    "zod": "^4.4.3"
+  }
+}

@@ -1,0 +1,4854 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DRPE \u2014 Data Retention Policy Engine",
+    "description": "Define, evaluate, and enforce data retention policies",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/policies/validate": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Validate Policy",
+        "operationId": "validate_policy_api_v1_policies_validate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/policies/import": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Import Policies",
+        "operationId": "import_policies_api_v1_policies_import_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/policies": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "List Policies",
+        "operationId": "list_policies_api_v1_policies_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status_filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status Filter"
+            }
+          },
+          {
+            "name": "policy_kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PolicyKind"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PolicyListItem"
+                  },
+                  "title": "Response List Policies Api V1 Policies Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Create Policy",
+        "operationId": "create_policy_api_v1_policies_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicyCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Create Policy Api V1 Policies Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/{policy_id}": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Get Policy",
+        "operationId": "get_policy_api_v1_policies__policy_id__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Policy Api V1 Policies  Policy Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Update Policy",
+        "operationId": "update_policy_api_v1_policies__policy_id__put",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicyCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Update Policy Api V1 Policies  Policy Id  Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Delete Policy",
+        "operationId": "delete_policy_api_v1_policies__policy_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Delete Policy Api V1 Policies  Policy Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/{policy_id}/status": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Change Policy Status",
+        "operationId": "change_policy_status_api_v1_policies__policy_id__status_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicyStatusChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Change Policy Status Api V1 Policies  Policy Id  Status Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/{policy_id}/versions": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "List Policy Versions",
+        "operationId": "list_policy_versions_api_v1_policies__policy_id__versions_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PolicyVersionInfo"
+                  },
+                  "title": "Response List Policy Versions Api V1 Policies  Policy Id  Versions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/{policy_id}/versions/{ver}": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Get Policy Version",
+        "operationId": "get_policy_version_api_v1_policies__policy_id__versions__ver__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          },
+          {
+            "name": "ver",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Ver"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Policy Version Api V1 Policies  Policy Id  Versions  Ver  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/{policy_id}/versions/{ver}/activate": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Activate Policy Version",
+        "operationId": "activate_policy_version_api_v1_policies__policy_id__versions__ver__activate_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          },
+          {
+            "name": "ver",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Ver"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Activate Policy Version Api V1 Policies  Policy Id  Versions  Ver  Activate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/{policy_id}/diff": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Diff Policy Versions",
+        "operationId": "diff_policy_versions_api_v1_policies__policy_id__diff_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicyDiffRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyDiffResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/classify": {
+      "post": {
+        "tags": [
+          "classify"
+        ],
+        "summary": "Classify One",
+        "operationId": "classify_one_api_v1_classify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/classify/batch": {
+      "post": {
+        "tags": [
+          "classify"
+        ],
+        "summary": "Classify Batch",
+        "operationId": "classify_batch_api_v1_classify_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchClassificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ClassificationResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Classify Batch Api V1 Classify Batch Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/classify/dry-run": {
+      "post": {
+        "tags": [
+          "classify"
+        ],
+        "summary": "Classify Dry Run",
+        "operationId": "classify_dry_run_api_v1_classify_dry_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/evaluate": {
+      "post": {
+        "tags": [
+          "evaluate"
+        ],
+        "summary": "Evaluate One",
+        "operationId": "evaluate_one_api_v1_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/evaluate/batch": {
+      "post": {
+        "tags": [
+          "evaluate"
+        ],
+        "summary": "Evaluate Batch",
+        "operationId": "evaluate_batch_api_v1_evaluate_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchEvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EvaluationResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Evaluate Batch Api V1 Evaluate Batch Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/evaluate/dry-run": {
+      "post": {
+        "tags": [
+          "evaluate"
+        ],
+        "summary": "Evaluate Dry Run",
+        "operationId": "evaluate_dry_run_api_v1_evaluate_dry_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/enforce": {
+      "post": {
+        "tags": [
+          "enforce"
+        ],
+        "summary": "Trigger Enforce",
+        "operationId": "trigger_enforce_api_v1_enforce_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnforceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnforceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/enforce/jobs": {
+      "get": {
+        "tags": [
+          "enforce"
+        ],
+        "summary": "List Jobs",
+        "operationId": "list_jobs_api_v1_enforce_jobs_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/JobStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "policy_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnforcementJob"
+                  },
+                  "title": "Response List Jobs Api V1 Enforce Jobs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/enforce/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "enforce"
+        ],
+        "summary": "Get Job",
+        "operationId": "get_job_api_v1_enforce_jobs__job_id__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnforcementJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dsar/access": {
+      "post": {
+        "tags": [
+          "dsar"
+        ],
+        "summary": "Submit Access",
+        "operationId": "submit_access_api_v1_dsar_access_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DsarSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DsarRequest"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/dsar/erasure": {
+      "post": {
+        "tags": [
+          "dsar"
+        ],
+        "summary": "Submit Erasure",
+        "operationId": "submit_erasure_api_v1_dsar_erasure_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DsarSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DsarRequest"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/dsar/requests": {
+      "get": {
+        "tags": [
+          "dsar"
+        ],
+        "summary": "List Requests",
+        "operationId": "list_requests_api_v1_dsar_requests_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DsarRequestType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DsarRequestStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "subject_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject Id"
+            }
+          },
+          {
+            "name": "policy_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DsarRequest"
+                  },
+                  "title": "Response List Requests Api V1 Dsar Requests Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dsar/requests/{request_id}": {
+      "get": {
+        "tags": [
+          "dsar"
+        ],
+        "summary": "Get Request",
+        "operationId": "get_request_api_v1_dsar_requests__request_id__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DsarRequest"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Create Webhook",
+        "operationId": "create_webhook_api_v1_webhooks_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "List Webhooks",
+        "operationId": "list_webhooks_api_v1_webhooks_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Active"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookResponse"
+                  },
+                  "title": "Response List Webhooks Api V1 Webhooks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/{webhook_id}": {
+      "get": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Get Webhook",
+        "operationId": "get_webhook_api_v1_webhooks__webhook_id__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Update Webhook",
+        "operationId": "update_webhook_api_v1_webhooks__webhook_id__patch",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Delete Webhook",
+        "operationId": "delete_webhook_api_v1_webhooks__webhook_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit/logs": {
+      "get": {
+        "tags": [
+          "audit"
+        ],
+        "summary": "List Audit Logs",
+        "operationId": "list_audit_logs_api_v1_audit_logs_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Id"
+            }
+          },
+          {
+            "name": "record_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Record Id"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AuditEventType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Type"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditEntry"
+                  },
+                  "title": "Response List Audit Logs Api V1 Audit Logs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Ready",
+        "operationId": "ready_api_v1_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jurisdictions": {
+      "get": {
+        "tags": [
+          "jurisdictions"
+        ],
+        "summary": "List All",
+        "operationId": "list_all_api_v1_jurisdictions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List All Api V1 Jurisdictions Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/jurisdictions/{code}": {
+      "get": {
+        "tags": [
+          "jurisdictions"
+        ],
+        "summary": "Get One",
+        "operationId": "get_one_api_v1_jurisdictions__code__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get One Api V1 Jurisdictions  Code  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/privacy/status": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Privacy Status",
+        "operationId": "privacy_status_api_v1_privacy_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/privacy/mask": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Privacy Mask",
+        "operationId": "privacy_mask_api_v1_privacy_mask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/privacy/unmask": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Privacy Unmask",
+        "operationId": "privacy_unmask_api_v1_privacy_unmask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnmaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnmaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Action": {
+        "type": "string",
+        "enum": [
+          "retain",
+          "archive",
+          "anonymize",
+          "pseudonymize",
+          "delete",
+          "notify",
+          "flag"
+        ],
+        "title": "Action"
+      },
+      "AuditConfig": {
+        "properties": {
+          "log_evaluations": {
+            "type": "boolean",
+            "title": "Log Evaluations",
+            "default": true
+          },
+          "log_actions": {
+            "type": "boolean",
+            "title": "Log Actions",
+            "default": true
+          },
+          "retention_of_audit_logs": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retention Of Audit Logs"
+          }
+        },
+        "type": "object",
+        "title": "AuditConfig"
+      },
+      "AuditEntry": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/AuditEventType"
+          },
+          "policy_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Id"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Id"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "evaluation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "event_type"
+        ],
+        "title": "AuditEntry",
+        "description": "Immutable audit log entry."
+      },
+      "AuditEventType": {
+        "type": "string",
+        "enum": [
+          "evaluation",
+          "action",
+          "notify",
+          "pending_grace",
+          "flag",
+          "dsar_access",
+          "dsar_erasure"
+        ],
+        "title": "AuditEventType"
+      },
+      "BatchClassificationRequest": {
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationRequest"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "records"
+        ],
+        "title": "BatchClassificationRequest"
+      },
+      "BatchEvaluateRequest": {
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationRequest"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "records"
+        ],
+        "title": "BatchEvaluateRequest"
+      },
+      "ClassificationAction": {
+        "type": "string",
+        "enum": [
+          "flag",
+          "mask",
+          "block",
+          "review",
+          "allow"
+        ],
+        "title": "ClassificationAction"
+      },
+      "ClassificationDiagnostics": {
+        "properties": {
+          "applicable_policy_count": {
+            "type": "integer",
+            "title": "Applicable Policy Count",
+            "default": 0
+          },
+          "selected_policy_applied": {
+            "type": "boolean",
+            "title": "Selected Policy Applied",
+            "default": false
+          },
+          "out_of_scope_reason": {
+            "type": "string",
+            "enum": [
+              "none",
+              "jurisdiction",
+              "data_type",
+              "source"
+            ],
+            "title": "Out Of Scope Reason",
+            "default": "none"
+          },
+          "policy_scope_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassificationPolicyScopeSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ClassificationDiagnostics",
+        "description": "Why a policy did or did not apply to this request."
+      },
+      "ClassificationEntity": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "classification": {
+            "$ref": "#/components/schemas/DataClassification"
+          },
+          "sensitivity": {
+            "$ref": "#/components/schemas/Sensitivity",
+            "default": "medium"
+          },
+          "regulatory_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Regulatory Refs"
+          },
+          "detection": {
+            "$ref": "#/components/schemas/EntityDetection"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "classification"
+        ],
+        "title": "ClassificationEntity",
+        "description": "A detectable PII / sensitive data entity definition."
+      },
+      "ClassificationPolicy": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "default": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/PolicyStatus",
+            "default": "draft"
+          },
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
+          "policy_kind": {
+            "$ref": "#/components/schemas/PolicyKind",
+            "default": "classification"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "effective_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PolicyScope"
+          },
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationEntity"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Entities"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationRule"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Rules"
+          },
+          "text_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Text Fields",
+            "description": "Metadata field paths scanned with NER when privalyse is available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "jurisdiction",
+          "entities",
+          "rules"
+        ],
+        "title": "ClassificationPolicy",
+        "description": "Full classification policy definition."
+      },
+      "ClassificationPolicyScopeSummary": {
+        "properties": {
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
+          "data_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Data Types"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "excluded_data_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Data Types"
+          },
+          "excluded_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Sources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jurisdiction"
+        ],
+        "title": "ClassificationPolicyScopeSummary",
+        "description": "Subset of selected policy scope echoed for UI diagnostics."
+      },
+      "ClassificationRequest": {
+        "properties": {
+          "data_type": {
+            "type": "string",
+            "title": "Data Type"
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "jurisdiction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction"
+          },
+          "text_fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Fields"
+          },
+          "policy_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_type",
+          "record_id"
+        ],
+        "title": "ClassificationRequest",
+        "description": "Request to classify a record against classification policies."
+      },
+      "ClassificationResponse": {
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "title": "Record Id"
+          },
+          "classification_id": {
+            "type": "string",
+            "title": "Classification Id"
+          },
+          "detected_entities": {
+            "items": {
+              "$ref": "#/components/schemas/DetectedEntity"
+            },
+            "type": "array",
+            "title": "Detected Entities"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ClassificationResultDetail"
+          },
+          "diagnostics": {
+            "$ref": "#/components/schemas/ClassificationDiagnostics"
+          },
+          "jurisdiction_applied": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction Applied"
+          },
+          "classified_at": {
+            "type": "string",
+            "title": "Classified At"
+          },
+          "audit_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "record_id",
+          "classification_id",
+          "result",
+          "classified_at"
+        ],
+        "title": "ClassificationResponse"
+      },
+      "ClassificationResultDetail": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ClassificationAction"
+          },
+          "handling": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handling"
+          },
+          "matched_policy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Policy"
+          },
+          "matched_rule": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Rule"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "max_classification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataClassification"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_sensitivity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sensitivity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "ClassificationResultDetail"
+      },
+      "ClassificationRule": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Priority"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/ConditionGroup"
+          },
+          "action": {
+            "$ref": "#/components/schemas/ClassificationAction"
+          },
+          "handling": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handling"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "priority",
+          "condition",
+          "action"
+        ],
+        "title": "ClassificationRule",
+        "description": "Rule fired after entity detection to recommend handling."
+      },
+      "ConditionGroup": {
+        "properties": {
+          "all": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FieldCondition"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "All"
+          },
+          "any": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FieldCondition"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Any"
+          }
+        },
+        "type": "object",
+        "title": "ConditionGroup",
+        "description": "Compound condition: all (AND) or any (OR) of field conditions."
+      },
+      "ConflictingPolicy": {
+        "properties": {
+          "policy_id": {
+            "type": "string",
+            "title": "Policy Id"
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          }
+        },
+        "type": "object",
+        "required": [
+          "policy_id",
+          "rule_id",
+          "action",
+          "priority"
+        ],
+        "title": "ConflictingPolicy"
+      },
+      "DataClassification": {
+        "type": "string",
+        "enum": [
+          "PII",
+          "SPII",
+          "financial",
+          "operational",
+          "public"
+        ],
+        "title": "DataClassification"
+      },
+      "DetectedEntity": {
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "classification": {
+            "$ref": "#/components/schemas/DataClassification"
+          },
+          "sensitivity": {
+            "$ref": "#/components/schemas/Sensitivity"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence",
+            "default": "definitive"
+          },
+          "snippet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snippet"
+          },
+          "detector": {
+            "type": "string",
+            "title": "Detector"
+          },
+          "regulatory_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Regulatory Refs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_id",
+          "label",
+          "field",
+          "classification",
+          "sensitivity",
+          "detector"
+        ],
+        "title": "DetectedEntity",
+        "description": "A single entity hit from classification."
+      },
+      "DsarConfig": {
+        "properties": {
+          "right_to_access": {
+            "type": "boolean",
+            "title": "Right To Access",
+            "default": true
+          },
+          "right_to_erasure": {
+            "type": "boolean",
+            "title": "Right To Erasure",
+            "default": true
+          },
+          "erasure_exceptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Erasure Exceptions"
+          },
+          "response_deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Deadline"
+          }
+        },
+        "type": "object",
+        "title": "DsarConfig"
+      },
+      "DsarDeniedRecord": {
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "title": "Record Id"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "record_id",
+          "reason"
+        ],
+        "title": "DsarDeniedRecord"
+      },
+      "DsarError": {
+        "properties": {
+          "record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Id"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "DsarError"
+      },
+      "DsarRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DsarRequestType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DsarRequestStatus",
+            "default": "received"
+          },
+          "subject_id": {
+            "type": "string",
+            "title": "Subject Id"
+          },
+          "policy_id": {
+            "type": "string",
+            "title": "Policy Id"
+          },
+          "identity": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identity"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested At"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "inline_records": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/RecordRef"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inline Records"
+          },
+          "result": {
+            "$ref": "#/components/schemas/DsarResult"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "subject_id",
+          "policy_id",
+          "requested_at"
+        ],
+        "title": "DsarRequest"
+      },
+      "DsarRequestStatus": {
+        "type": "string",
+        "enum": [
+          "received",
+          "in_progress",
+          "completed",
+          "partial",
+          "denied",
+          "failed"
+        ],
+        "title": "DsarRequestStatus"
+      },
+      "DsarRequestType": {
+        "type": "string",
+        "enum": [
+          "access",
+          "erasure"
+        ],
+        "title": "DsarRequestType"
+      },
+      "DsarResult": {
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/RecordRef"
+            },
+            "type": "array",
+            "title": "Records"
+          },
+          "erased": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Erased"
+          },
+          "denied": {
+            "items": {
+              "$ref": "#/components/schemas/DsarDeniedRecord"
+            },
+            "type": "array",
+            "title": "Denied"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/DsarError"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "DsarResult",
+        "description": "Outcome payload stored on a DSAR request after processing."
+      },
+      "DsarSubmitRequest": {
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "title": "Subject Id"
+          },
+          "policy_id": {
+            "type": "string",
+            "title": "Policy Id"
+          },
+          "identity": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identity"
+          },
+          "records": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/RecordRef"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject_id",
+          "policy_id"
+        ],
+        "title": "DsarSubmitRequest",
+        "description": "POST /api/v1/dsar/access|erasure body."
+      },
+      "EnforceRequest": {
+        "properties": {
+          "policy_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Id"
+          },
+          "records": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/RecordRef"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records"
+          }
+        },
+        "type": "object",
+        "title": "EnforceRequest",
+        "description": "POST /api/v1/enforce body."
+      },
+      "EnforceResponse": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "status"
+        ],
+        "title": "EnforceResponse"
+      },
+      "EnforcementJob": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "policy_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus",
+            "default": "queued"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/JobTrigger",
+            "default": "api"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested At"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/JobProgress"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "inline_records": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/RecordRef"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inline Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "requested_at"
+        ],
+        "title": "EnforcementJob"
+      },
+      "EntityDetection": {
+        "properties": {
+          "field_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Field Names"
+          },
+          "regex": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regex"
+          },
+          "ner_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ner Types"
+          },
+          "catalog_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Ref"
+          }
+        },
+        "type": "object",
+        "title": "EntityDetection",
+        "description": "How to detect an entity in record metadata or text."
+      },
+      "EvaluationRequest": {
+        "properties": {
+          "data_type": {
+            "type": "string",
+            "title": "Data Type"
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "jurisdiction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_type",
+          "record_id"
+        ],
+        "title": "EvaluationRequest",
+        "description": "Request to evaluate a record against policies."
+      },
+      "EvaluationResponse": {
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "title": "Record Id"
+          },
+          "evaluation_id": {
+            "type": "string",
+            "title": "Evaluation Id"
+          },
+          "result": {
+            "$ref": "#/components/schemas/EvaluationResultDetail"
+          },
+          "conflicting_policies": {
+            "items": {
+              "$ref": "#/components/schemas/ConflictingPolicy"
+            },
+            "type": "array",
+            "title": "Conflicting Policies"
+          },
+          "jurisdiction_applied": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction Applied"
+          },
+          "evaluated_at": {
+            "type": "string",
+            "title": "Evaluated At"
+          },
+          "audit_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "record_id",
+          "evaluation_id",
+          "result",
+          "evaluated_at"
+        ],
+        "title": "EvaluationResponse",
+        "description": "Full evaluation response (API + SDK)."
+      },
+      "EvaluationResultDetail": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "matched_policy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Policy"
+          },
+          "matched_rule": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Rule"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "grace_period_ends": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grace Period Ends"
+          },
+          "notify_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notify At"
+          },
+          "requires_approval": {
+            "type": "boolean",
+            "title": "Requires Approval",
+            "default": false
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "definitive",
+              "partial",
+              "none"
+            ],
+            "title": "Confidence",
+            "default": "none"
+          },
+          "archive_target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archive Target"
+          },
+          "retain_until": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retain Until"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "EvaluationResultDetail"
+      },
+      "FieldCondition": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/Operator"
+          },
+          "value": {
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "operator"
+        ],
+        "title": "FieldCondition",
+        "description": "A single field comparison in a rule condition."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "0.1.0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse"
+      },
+      "ImportRequest": {
+        "properties": {
+          "yaml": {
+            "type": "string",
+            "title": "Yaml"
+          }
+        },
+        "type": "object",
+        "required": [
+          "yaml"
+        ],
+        "title": "ImportRequest"
+      },
+      "ImportResponse": {
+        "properties": {
+          "imported": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Imported"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "imported",
+          "count"
+        ],
+        "title": "ImportResponse"
+      },
+      "JobProgress": {
+        "properties": {
+          "scanned": {
+            "type": "integer",
+            "title": "Scanned",
+            "default": 0
+          },
+          "dispatched": {
+            "type": "integer",
+            "title": "Dispatched",
+            "default": 0
+          },
+          "pending_grace": {
+            "type": "integer",
+            "title": "Pending Grace",
+            "default": 0
+          },
+          "errors": {
+            "type": "integer",
+            "title": "Errors",
+            "default": 0
+          },
+          "notified": {
+            "type": "integer",
+            "title": "Notified",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "JobProgress"
+      },
+      "JobStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ],
+        "title": "JobStatus"
+      },
+      "JobTrigger": {
+        "type": "string",
+        "enum": [
+          "schedule",
+          "api"
+        ],
+        "title": "JobTrigger"
+      },
+      "MaskRequest": {
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "messages": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "title": "MaskRequest"
+      },
+      "MaskResponse": {
+        "properties": {
+          "masked_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Masked Text"
+          },
+          "masked_messages": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Masked Messages"
+          },
+          "mapping_token": {
+            "type": "string",
+            "title": "Mapping Token"
+          },
+          "entity_count": {
+            "type": "integer",
+            "title": "Entity Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mapping_token",
+          "entity_count"
+        ],
+        "title": "MaskResponse"
+      },
+      "Operator": {
+        "type": "string",
+        "enum": [
+          "eq",
+          "neq",
+          "gt",
+          "gte",
+          "lt",
+          "lte",
+          "in",
+          "not_in",
+          "contains",
+          "older_than",
+          "newer_than",
+          "is_null",
+          "regex"
+        ],
+        "title": "Operator"
+      },
+      "Policy": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "default": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/PolicyStatus",
+            "default": "draft"
+          },
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
+          "policy_kind": {
+            "$ref": "#/components/schemas/PolicyKind",
+            "default": "retention"
+          },
+          "data_classification": {
+            "$ref": "#/components/schemas/DataClassification"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "effective_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PolicyScope"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyRule"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Rules"
+          },
+          "dsar": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DsarConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "audit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuditConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "jurisdiction",
+          "data_classification",
+          "rules"
+        ],
+        "title": "Policy",
+        "description": "Full retention policy definition."
+      },
+      "PolicyCreateRequest": {
+        "properties": {
+          "yaml": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yaml"
+          },
+          "policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy"
+          }
+        },
+        "type": "object",
+        "title": "PolicyCreateRequest",
+        "description": "Create from YAML string or JSON policy object."
+      },
+      "PolicyDiffChange": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "add",
+              "remove",
+              "replace"
+            ],
+            "title": "Op"
+          },
+          "old": {
+            "title": "Old"
+          },
+          "new": {
+            "title": "New"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "op"
+        ],
+        "title": "PolicyDiffChange",
+        "description": "A single structural change between two policy versions."
+      },
+      "PolicyDiffRequest": {
+        "properties": {
+          "from_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "From Version"
+          },
+          "to_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "To Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from_version",
+          "to_version"
+        ],
+        "title": "PolicyDiffRequest"
+      },
+      "PolicyDiffResponse": {
+        "properties": {
+          "policy_id": {
+            "type": "string",
+            "title": "Policy Id"
+          },
+          "from_version": {
+            "type": "integer",
+            "title": "From Version"
+          },
+          "to_version": {
+            "type": "integer",
+            "title": "To Version"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyDiffChange"
+            },
+            "type": "array",
+            "title": "Changes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "policy_id",
+          "from_version",
+          "to_version"
+        ],
+        "title": "PolicyDiffResponse"
+      },
+      "PolicyKind": {
+        "type": "string",
+        "enum": [
+          "retention",
+          "classification"
+        ],
+        "title": "PolicyKind"
+      },
+      "PolicyListItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PolicyStatus"
+          },
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
+          "policy_kind": {
+            "$ref": "#/components/schemas/PolicyKind"
+          },
+          "data_classification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Classification"
+          },
+          "entity_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Count"
+          },
+          "scope_data_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scope Data Types"
+          },
+          "scope_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scope Sources"
+          },
+          "excluded_data_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Data Types"
+          },
+          "excluded_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Sources"
+          },
+          "rule_count": {
+            "type": "integer",
+            "title": "Rule Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "version",
+          "status",
+          "jurisdiction",
+          "policy_kind",
+          "rule_count"
+        ],
+        "title": "PolicyListItem"
+      },
+      "PolicyRule": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Priority"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/ConditionGroup"
+          },
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "grace_period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grace Period"
+          },
+          "notify_before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notify Before"
+          },
+          "requires_approval": {
+            "type": "boolean",
+            "title": "Requires Approval",
+            "default": false
+          },
+          "archive_target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archive Target"
+          },
+          "retain_until": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retain Until"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "priority",
+          "condition",
+          "action"
+        ],
+        "title": "PolicyRule",
+        "description": "A single retention rule within a policy."
+      },
+      "PolicyScope": {
+        "properties": {
+          "data_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Data Types"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "exclude": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScopeExclude"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "PolicyScope"
+      },
+      "PolicyStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "active",
+          "deprecated",
+          "archived"
+        ],
+        "title": "PolicyStatus"
+      },
+      "PolicyStatusChangeRequest": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/PolicyStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "PolicyStatusChangeRequest"
+      },
+      "PolicyVersionInfo": {
+        "properties": {
+          "policy_id": {
+            "type": "string",
+            "title": "Policy Id"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "policy_id",
+          "version"
+        ],
+        "title": "PolicyVersionInfo",
+        "description": "Lightweight metadata for a stored policy version snapshot."
+      },
+      "PrivacyStatusResponse": {
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "model_size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Size"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Languages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "available",
+          "enabled"
+        ],
+        "title": "PrivacyStatusResponse"
+      },
+      "ReadyResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "policies_loaded": {
+            "type": "integer",
+            "title": "Policies Loaded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "policies_loaded"
+        ],
+        "title": "ReadyResponse"
+      },
+      "RecordRef": {
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "title": "Record Id"
+          },
+          "data_type": {
+            "type": "string",
+            "title": "Data Type"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "jurisdiction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "record_id",
+          "data_type"
+        ],
+        "title": "RecordRef",
+        "description": "A record reference for enforcement scans."
+      },
+      "ScopeExclude": {
+        "properties": {
+          "data_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Data Types"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "type": "object",
+        "title": "ScopeExclude"
+      },
+      "Sensitivity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "title": "Sensitivity"
+      },
+      "UnmaskRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "mapping_token": {
+            "type": "string",
+            "title": "Mapping Token"
+          },
+          "consume_token": {
+            "type": "boolean",
+            "title": "Consume Token",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "mapping_token"
+        ],
+        "title": "UnmaskRequest"
+      },
+      "UnmaskResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "UnmaskResponse"
+      },
+      "ValidateRequest": {
+        "properties": {
+          "yaml": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yaml"
+          },
+          "policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy"
+          }
+        },
+        "type": "object",
+        "title": "ValidateRequest"
+      },
+      "ValidateResponse": {
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "title": "Valid"
+          },
+          "policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Policy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "classification_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassificationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "policy_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PolicyKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "valid"
+        ],
+        "title": "ValidateResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WebhookCreateRequest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "format": "uri",
+            "title": "Url"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Events"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "events"
+        ],
+        "title": "WebhookCreateRequest",
+        "description": "POST /api/v1/webhooks body."
+      },
+      "WebhookCreateResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          },
+          "secret_set": {
+            "type": "boolean",
+            "title": "Secret Set",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "secret": {
+            "type": "string",
+            "title": "Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "events",
+          "created_at",
+          "updated_at",
+          "secret"
+        ],
+        "title": "WebhookCreateResponse",
+        "description": "Create response includes secret once for the client to store."
+      },
+      "WebhookResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          },
+          "secret_set": {
+            "type": "boolean",
+            "title": "Secret Set",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "events",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "WebhookResponse",
+        "description": "Public webhook view (secret omitted)."
+      },
+      "WebhookUpdateRequest": {
+        "properties": {
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "events": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "title": "WebhookUpdateRequest",
+        "description": "PATCH /api/v1/webhooks/{id} body."
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "description": "API key as Bearer token (DRPE_API_KEY)",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local DRPE API"
+    }
+  ]
+}

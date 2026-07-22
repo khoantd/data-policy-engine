@@ -1,0 +1,47 @@
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:turbo": "next dev --turbopack",
+    "build": "next build",
+    "build:turbo": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "openapi": "openapi-typescript ../openapi/openapi.json -o lib/generated/schema.d.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^3.0.86",
+    "@monaco-editor/react": "^4.7.0",
+    "@tavily/core": "^0.7.6",
+    "ai": "^6.0.233",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "js-yaml": "^5.2.1",
+    "langsmith": "^0.8.4",
+    "lucide-react": "^1.25.0",
+    "monaco-editor": "^0.56.0",
+    "next": "15.5.21",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.21",
+    "openapi-typescript": "^7.13.0",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

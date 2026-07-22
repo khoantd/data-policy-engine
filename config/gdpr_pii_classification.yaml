@@ -1,0 +1,56 @@
+classification_policy:
+  id: pol_gdpr_pii_detect
+  name: "GDPR Personal Data Detection"
+  status: draft
+  jurisdiction: EU_GDPR
+  version: 1
+  tags: [gdpr, pii, detection]
+  scope:
+    data_types: [customer_profile, support_ticket]
+    sources: [crm_system]
+  text_fields: [note, description]
+  entities:
+    - id: ent_email
+      label: "Email address"
+      classification: PII
+      sensitivity: medium
+      regulatory_refs: ["GDPR Art. 4(1)"]
+      detection:
+        field_names: [email, contact_email]
+        regex: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+        ner_types: [EMAIL]
+    - id: ent_phone
+      label: "Phone number"
+      classification: PII
+      sensitivity: medium
+      regulatory_refs: ["GDPR Art. 4(1)"]
+      detection:
+        field_names: [phone, mobile]
+        ner_types: [PHONE]
+    - id: ent_national_id
+      label: "National ID / SSN"
+      classification: SPII
+      sensitivity: critical
+      regulatory_refs: ["GDPR Art. 9 (verify lawful basis)"]
+      detection:
+        field_names: [ssn, national_id, passport]
+  rules:
+    - id: rule_spii_flag
+      priority: 10
+      description: "Flag SPII for encryption and DPO review"
+      condition:
+        any:
+          - field: _max_classification
+            operator: eq
+            value: SPII
+      action: flag
+      handling: require_encryption
+    - id: rule_pii_review
+      priority: 20
+      description: "Review detected PII before export"
+      condition:
+        any:
+          - field: _has_pii
+            operator: eq
+            value: true
+      action: review

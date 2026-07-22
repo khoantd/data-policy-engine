@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drpe"
+version = "0.1.0"
+description = "Data Retention Policy Engine — define, evaluate, and enforce retention policies"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "DRPE" }]
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "pydantic>=2.9.0",
+  "pydantic-settings>=2.6.0",
+  "pyyaml>=6.0.2",
+  "httpx>=0.27.0",
+  "sqlalchemy>=2.0.36",
+  "psycopg[binary]>=3.2.0",
+  "alembic>=1.14.0",
+  "redis>=5.0.0",
+  "celery[redis]>=5.4.0",
+]
+
+[project.optional-dependencies]
+ai = ["privalyse-mask>=0.1.0"]
+sdk = ["httpx>=0.27.0"]
+dev = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+  "httpx>=0.27.0",
+  "fakeredis>=2.0.0",
+]
+
+[project.scripts]
+drpe = "drpe.api.app:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["drpe*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]

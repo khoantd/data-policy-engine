@@ -1,0 +1,5 @@
+# Alembic migration scripts for DRPE (PostgreSQL / Supabase).
+#
+# Apply:
+#   export DATABASE_URL=postgresql+psycopg://...
+#   alembic upgrade head
