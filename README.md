@@ -32,6 +32,107 @@ Open `http://localhost:3000`, connect with your `DRPE_API_KEY` (or leave empty i
 
 Optional **privacy-safe AI**: `pip install -e ".[ai]"` installs [privalyse-mask](https://github.com/khoantd/privalyse-mask) on the API so Policy Import and Evaluate mask PII before LiteLLM.
 
+### Docker
+
+Requires [Docker](https://docs.docker.com/get-docker/) with the Compose plugin.
+
+#### Build images
+
+Use the helper script (recommended) or call `docker build` / `docker compose` directly:
+
+```bash
+chmod +x scripts/docker-build.sh   # once
+
+./scripts/docker-build.sh          # build API + Admin → drpe-api:latest, drpe-admin:latest
+./scripts/docker-build.sh api      # API only
+./scripts/docker-build.sh admin    # Admin only
+./scripts/docker-build.sh compose  # build via docker compose only
+
+TAG=v0.1.0 ./scripts/docker-build.sh          # custom tag
+NO_CACHE=1 ./scripts/docker-build.sh          # rebuild without cache
+```
+
+Equivalent manual builds:
+
+```bash
+# API (repo root Dockerfile)
+docker build -t drpe-api:latest -f Dockerfile .
+
+# Admin (admin/Dockerfile)
+docker build -t drpe-admin:latest -f admin/Dockerfile ./admin
+
+# Or both via Compose
+docker compose build
+```
+
+#### Run the stack
+
+Run the API and Admin UI together (in-memory stores by default; point `.env` at Postgres/Redis when you need persistence):
+
+```bash
+docker compose up --build
+# API   http://localhost:8000/docs
+# Admin http://localhost:3000
+```
+
+After images are already built:
+
+```bash
+docker compose up
+```
+
+Standalone containers (without Compose):
+
+```bash
+docker run --rm -p 8000:8000 --env-file .env drpe-api:latest
+docker run --rm -p 3000:3000 \
+  -e DRPE_API_URL=http://host.docker.internal:8000 \
+  -e DRPE_API_KEY \
+  drpe-admin:latest
+```
+
+With `DATABASE_URL` set, apply migrations before relying on the DB:
+
+```bash
+docker compose run --rm api alembic upgrade head
+```
+
+The Admin container reaches the API at `http://api:8000` on the Compose network (`DRPE_API_URL`).
+
+### Postman
+
+Committed collection and local environment live under [`postman/`](postman/):
+
+| File | Purpose |
+|------|---------|
+| [`postman/DRPE.postman_collection.json`](postman/DRPE.postman_collection.json) | Full `/api/v1` request collection |
+| [`postman/DRPE.local.postman_environment.json`](postman/DRPE.local.postman_environment.json) | Local env (`baseUrl`, `apiKey`, resource IDs) |
+
+#### Import in Postman (desktop / web)
+
+1. Open [Postman](https://www.postman.com/downloads/) → **Import** (or **File → Import**).
+2. Choose **Upload Files** (or drag-and-drop) and select both:
+   - `postman/DRPE.postman_collection.json`
+   - `postman/DRPE.local.postman_environment.json`
+3. Confirm import. You should see the collection **DRPE — Data Retention Policy Engine** and environment **DRPE Local**.
+4. In the environment picker (top right), select **DRPE Local**.
+5. Edit the environment variables:
+   - `baseUrl` — default `http://localhost:8000` (use your API host if different)
+   - `apiKey` — your `DRPE_API_KEY` (leave empty if API auth is off)
+   - Optionally set `policyId`, `jobId`, `requestId`, `webhookId`, `jurisdictionCode` after creating resources
+6. Start the API (`uvicorn` or Docker), then run **Health → Health** to verify connectivity.
+
+Auth is **Bearer** (`Authorization: Bearer {{apiKey}}`) at the collection level. The collection mirrors [`openapi/openapi.json`](openapi/openapi.json).
+
+#### Import via Newman / CLI (optional)
+
+```bash
+# One-off run against a running API
+npx newman run postman/DRPE.postman_collection.json \
+  -e postman/DRPE.local.postman_environment.json \
+  --env-var "apiKey=$DRPE_API_KEY"
+```
+
 ### Define a Policy (YAML)
 
 ```yaml
@@ -209,6 +310,8 @@ Body fields: `url` (https), `events` (e.g. `["enforcement.delete"]` or `["*"]`),
 
 ## Architecture
 
+![DRPE C4 architecture — SDK, REST API, and Celery scheduler into the policy engine core (DSL parser, evaluator, versioner, jurisdiction, conflict resolver, audit logger) with PostgreSQL and Redis](drpe_architecture_c4.png)
+
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for C4 diagrams, DSL spec, API design, and database schema.
 
 ## Project Structure
@@ -229,6 +332,8 @@ admin/             # Next.js ops console (BFF over /api/v1)
 openapi/           # Committed OpenAPI schema (openapi.json)
 clients/           # Generated TS / Go / Java HTTP clients
 config/            # Example policy files
+postman/           # Postman collection + local environment
+scripts/           # OpenAPI export, client gen, docker-build.sh
 tests/             # Test suite
 docs/              # Architecture docs
 alembic.ini        # Alembic config

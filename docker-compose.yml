@@ -1,0 +1,31 @@
+# Minimal local stack: FastAPI API + Next.js Admin UI.
+# Postgres / Redis / Celery stay optional via .env (e.g. Supabase).
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DRPE_POLICIES_DIR: config
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DRPE_API_URL: http://api:8000
+      # Optional: set DRPE_API_KEY / LITELLM_* in the host environment or a compose override
+      DRPE_API_KEY: ${DRPE_API_KEY:-}
+      LITELLM_BASE_URL: ${LITELLM_BASE_URL:-}
+      LITELLM_API_KEY: ${LITELLM_API_KEY:-}
+      LITELLM_MODEL: ${LITELLM_MODEL:-}
+    depends_on:
+      - api

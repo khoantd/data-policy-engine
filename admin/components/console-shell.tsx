@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { isNavActive } from "@/lib/nav-active";
 import { Button } from "@/components/ui/button";
 
 type NavItem = {
@@ -65,10 +66,9 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-function isNavActive(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
+const NAV_HREFS = NAV_GROUPS.flatMap((group) =>
+  group.items.map((item) => item.href),
+);
 
 export function ConsoleShell({
   children,
@@ -98,7 +98,7 @@ export function ConsoleShell({
           </p>
           <nav className="flex flex-col gap-0.5" aria-label={group.label}>
             {group.items.map(({ href, label, icon: Icon }) => {
-              const active = isNavActive(pathname, href);
+              const active = isNavActive(pathname, href, NAV_HREFS);
               return (
                 <Link
                   key={href}

@@ -40,6 +40,8 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **Policy Import AI assist** — Admin `/policies/import` compose workspace (Generate/Polish/Enhance/Expand) via LiteLLM BFF `POST /api/ai/policy-suggest`; Monaco draft + validate/import; design override `admin/design-system/pages/policy-import.md`
 - **Classification scan UX diagnostics** — `/classify` now returns policy applicability diagnostics, surfaces policy scope hints/source input, and distinguishes out-of-scope vs clean scans
 - **Scan AI sample generation** — Admin `/classify` Generate sample data via LiteLLM BFF `POST /api/ai/classify-sample` (scenarios: auto/pii/spii/mixed/clean); fills single-record form only; never auto-runs scan
+- **Docker** — `scripts/docker-build.sh` + README build/run steps (API + Admin images / Compose)
+- **Postman** — README import guidelines for `postman/DRPE.postman_collection.json` + local env
 
 ## In progress
 
@@ -53,6 +55,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 3. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
 4. Optional: JWT OAuth2 scopes
 5. Optional: audit_logs monthly partitioning
+
 
 ## Decisions
 

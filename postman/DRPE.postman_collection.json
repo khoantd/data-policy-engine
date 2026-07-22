@@ -1,0 +1,1531 @@
+{
+  "info": {
+    "_postman_id": "fca6ba9d-026c-4ff1-b2c2-d26a38a3c7aa",
+    "name": "DRPE \u2014 Data Retention Policy Engine",
+    "description": "HTTP collection for the DRPE FastAPI backend (`/api/v1`).\n\n**Setup**\n1. Import this collection and the companion environment `DRPE.local.postman_environment.json`.\n2. Set `baseUrl` (default `http://localhost:8000`) and `apiKey` (your `DRPE_API_KEY`; leave empty if auth is off).\n3. Optionally set `policyId`, `jobId`, `requestId`, `webhookId` after creating resources.\n\nAuth: Bearer token (`Authorization: Bearer {{apiKey}}`).\nOpenAPI source: `openapi/openapi.json`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{apiKey}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    },
+    {
+      "key": "policyId",
+      "value": "pol_gdpr_customer"
+    },
+    {
+      "key": "policyVersion",
+      "value": "1"
+    },
+    {
+      "key": "jobId",
+      "value": ""
+    },
+    {
+      "key": "requestId",
+      "value": ""
+    },
+    {
+      "key": "webhookId",
+      "value": ""
+    },
+    {
+      "key": "jurisdictionCode",
+      "value": "EU_GDPR"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "description": "Liveness and readiness probes.",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ],
+              "query": []
+            },
+            "description": "Health"
+          },
+          "response": []
+        },
+        {
+          "name": "Ready",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health/ready",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health",
+                "ready"
+              ],
+              "query": []
+            },
+            "description": "Ready"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Jurisdictions",
+      "description": "List and fetch jurisdiction metadata.",
+      "item": [
+        {
+          "name": "List All",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jurisdictions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jurisdictions"
+              ],
+              "query": []
+            },
+            "description": "List All"
+          },
+          "response": []
+        },
+        {
+          "name": "Get One",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jurisdictions/{{jurisdictionCode}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jurisdictions",
+                "{{jurisdictionCode}}"
+              ],
+              "query": []
+            },
+            "description": "Get One"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Policies",
+      "description": "Validate, import, CRUD, versions, diff, and activate.",
+      "item": [
+        {
+          "name": "List Policies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies"
+              ],
+              "query": [
+                {
+                  "key": "status_filter",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "policy_kind",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List Policies"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Policy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies"
+              ],
+              "query": []
+            },
+            "description": "Create Policy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"yaml\": \"policy:\\n  id: pol_postman_demo\\n  name: Postman Demo Policy\\n  status: draft\\n  jurisdiction: EU_GDPR\\n  data_classification: PII\\n  scope:\\n    data_types: [customer_profile]\\n  rules:\\n    - id: rule_inactive_delete\\n      priority: 100\\n      condition:\\n        all:\\n          - field: status\\n            operator: eq\\n            value: inactive\\n          - field: last_activity_at\\n            operator: older_than\\n            value: 730d\\n      action: delete\\n      grace_period: 30d\\n\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Import Policies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "import"
+              ],
+              "query": []
+            },
+            "description": "Import Policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"yaml\": \"policy:\\n  id: pol_example_import\\n  name: Example Import Policy\\n  status: draft\\n  jurisdiction: EU_GDPR\\n  data_classification: PII\\n  scope:\\n    data_types: [customer_profile]\\n  rules:\\n    - id: rule_inactive_delete\\n      priority: 100\\n      condition:\\n        all:\\n          - field: status\\n            operator: eq\\n            value: inactive\\n          - field: last_activity_at\\n            operator: older_than\\n            value: 730d\\n      action: delete\\n      grace_period: 30d\\n\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Policy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "validate"
+              ],
+              "query": []
+            },
+            "description": "Validate Policy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"yaml\": \"policy:\\n  id: pol_example\\n  name: Example Retention Policy\\n  status: draft\\n  jurisdiction: EU_GDPR\\n  data_classification: PII\\n  scope:\\n    data_types: [customer_profile]\\n  rules:\\n    - id: rule_inactive_delete\\n      priority: 100\\n      condition:\\n        all:\\n          - field: status\\n            operator: eq\\n            value: inactive\\n          - field: last_activity_at\\n            operator: older_than\\n            value: 730d\\n      action: delete\\n      grace_period: 30d\\n\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Policy",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}"
+              ],
+              "query": []
+            },
+            "description": "Get Policy"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Policy",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}"
+              ],
+              "query": []
+            },
+            "description": "Update Policy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"yaml\": \"policy:\\n  id: pol_gdpr_customer\\n  name: GDPR Customer Data Retention (updated)\\n  status: active\\n  jurisdiction: EU_GDPR\\n  data_classification: PII\\n  scope:\\n    data_types: [customer_profile]\\n  rules:\\n    - id: rule_inactive_delete\\n      priority: 100\\n      condition:\\n        all:\\n          - field: status\\n            operator: eq\\n            value: inactive\\n          - field: last_activity_at\\n            operator: older_than\\n            value: 730d\\n      action: delete\\n      grace_period: 30d\\n\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Policy",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}"
+              ],
+              "query": []
+            },
+            "description": "Delete Policy"
+          },
+          "response": []
+        },
+        {
+          "name": "Diff Policy Versions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/diff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "diff"
+              ],
+              "query": []
+            },
+            "description": "Diff Policy Versions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_version\": 1,\n  \"to_version\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Policy Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Change Policy Status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Policy Versions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "versions"
+              ],
+              "query": []
+            },
+            "description": "List Policy Versions"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Policy Version",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/versions/{{policyVersion}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "versions",
+                "{{policyVersion}}"
+              ],
+              "query": []
+            },
+            "description": "Get Policy Version"
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Policy Version",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/versions/{{policyVersion}}/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "versions",
+                "{{policyVersion}}",
+                "activate"
+              ],
+              "query": []
+            },
+            "description": "Activate Policy Version"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Evaluate",
+      "description": "Evaluate records against retention policies.",
+      "item": [
+        {
+          "name": "Evaluate One",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "evaluate"
+              ],
+              "query": []
+            },
+            "description": "Evaluate One",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data_type\": \"customer_profile\",\n  \"record_id\": \"cust_123\",\n  \"source\": \"crm_system\",\n  \"jurisdiction\": \"EU_GDPR\",\n  \"metadata\": {\n    \"status\": \"inactive\",\n    \"last_activity_at\": \"2023-01-01T00:00:00Z\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Evaluate Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/evaluate/batch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "evaluate",
+                "batch"
+              ],
+              "query": []
+            },
+            "description": "Evaluate Batch",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"records\": [\n    {\n      \"data_type\": \"customer_profile\",\n      \"record_id\": \"cust_123\",\n      \"source\": \"crm_system\",\n      \"jurisdiction\": \"EU_GDPR\",\n      \"metadata\": {\n        \"status\": \"inactive\",\n        \"last_activity_at\": \"2023-01-01T00:00:00Z\"\n      }\n    },\n    {\n      \"data_type\": \"customer_profile\",\n      \"record_id\": \"cust_456\",\n      \"source\": \"crm_system\",\n      \"jurisdiction\": \"EU_GDPR\",\n      \"metadata\": {\n        \"status\": \"active\",\n        \"created_at\": \"2018-01-01T00:00:00Z\"\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Evaluate Dry Run",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/evaluate/dry-run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "evaluate",
+                "dry-run"
+              ],
+              "query": []
+            },
+            "description": "Evaluate Dry Run",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data_type\": \"customer_profile\",\n  \"record_id\": \"cust_123\",\n  \"source\": \"crm_system\",\n  \"jurisdiction\": \"EU_GDPR\",\n  \"metadata\": {\n    \"status\": \"inactive\",\n    \"last_activity_at\": \"2023-01-01T00:00:00Z\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Classify",
+      "description": "Classify records for PII / sensitive data.",
+      "item": [
+        {
+          "name": "Classify One",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classify"
+              ],
+              "query": []
+            },
+            "description": "Classify One",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data_type\": \"customer_profile\",\n  \"record_id\": \"cust_123\",\n  \"source\": \"crm_system\",\n  \"jurisdiction\": \"EU_GDPR\",\n  \"metadata\": {\n    \"email\": \"user@example.com\",\n    \"ssn\": \"123-45-6789\",\n    \"phone\": \"+1-555-0100\"\n  },\n  \"text_fields\": [\n    \"email\",\n    \"ssn\",\n    \"phone\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Classify Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classify/batch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classify",
+                "batch"
+              ],
+              "query": []
+            },
+            "description": "Classify Batch",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"records\": [\n    {\n      \"data_type\": \"customer_profile\",\n      \"record_id\": \"cust_123\",\n      \"jurisdiction\": \"EU_GDPR\",\n      \"metadata\": {\n        \"email\": \"user@example.com\"\n      }\n    },\n    {\n      \"data_type\": \"customer_profile\",\n      \"record_id\": \"cust_456\",\n      \"jurisdiction\": \"EU_GDPR\",\n      \"metadata\": {\n        \"notes\": \"no PII here\"\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Classify Dry Run",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classify/dry-run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classify",
+                "dry-run"
+              ],
+              "query": []
+            },
+            "description": "Classify Dry Run",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data_type\": \"customer_profile\",\n  \"record_id\": \"cust_123\",\n  \"jurisdiction\": \"EU_GDPR\",\n  \"metadata\": {\n    \"email\": \"user@example.com\",\n    \"ssn\": \"123-45-6789\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Enforce",
+      "description": "Trigger enforcement jobs and inspect job status.",
+      "item": [
+        {
+          "name": "Trigger Enforce",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/enforce",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enforce"
+              ],
+              "query": []
+            },
+            "description": "Trigger Enforce",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policy_id\": \"{{policyId}}\",\n  \"records\": [\n    {\n      \"record_id\": \"cust_123\",\n      \"data_type\": \"customer_profile\",\n      \"source\": \"crm_system\",\n      \"jurisdiction\": \"EU_GDPR\",\n      \"metadata\": {\n        \"status\": \"inactive\",\n        \"last_activity_at\": \"2023-01-01T00:00:00Z\"\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/enforce/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enforce",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "policy_id",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List Jobs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Job",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/enforce/jobs/{{jobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enforce",
+                "jobs",
+                "{{jobId}}"
+              ],
+              "query": []
+            },
+            "description": "Get Job"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dsar",
+      "description": "Data subject access and erasure requests.",
+      "item": [
+        {
+          "name": "Submit Access",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dsar/access",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dsar",
+                "access"
+              ],
+              "query": []
+            },
+            "description": "Submit Access",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject_id\": \"subj_001\",\n  \"policy_id\": \"{{policyId}}\",\n  \"identity\": {\n    \"email\": \"subject@example.com\"\n  },\n  \"records\": [\n    {\n      \"record_id\": \"cust_123\",\n      \"data_type\": \"customer_profile\",\n      \"metadata\": {\n        \"subject_id\": \"subj_001\",\n        \"email\": \"subject@example.com\"\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Erasure",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dsar/erasure",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dsar",
+                "erasure"
+              ],
+              "query": []
+            },
+            "description": "Submit Erasure",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject_id\": \"subj_001\",\n  \"policy_id\": \"{{policyId}}\",\n  \"identity\": {\n    \"email\": \"subject@example.com\"\n  },\n  \"records\": [\n    {\n      \"record_id\": \"cust_123\",\n      \"data_type\": \"customer_profile\",\n      \"metadata\": {\n        \"subject_id\": \"subj_001\",\n        \"legal_basis\": \"consent\"\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dsar/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dsar",
+                "requests"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "subject_id",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "policy_id",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List Requests"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Request",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dsar/requests/{{requestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dsar",
+                "requests",
+                "{{requestId}}"
+              ],
+              "query": []
+            },
+            "description": "Get Request"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "description": "Webhook registration CRUD.",
+      "item": [
+        {
+          "name": "List Webhooks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhooks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List Webhooks"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhooks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks"
+              ],
+              "query": []
+            },
+            "description": "Create Webhook",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://example.com/webhooks/drpe\",\n  \"events\": [\n    \"policy.activated\",\n    \"enforce.completed\",\n    \"dsar.completed\"\n  ],\n  \"description\": \"Ops webhook\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Webhook",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhooks/{{webhookId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks",
+                "{{webhookId}}"
+              ],
+              "query": []
+            },
+            "description": "Get Webhook"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Webhook",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhooks/{{webhookId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks",
+                "{{webhookId}}"
+              ],
+              "query": []
+            },
+            "description": "Update Webhook",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true,\n  \"description\": \"Updated webhook\",\n  \"events\": [\n    \"policy.activated\",\n    \"enforce.completed\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Webhook",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhooks/{{webhookId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks",
+                "{{webhookId}}"
+              ],
+              "query": []
+            },
+            "description": "Delete Webhook"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Audit",
+      "description": "Append-only audit log queries.",
+      "item": [
+        {
+          "name": "List Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/audit/logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "audit",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "policy_id",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "record_id",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "job_id",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "event_type",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "since",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "until",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List Audit Logs"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Privacy",
+      "description": "Optional PII mask/unmask (requires privalyse-mask).",
+      "item": [
+        {
+          "name": "Privacy Mask",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/privacy/mask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "privacy",
+                "mask"
+              ],
+              "query": []
+            },
+            "description": "Privacy Mask",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Contact Jane Doe at jane.doe@example.com or +1-555-0100\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Privacy Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/privacy/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "privacy",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Privacy Status"
+          },
+          "response": []
+        },
+        {
+          "name": "Privacy Unmask",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/privacy/unmask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "privacy",
+                "unmask"
+              ],
+              "query": []
+            },
+            "description": "Privacy Unmask",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Contact {{TOKEN_1}} at {{TOKEN_2}} or {{TOKEN_3}}\",\n  \"mapping_token\": \"replace-with-mapping-token-from-mask\",\n  \"consume_token\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
