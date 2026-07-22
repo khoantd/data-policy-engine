@@ -187,7 +187,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         set_enforcement_runtime(None)
 
     app = FastAPI(
-        title="DRPE — Data Retention Policy Engine",
+        title="ROS Policy",
         version="0.1.0",
         description="Define, evaluate, and enforce data retention policies",
         lifespan=lifespan,

@@ -1,6 +1,6 @@
 # Evaluate Playground Page Overrides
 
-> **PROJECT:** DRPE Admin
+> **PROJECT:** ROS Policy
 > **Generated:** 2026-07-22
 > **Page Type:** Interactive evaluate playground / ops console
 

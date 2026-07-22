@@ -1,8 +1,8 @@
-# Data Retention Policy Engine (DRPE) — Architecture
+# ROS Policy — Architecture
 
 ## 1. System Overview
 
-DRPE is a **standalone policy engine** that other applications integrate with to:
+ROS Policy is a **standalone policy engine** that other applications integrate with to:
 
 1. **Define** data retention policies via a YAML-based DSL
 2. **Evaluate** whether a data record should be retained, archived, anonymized, or deleted
@@ -17,7 +17,7 @@ DRPE is a **standalone policy engine** that other applications integrate with to
 
 ```
 ┌─────────────────────────────────────────────────┐
-│                  DRPE Core                      │
+│                  ROS Policy Core                │
 │  ┌───────────┐  ┌──────────┐  ┌──────────────┐ │
 │  │ Policy DSL│  │ Evaluator│  │ Version Mgr  │ │
 │  │  Parser   │  │  Engine  │  │              │ │
@@ -45,12 +45,12 @@ DRPE is a **standalone policy engine** that other applications integrate with to
 
 ```mermaid
 C4Context
-    title Data Retention Policy Engine — System Context
+    title ROS Policy — System Context
 
     Person(admin, "Policy Admin", "Defines and manages retention policies")
     Person(devops, "DevOps / DPO", "Monitors compliance, reviews audit logs")
 
-    System(drpe, "DRPE", "Data Retention Policy Engine")
+    System(drpe, "ROS Policy", "Retention & classification policy engine")
 
     System_Ext(crm, "CRM System", "Checks policies before data ops")
     System_Ext(erp, "ERP System", "Enforces retention on financial data")
@@ -69,7 +69,7 @@ C4Context
 
 ```mermaid
 C4Container
-    title DRPE — Container Diagram
+    title ROS Policy — Container Diagram
 
     Container(api, "REST API", "FastAPI", "Policy CRUD, evaluation, audit endpoints")
     Container(sdk, "Python SDK", "PyPI package", "In-process policy evaluation")
@@ -494,4 +494,4 @@ def get_customer(customer_id: str):
 - No built-in UI (API-first; admin UI is a separate concern)
 - No cross-datacenter replication (single-region for v1)
 - No real-time streaming evaluation (batch + request/response only)
-- No automatic data deletion execution (DRPE tells you WHAT to do; YOUR system does it)
+- No automatic data deletion execution (ROS Policy tells you WHAT to do; YOUR system does it)

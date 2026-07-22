@@ -42,6 +42,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **Scan AI sample generation** — Admin `/classify` Generate sample data via LiteLLM BFF `POST /api/ai/classify-sample` (scenarios: auto/pii/spii/mixed/clean); fills single-record form only; never auto-runs scan
 - **Docker** — `scripts/docker-build.sh` + README build/run steps (API + Admin images / Compose)
 - **Postman** — README import guidelines for `postman/DRPE.postman_collection.json` + local env
+- **Product rename** — user-facing brand is **ROS Policy** (Admin UI, API OpenAPI title, README, Postman display names, docs). Technical IDs unchanged: package `drpe`, env `DRPE_*`, SDK `DRPEClient`, Docker image names `drpe-api` / `drpe-admin`
 
 ## In progress
 
@@ -55,7 +56,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 3. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
 4. Optional: JWT OAuth2 scopes
 5. Optional: audit_logs monthly partitioning
-
+6. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
 
 ## Decisions
 
@@ -74,6 +75,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - Policy activate = rollback-as-new-version (never rewrite `policy_versions` history)
 - Admin UI: Next.js App Router BFF in `admin/` (not static html-tailwind); API key in httpOnly cookie
 - Policy Import AI: Admin BFF → remote LiteLLM (OpenAI-compatible); FastAPI stays validate/import only; never auto-import AI drafts
+- Product name: **ROS Policy** (display); technical package/env remain `drpe` / `DRPE_*` unless a breaking rebrand is requested
 
 ## Gotchas
 

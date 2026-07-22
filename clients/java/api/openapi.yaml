@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   description: "Define, evaluate, and enforce data retention policies"
-  title: DRPE — Data Retention Policy Engine
+  title: ROS Policy
   version: 0.1.0
 servers:
 - description: Local DRPE API

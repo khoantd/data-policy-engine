@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "fca6ba9d-026c-4ff1-b2c2-d26a38a3c7aa",
-    "name": "DRPE \u2014 Data Retention Policy Engine",
-    "description": "HTTP collection for the DRPE FastAPI backend (`/api/v1`).\n\n**Setup**\n1. Import this collection and the companion environment `DRPE.local.postman_environment.json`.\n2. Set `baseUrl` (default `http://localhost:8000`) and `apiKey` (your `DRPE_API_KEY`; leave empty if auth is off).\n3. Optionally set `policyId`, `jobId`, `requestId`, `webhookId` after creating resources.\n\nAuth: Bearer token (`Authorization: Bearer {{apiKey}}`).\nOpenAPI source: `openapi/openapi.json`.",
+    "name": "ROS Policy",
+    "description": "HTTP collection for the ROS Policy FastAPI backend (`/api/v1`).\n\n**Setup**\n1. Import this collection and the companion environment `DRPE.local.postman_environment.json`.\n2. Set `baseUrl` (default `http://localhost:8000`) and `apiKey` (your `DRPE_API_KEY`; leave empty if auth is off).\n3. Optionally set `policyId`, `jobId`, `requestId`, `webhookId` after creating resources.\n\nAuth: Bearer token (`Authorization: Bearer {{apiKey}}`).\nOpenAPI source: `openapi/openapi.json`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {

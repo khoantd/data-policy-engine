@@ -1,7 +1,7 @@
 {
   "name": "drpe",
   "private": true,
-  "description": "DRPE tooling — OpenAPI export and multi-language client generation",
+  "description": "ROS Policy tooling — OpenAPI export and multi-language client generation",
   "scripts": {
     "openapi:export": "python scripts/export_openapi.py",
     "openapi:generate:typescript": "openapi-generator-cli generate -i openapi/openapi.json -g typescript-fetch -o clients/typescript --additional-properties=npmName=drpe-api-client,supportsES6=true,typescriptThreePlus=true,withoutRuntimeChecks=true --skip-validate-spec",

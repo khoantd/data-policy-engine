@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         error:
           err instanceof Error
             ? err.message
-            : "Cannot reach DRPE API. Is the server running?",
+            : "Cannot reach ROS Policy API. Is the server running?",
       },
       { status: 502 },
     );

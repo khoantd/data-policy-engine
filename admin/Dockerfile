@@ -1,4 +1,4 @@
-# DRPE Admin UI — Next.js standalone multi-stage image
+# ROS Policy Admin UI — Next.js standalone multi-stage image
 FROM node:20-alpine AS deps
 
 WORKDIR /app

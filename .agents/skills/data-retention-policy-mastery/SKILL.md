@@ -135,7 +135,7 @@ with clear periods, actions, triggers, exceptions, and approval requirements.
 
 **Goal:** Translate the retention schedule into machine-readable policy definitions.
 
-The DRPE (Data Retention Policy Engine) uses a YAML-based DSL for policy definitions.
+ROS Policy uses a YAML-based DSL for policy definitions.
 Each policy contains:
 
 ```yaml

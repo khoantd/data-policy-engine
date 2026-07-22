@@ -24,7 +24,7 @@ export type RetentionIndustry = (typeof RETENTION_INDUSTRIES)[number];
 
 export const RETENTION_MASTERY_MARKER = "DATA_RETENTION_POLICY_MASTERY";
 
-const CORE_PRINCIPLES = `## Data retention policy mastery (DRPE)
+const CORE_PRINCIPLES = `## Data retention policy mastery (ROS Policy)
 
 Apply these principles when authoring YAML policies. Do not invent legal requirements; use approximations only where noted and prefer conservative retention.
 

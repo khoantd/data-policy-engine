@@ -1,6 +1,6 @@
 # Dashboard Page Overrides
 
-> **PROJECT:** DRPE Admin
+> **PROJECT:** ROS Policy
 > **Generated:** 2026-07-22 12:32:05
 > **Page Type:** Dashboard / Data View
 

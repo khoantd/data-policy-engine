@@ -1,6 +1,6 @@
 # Observability Page Overrides
 
-> **PROJECT:** DRPE Admin
+> **PROJECT:** ROS Policy
 > **Generated:** 2026-07-22
 > **Page Type:** AI trace observability / ops console
 

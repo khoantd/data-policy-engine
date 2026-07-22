@@ -4,14 +4,14 @@ import { buildBreadcrumbs } from "./breadcrumbs";
 describe("buildBreadcrumbs", () => {
   it("returns overview for root", () => {
     expect(buildBreadcrumbs("/")).toEqual([
-      { label: "DRPE Admin", href: "/" },
+      { label: "ROS Policy", href: "/" },
       { label: "Overview" },
     ]);
   });
 
   it("builds policies trail", () => {
     expect(buildBreadcrumbs("/policies")).toEqual([
-      { label: "DRPE Admin", href: "/" },
+      { label: "ROS Policy", href: "/" },
       { label: "Policies" },
     ]);
   });
@@ -20,7 +20,7 @@ describe("buildBreadcrumbs", () => {
     expect(
       buildBreadcrumbs("/policies/my-policy", { tailLabel: "my-policy" }),
     ).toEqual([
-      { label: "DRPE Admin", href: "/" },
+      { label: "ROS Policy", href: "/" },
       { label: "Policies", href: "/policies" },
       { label: "my-policy" },
     ]);
@@ -28,7 +28,7 @@ describe("buildBreadcrumbs", () => {
 
   it("builds import under policies", () => {
     expect(buildBreadcrumbs("/policies/import")).toEqual([
-      { label: "DRPE Admin", href: "/" },
+      { label: "ROS Policy", href: "/" },
       { label: "Policies", href: "/policies" },
       { label: "Import" },
     ]);

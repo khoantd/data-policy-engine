@@ -5,6 +5,5 @@ export default function ConsoleLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const apiUrl = process.env.DRPE_API_URL || "http://127.0.0.1:8000";
-  return <ConsoleShell apiUrl={apiUrl}>{children}</ConsoleShell>;
+  return <ConsoleShell>{children}</ConsoleShell>;
 }

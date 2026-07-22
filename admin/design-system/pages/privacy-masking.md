@@ -1,6 +1,6 @@
 # Privacy Masking Page Overrides
 
-> **PROJECT:** DRPE Admin
+> **PROJECT:** ROS Policy
 > **Generated:** 2026-07-22
 > **Page Type:** Semantic PII masking indicators (privalyse-mask)
 

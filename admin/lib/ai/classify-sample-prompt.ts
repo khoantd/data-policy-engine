@@ -3,7 +3,7 @@ import type {
   ClassifySampleScenario,
 } from "@/lib/ai/classify-sample-schema";
 
-const RECORD_CONTRACT = `You generate synthetic classification scan records for the DRPE (Data Retention Policy Engine) Scan playground.
+const RECORD_CONTRACT = `You generate synthetic classification scan records for the ROS Policy Scan playground.
 Each record must use these exact field names (snake_case):
 - data_type (string, required) — match a policy scope data_type when the policy restricts them
 - record_id (string, required, synthetic IDs like cust_scan_ai_001 — never real identifiers)

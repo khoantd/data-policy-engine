@@ -1,4 +1,4 @@
-"""DRPE — Data Retention Policy Engine public API."""
+"""ROS Policy public API."""
 
 from drpe.models.policy import EvaluationRequest, EvaluationResponse
 from drpe.sdk.client import DRPEClient, DRPEClientError

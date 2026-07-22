@@ -1,6 +1,6 @@
 # Classification / Scan Page Overrides
 
-> **PROJECT:** DRPE Admin
+> **PROJECT:** ROS Policy
 > **Page Type:** PII / sensitive data scan playground
 
 > Rules here override `design-system/MASTER.md` for the Scan (`/classify`) page.

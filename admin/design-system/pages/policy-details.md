@@ -1,6 +1,6 @@
 # Policy Details Page Overrides
 
-> **PROJECT:** DRPE Admin
+> **PROJECT:** ROS Policy
 > **Generated:** 2026-07-22
 > **Page Type:** Policy definition editor / ops console
 

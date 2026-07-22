@@ -24,7 +24,7 @@ export type ClassificationEntityCategory =
 
 export const CLASSIFICATION_MASTERY_MARKER = "DATA_CLASSIFICATION_POLICY_MASTERY";
 
-const CORE_PRINCIPLES = `## PII / sensitive data classification policy mastery (DRPE)
+const CORE_PRINCIPLES = `## PII / sensitive data classification policy mastery (ROS Policy)
 
 Apply these principles when authoring classification_policy YAML. Do not invent legal definitions; use conservative sensitivity defaults.
 

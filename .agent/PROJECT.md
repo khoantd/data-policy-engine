@@ -11,7 +11,7 @@
 
 ## Stack
 
-**Application:** Python 3.11+ package `drpe` — Data Retention Policy Engine
+**Application:** Python 3.11+ package `drpe` — ROS Policy
 
 | Layer | Choice |
 |-------|--------|

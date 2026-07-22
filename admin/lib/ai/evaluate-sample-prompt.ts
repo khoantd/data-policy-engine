@@ -3,7 +3,7 @@ import type {
   EvaluateSampleScenario,
 } from "@/lib/ai/evaluate-sample-schema";
 
-const RECORD_CONTRACT = `You generate synthetic evaluation records for the DRPE (Data Retention Policy Engine) playground.
+const RECORD_CONTRACT = `You generate synthetic evaluation records for the ROS Policy playground.
 Each record must use these exact field names (snake_case):
 - data_type (string, required)
 - record_id (string, required, synthetic IDs like cust_sample_001 — no real PII)

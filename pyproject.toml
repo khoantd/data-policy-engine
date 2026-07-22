@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "drpe"
 version = "0.1.0"
-description = "Data Retention Policy Engine — define, evaluate, and enforce retention policies"
+description = "ROS Policy — define, evaluate, and enforce retention policies"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "DRPE" }]
+authors = [{ name = "ROS Policy" }]
 dependencies = [
   "fastapi>=0.115.0",
   "uvicorn[standard]>=0.32.0",

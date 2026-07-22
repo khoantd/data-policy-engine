@@ -72,10 +72,8 @@ const NAV_HREFS = NAV_GROUPS.flatMap((group) =>
 
 export function ConsoleShell({
   children,
-  apiUrl,
 }: {
   children: React.ReactNode;
-  apiUrl: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -149,10 +147,10 @@ export function ConsoleShell({
         <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
           <div className="min-w-0">
             <p className="truncate font-semibold tracking-tight text-foreground">
-              DRPE Admin
+              ROS Policy
             </p>
-            <p className="truncate font-mono text-[10px] text-muted-fg" title={apiUrl}>
-              {apiUrl}
+            <p className="truncate text-[10px] text-muted-fg">
+              Data Policy Safeguard
             </p>
           </div>
           <button

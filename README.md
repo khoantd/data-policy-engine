@@ -1,4 +1,4 @@
-# DRPE — Data Retention Policy Engine
+# ROS Policy
 
 Define, evaluate, and enforce data retention policies with full audit trail and GDPR/PDPA compliance.
 
@@ -114,7 +114,7 @@ Committed collection and local environment live under [`postman/`](postman/):
 2. Choose **Upload Files** (or drag-and-drop) and select both:
    - `postman/DRPE.postman_collection.json`
    - `postman/DRPE.local.postman_environment.json`
-3. Confirm import. You should see the collection **DRPE — Data Retention Policy Engine** and environment **DRPE Local**.
+3. Confirm import. You should see the collection **ROS Policy** and environment **ROS Policy Local**.
 4. In the environment picker (top right), select **DRPE Local**.
 5. Edit the environment variables:
    - `baseUrl` — default `http://localhost:8000` (use your API host if different)

@@ -1,6 +1,6 @@
 # drpe-api-client
 
-DRPE — Data Retention Policy Engine
+ROS Policy
 - API version: 0.1.0
   - Build date: 2026-07-22T15:59:15.048403+07:00[Asia/Ho_Chi_Minh]
   - Generator version: 7.14.0

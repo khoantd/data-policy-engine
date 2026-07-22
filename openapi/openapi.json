@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "DRPE \u2014 Data Retention Policy Engine",
+    "title": "ROS Policy",
     "description": "Define, evaluate, and enforce data retention policies",
     "version": "0.1.0"
   },
@@ -4848,7 +4848,7 @@
   "servers": [
     {
       "url": "http://localhost:8000",
-      "description": "Local DRPE API"
+      "description": "Local ROS Policy API"
     }
   ]
 }

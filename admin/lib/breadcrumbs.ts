@@ -27,7 +27,7 @@ export function buildBreadcrumbs(
   options?: { tailLabel?: string },
 ): BreadcrumbSegment[] {
   const segments = pathname.split("/").filter(Boolean);
-  const crumbs: BreadcrumbSegment[] = [{ label: "DRPE Admin", href: "/" }];
+  const crumbs: BreadcrumbSegment[] = [{ label: "ROS Policy", href: "/" }];
 
   if (segments.length === 0) {
     crumbs.push({ label: "Overview" });

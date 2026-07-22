@@ -1,5 +1,5 @@
 /*
-DRPE — Data Retention Policy Engine
+ROS Policy
 
 Define, evaluate, and enforce data retention policies
 

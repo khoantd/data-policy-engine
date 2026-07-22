@@ -1,6 +1,6 @@
-# DRPE Admin Console
+# ROS Policy Admin Console
 
-Next.js operations UI for the Data Retention Policy Engine API.
+Next.js operations UI for the ROS Policy API.
 
 ## Setup
 

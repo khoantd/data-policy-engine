@@ -17,8 +17,8 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  title: "DRPE Admin",
-  description: "Data Retention Policy Engine — operations console",
+  title: "ROS Policy",
+  description: "ROS Policy — operations console",
 };
 
 export default function RootLayout({

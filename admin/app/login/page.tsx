@@ -14,10 +14,10 @@ export default function LoginPage() {
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
         <div className="mb-8">
           <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
-            Data Retention
+            Policy Engine
           </p>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">
-            DRPE Admin
+            ROS Policy
           </h1>
           <p className="mt-2 text-sm text-muted-fg">
             Connect with your Bearer API key to manage policies, DSAR, audit,

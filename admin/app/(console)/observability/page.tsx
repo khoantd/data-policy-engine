@@ -21,7 +21,7 @@ export default async function ObservabilityPage() {
 
   const breadcrumbs = project
     ? [
-        { label: "DRPE Admin", href: "/" },
+        { label: "ROS Policy", href: "/" },
         { label: "Observability", href: "/observability" },
         { label: project },
       ]

@@ -1,4 +1,4 @@
-# DRPE FastAPI API — multi-stage production image
+# ROS Policy FastAPI API — multi-stage production image
 FROM python:3.11-slim AS builder
 
 WORKDIR /build

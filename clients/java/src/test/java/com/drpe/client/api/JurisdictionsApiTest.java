@@ -1,5 +1,5 @@
 /*
- * DRPE — Data Retention Policy Engine
+ * ROS Policy
  * Define, evaluate, and enforce data retention policies
  *
  * The version of the OpenAPI document: 0.1.0

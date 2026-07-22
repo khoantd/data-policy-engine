@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build DRPE Docker images (API and/or Admin).
+# Build ROS Policy Docker images (API and/or Admin).
 #
 # Usage:
 #   ./scripts/docker-build.sh              # build API + Admin images
