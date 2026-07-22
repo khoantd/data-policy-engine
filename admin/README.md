@@ -26,6 +26,62 @@ Optional CORS (only needed for browser→API calls; the admin BFF talks server-t
 DRPE_CORS_ORIGINS=http://localhost:3000
 ```
 
+## Deploy on Vercel
+
+Import this Git repository in [Vercel](https://vercel.com/new) and set the project **Root Directory** to `admin` (required — the repo root is the Python/OpenAPI project, not Next.js).
+
+| Setting | Value |
+|---------|--------|
+| Root Directory | `admin` |
+| Framework | Next.js (auto-detected) |
+| Install / Build | defaults (`npm install` / `npm run build`) |
+| Node.js | ≥ 20 (`engines` in `package.json`) |
+
+### CLI deploy (recommended)
+
+Deploys to the **Royal Platform** team by default (`SCOPE=royal-platform`, project `ros-policy-admin`).
+
+From the repo root (requires [Vercel CLI](https://vercel.com/docs/cli) — `npm i -g vercel` or `npx`):
+
+```bash
+chmod +x scripts/deploy-admin.sh   # once
+
+./scripts/deploy-admin.sh --link --yes   # first time: create/link on Royal Platform
+./scripts/deploy-admin.sh                # preview
+./scripts/deploy-admin.sh --prod         # production
+./scripts/deploy-admin.sh --yes --prod   # non-interactive (CI)
+```
+
+Override team/project if needed: `--scope other-team --project my-admin`.
+
+Set `VERCEL_TOKEN` (and optionally `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`) for CI — never commit tokens. Backend API stays on your VPS; build it with `./scripts/build-backend.sh`.
+
+After the first deploy, set the API base URL on Royal Platform:
+
+```bash
+vercel env add DRPE_API_URL production --scope royal-platform --cwd admin
+./scripts/deploy-admin.sh --prod
+```
+
+### Environment variables
+
+Set these in the Vercel project (Production / Preview as needed):
+
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `DRPE_API_URL` | **Yes** | Public HTTPS base URL of the FastAPI API (no trailing slash) |
+| `DRPE_API_KEY` | No | Skip in production unless you want auto-login without the login form (middleware treats an env key as a session) |
+| `LITELLM_BASE_URL`, `LITELLM_API_KEY`, `LITELLM_MODEL` | No | Required only for AI assist |
+| `TAVILY_API_KEY` | No | Optional web research on Policy Import |
+| `LANGSMITH_*` | No | Optional Observability / tracing — see table below |
+| `PRIVACY_MASK_ENABLED` | No | Optional; default on when masking is available on the API |
+
+`vercel.json` in this directory sets `framework: nextjs`. Docker continues to use `output: "standalone"` locally; on Vercel that flag is omitted automatically.
+
+**AI route duration:** Policy Import / Evaluate / Scan sample routes set `maxDuration = 60`. Plans that cap serverless functions below 60s will time out on long LiteLLM calls — use a plan (or Fluid Compute settings) that allows 60s if you rely on AI assist.
+
+**CORS:** Admin→API is server-side BFF, so `DRPE_CORS_ORIGINS` is **not** required for Vercel Admin. Set it on the API only if browsers call the API directly. The API must be reachable over HTTPS from Vercel’s servers.
+
 ## Design system
 
 See [`design-system/MASTER.md`](design-system/MASTER.md) (ui-ux-pro-max). Tokens: Fira Sans / Fira Code, blue primary `#1E40AF`, amber accent `#D97706`.

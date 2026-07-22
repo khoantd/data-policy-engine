@@ -2,6 +2,9 @@
   "name": "admin",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
@@ -11,7 +14,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "openapi": "openapi-typescript ../openapi/openapi.json -o lib/generated/schema.d.ts"
+    "openapi": "openapi-typescript ../openapi/openapi.json -o lib/generated/schema.d.ts",
+    "deploy": "../scripts/deploy-admin.sh",
+    "deploy:prod": "../scripts/deploy-admin.sh --prod"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.86",

@@ -30,6 +30,15 @@ npm run dev
 
 Open `http://localhost:3000`, connect with your `DRPE_API_KEY` (or leave empty if API auth is off). See [`admin/README.md`](admin/README.md).
 
+**Deploy on Vercel (Royal Platform):**
+
+```bash
+./scripts/deploy-admin.sh --link --yes   # first time
+./scripts/deploy-admin.sh --prod         # production
+```
+
+Or import the repo in the Vercel dashboard under **Royal Platform**, set **Root Directory** to `admin`, and set `DRPE_API_URL` to your public FastAPI base URL. Full steps: [admin/README.md — Deploy on Vercel](admin/README.md#deploy-on-vercel).
+
 Optional **privacy-safe AI**: `pip install -e ".[ai]"` installs [privalyse-mask](https://github.com/khoantd/privalyse-mask) on the API so Policy Import and Evaluate mask PII before LiteLLM.
 
 ### Docker
@@ -51,6 +60,56 @@ chmod +x scripts/docker-build.sh   # once
 TAG=v0.1.0 ./scripts/docker-build.sh          # custom tag
 NO_CACHE=1 ./scripts/docker-build.sh          # rebuild without cache
 ```
+
+#### Backend only (VPS)
+
+When Admin is on Vercel and the API runs on a VPS, build the FastAPI image alone:
+
+```bash
+chmod +x scripts/build-backend.sh   # once
+
+./scripts/build-backend.sh              # build drpe-api:latest
+./scripts/build-backend.sh --save       # also write dist/drpe-api-latest.tar.gz
+./scripts/build-backend.sh --platform linux/amd64
+./scripts/build-backend.sh --platform linux/amd64 --registry docker.io/myuser --push
+TAG=v0.1.0 ./scripts/build-backend.sh --registry docker.io/myuser --push
+```
+
+**Registry push** (login first: `docker login` for Docker Hub). Use `--platform linux/amd64` when building on Apple Silicon for a typical x86_64 VPS:
+
+```bash
+./scripts/build-backend.sh --platform linux/amd64 --registry docker.io/myuser --push
+# on VPS:
+docker pull docker.io/myuser/drpe-api:latest
+docker run -d --name drpe-api --restart unless-stopped \
+  -p 8000:8000 --env-file /path/to/.env docker.io/myuser/drpe-api:latest
+```
+
+**Tarball transfer** (no registry):
+
+```bash
+./scripts/build-backend.sh --platform linux/amd64 --save
+scp dist/drpe-api-latest.tar.gz user@vps:/tmp/
+# on VPS:
+gunzip -c /tmp/drpe-api-latest.tar.gz | docker load
+docker run -d --name drpe-api --restart unless-stopped \
+  -p 8000:8000 --env-file /path/to/.env drpe-api:latest
+docker exec drpe-api alembic upgrade head   # when DATABASE_URL is set
+```
+
+Set `.env` with `DATABASE_URL`, `DRPE_API_KEY`, `DRPE_CORS_ORIGINS` for your Admin origin, etc.
+
+#### Admin UI (Vercel — Royal Platform)
+
+```bash
+chmod +x scripts/deploy-admin.sh   # once
+
+./scripts/deploy-admin.sh --link --yes   # create/link ros-policy-admin on Royal Platform
+./scripts/deploy-admin.sh                # preview
+./scripts/deploy-admin.sh --prod         # production
+```
+
+Requires Vercel CLI login (`vercel login` or `VERCEL_TOKEN`) and access to the **royal-platform** team. Set `DRPE_API_URL` in the Vercel project. See [admin/README.md](admin/README.md#deploy-on-vercel).
 
 Equivalent manual builds:
 
@@ -333,7 +392,7 @@ openapi/           # Committed OpenAPI schema (openapi.json)
 clients/           # Generated TS / Go / Java HTTP clients
 config/            # Example policy files
 postman/           # Postman collection + local environment
-scripts/           # OpenAPI export, client gen, docker-build.sh
+scripts/           # OpenAPI export, client gen, docker-build.sh, build-backend.sh, deploy-admin.sh
 tests/             # Test suite
 docs/              # Architecture docs
 alembic.ini        # Alembic config

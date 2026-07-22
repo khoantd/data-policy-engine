@@ -9,7 +9,9 @@
     "openapi:generate:java": "openapi-generator-cli generate -i openapi/openapi.json -g java -o clients/java --additional-properties=groupId=com.drpe,artifactId=drpe-api-client,apiPackage=com.drpe.client.api,modelPackage=com.drpe.client.model,invokerPackage=com.drpe.client,library=okhttp-gson,dateLibrary=java8 --skip-validate-spec",
     "openapi:generate:admin": "npm --prefix admin run openapi",
     "openapi:generate": "npm run openapi:generate:typescript && npm run openapi:generate:go && npm run openapi:generate:java && npm run openapi:generate:admin",
-    "openapi": "npm run openapi:export && npm run openapi:generate"
+    "openapi": "npm run openapi:export && npm run openapi:generate",
+    "deploy:admin": "./scripts/deploy-admin.sh",
+    "deploy:admin:prod": "./scripts/deploy-admin.sh --prod"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.23.1",

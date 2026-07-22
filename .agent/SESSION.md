@@ -43,6 +43,9 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **Docker** — `scripts/docker-build.sh` + README build/run steps (API + Admin images / Compose)
 - **Postman** — README import guidelines for `postman/DRPE.postman_collection.json` + local env
 - **Product rename** — user-facing brand is **ROS Policy** (Admin UI, API OpenAPI title, README, Postman display names, docs). Technical IDs unchanged: package `drpe`, env `DRPE_*`, SDK `DRPEClient`, Docker image names `drpe-api` / `drpe-admin`
+- **Admin Vercel readiness** — `admin/vercel.json` (framework nextjs); `engines.node >=20`; dual-target `next.config` (standalone when not `VERCEL`); docs for Root Directory=`admin` + `DRPE_API_URL`; build/tests green
+- **Backend VPS build** — `scripts/build-backend.sh` builds API image only; `--save` writes `dist/drpe-api-<tag>.tar.gz` for scp/load on VPS
+- **Admin Vercel deploy** — `scripts/deploy-admin.sh` defaults to **Royal Platform** (`SCOPE=royal-platform`, project `ros-policy-admin`); `--link --yes` creates/links; preview / `--prod`
 
 ## In progress
 
@@ -52,11 +55,12 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 ## Next
 
 1. Apply Alembic `005_policy_kind` anywhere the classification schema is not yet migrated
-2. Optional: AI assist on policy detail editor (same BFF)
-3. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
-4. Optional: JWT OAuth2 scopes
-5. Optional: audit_logs monthly partitioning
-6. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
+2. Set `DRPE_API_URL` on Vercel project `royal-platform/ros-policy-admin` (Production/Preview), then redeploy
+3. Optional: AI assist on policy detail editor (same BFF)
+4. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
+5. Optional: JWT OAuth2 scopes
+6. Optional: audit_logs monthly partitioning
+7. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
 
 ## Decisions
 
