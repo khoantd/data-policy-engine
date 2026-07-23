@@ -33,6 +33,7 @@
 
 - **KPI strip:** Compact chips via `KpiStrip` + `Kpi compact`
 - **Audit table:** `StatusDot` for event type; sticky header
+- **Audit page filters** (`/audit`): Event type uses `AUDIT_EVENT_TYPE_OPTIONS` (human labels; API values unchanged). Combine with Policy / Record / Job / Requester. Same enum as Insights — see `design-system/pages/insights.md` for recipes
 
 ---
 

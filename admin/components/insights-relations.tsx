@@ -25,6 +25,7 @@ import {
   TableWrap,
 } from "@/components/ui/layout";
 import { cn } from "@/lib/utils";
+import { AUDIT_EVENT_TYPE_OPTIONS } from "@/lib/audit-event-types";
 import type { AuditEntry } from "@/lib/types";
 import {
   buildRelationGraph,
@@ -199,15 +200,14 @@ export function InsightsRelations({
             label="Event type"
             name="event_type"
             defaultValue={initial.event_type || ""}
+            title="Narrow graph hits to one event kind (API event_type)"
           >
             <option value="">All</option>
-            <option value="evaluation">evaluation</option>
-            <option value="action">action</option>
-            <option value="notify">notify</option>
-            <option value="pending_grace">pending_grace</option>
-            <option value="flag">flag</option>
-            <option value="dsar_access">dsar_access</option>
-            <option value="dsar_erasure">dsar_erasure</option>
+            {AUDIT_EVENT_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value} title={opt.hint}>
+                {opt.label}
+              </option>
+            ))}
           </Select>
           <Input
             label="Policy ID"

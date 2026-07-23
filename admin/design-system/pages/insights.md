@@ -41,6 +41,9 @@
 - Focus rings via global `:focus-visible`
 - Node/row selection updates detail panel (`aria-live="polite"`)
 - Do not auto-play or animate edges
+- **Event type filter:** GET `?event_type=` → `GET /api/v1/audit/logs`; empty = All. Options from `AUDIT_EVENT_TYPE_OPTIONS` (`admin/lib/audit-event-types.ts`) with human labels; values stay API enum strings
+- **When to filter:** After Enforce use Evaluation then Action / Pending grace / Notify / Flag; after DSAR use DSAR access or DSAR erasure; leave All for full policy↔requester connectivity
+- Bookmarkable examples: `/insights?mode=policies&event_type=evaluation`, `/audit?event_type=action`
 
 ### Anti-Patterns Forbidden
 
