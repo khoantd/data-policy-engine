@@ -136,22 +136,50 @@ export function Panel({
   );
 }
 
+const KPI_TONE_CLASS = {
+  neutral: "border-border bg-surface",
+  success: "border-success/30 bg-success/10",
+  warning: "border-warning/30 bg-warning/10",
+  error: "border-destructive/40 bg-destructive/10",
+} as const;
+
+const KPI_VALUE_TONE_CLASS = {
+  neutral: "text-foreground",
+  success: "text-success",
+  warning: "text-warning",
+  error: "text-destructive",
+} as const;
+
 export function Kpi({
   label,
   value,
   hint,
   compact,
+  tone = "neutral",
 }: {
   label: string;
   value: string | number;
   hint?: string;
   compact?: boolean;
+  tone?: keyof typeof KPI_TONE_CLASS;
 }) {
   if (compact) {
     return (
-      <div className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-sm">
+      <div
+        className={cn(
+          "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm",
+          KPI_TONE_CLASS[tone],
+        )}
+      >
         <span className="text-muted-fg">{label}</span>
-        <span className="font-mono font-medium text-foreground">{value}</span>
+        <span
+          className={cn(
+            "font-mono font-medium",
+            KPI_VALUE_TONE_CLASS[tone],
+          )}
+        >
+          {value}
+        </span>
         {hint && (
           <span className="text-xs text-muted-fg">({hint})</span>
         )}
@@ -160,9 +188,19 @@ export function Kpi({
   }
 
   return (
-    <div className="rounded-md border border-border bg-surface px-4 py-3">
+    <div
+      className={cn(
+        "rounded-md border px-4 py-3",
+        KPI_TONE_CLASS[tone],
+      )}
+    >
       <p className="text-xs font-medium text-muted-fg">{label}</p>
-      <p className="mt-1 font-mono text-xl font-semibold text-foreground">
+      <p
+        className={cn(
+          "mt-1 font-mono text-xl font-semibold",
+          KPI_VALUE_TONE_CLASS[tone],
+        )}
+      >
         {value}
       </p>
       {hint && <p className="mt-1 text-xs text-muted-fg">{hint}</p>}

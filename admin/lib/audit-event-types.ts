@@ -25,7 +25,7 @@ export const AUDIT_EVENT_TYPE_OPTIONS: ReadonlyArray<{
   {
     value: "pending_grace",
     label: "Pending grace",
-    hint: "Record entered grace period — action deferred",
+    hint: "Record entered grace period — action deferred; see Grace ends column",
   },
   {
     value: "flag",

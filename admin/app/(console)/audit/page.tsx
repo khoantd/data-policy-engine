@@ -1,4 +1,5 @@
 import { drpe } from "@/lib/drpe-client";
+import { auditScheduleFields } from "@/lib/audit-payload";
 import { formatDate } from "@/lib/utils";
 import { buildBreadcrumbs } from "@/lib/breadcrumbs";
 import { AuditFilters } from "@/components/dsar-audit-forms";
@@ -54,7 +55,7 @@ export default async function AuditPage({
         <EmptyState message="No audit entries for this filter." />
       ) : (
         <TableWrap stickyHeader>
-          <table className="w-full min-w-[800px] text-left text-sm">
+          <table className="w-full min-w-[960px] text-left text-sm">
             <thead className={tableHeaderClass}>
               <tr>
                 <th className={`${tableCellClass} font-medium`}>When</th>
@@ -63,33 +64,47 @@ export default async function AuditPage({
                 <th className={`${tableCellClass} font-medium`}>Rule</th>
                 <th className={`${tableCellClass} font-medium`}>Record</th>
                 <th className={`${tableCellClass} font-medium`}>Action</th>
+                <th className={`${tableCellClass} font-medium`}>Grace ends</th>
                 <th className={`${tableCellClass} font-medium`}>Job</th>
               </tr>
             </thead>
             <tbody>
-              {logs.map((row) => (
-                <tr key={row.id} className={tableRowClass}>
-                  <td className={`${tableCellClass} font-mono text-xs whitespace-nowrap`}>
-                    {formatDate(row.created_at)}
-                  </td>
-                  <td className={tableCellClass}>
-                    <StatusDot status={row.event_type} />
-                  </td>
-                  <td className={`${tableCellClass} font-mono text-xs`}>
-                    {row.policy_id || "—"}
-                  </td>
-                  <td className={`${tableCellClass} font-mono text-xs`}>
-                    {row.rule_id || "—"}
-                  </td>
-                  <td className={`${tableCellClass} font-mono text-xs`}>
-                    {row.record_id || "—"}
-                  </td>
-                  <td className={tableCellClass}>{row.action || "—"}</td>
-                  <td className={`${tableCellClass} font-mono text-xs`}>
-                    {row.job_id || "—"}
-                  </td>
-                </tr>
-              ))}
+              {logs.map((row) => {
+                const schedule = auditScheduleFields(row.payload);
+                return (
+                  <tr key={row.id} className={tableRowClass}>
+                    <td className={`${tableCellClass} font-mono text-xs whitespace-nowrap`}>
+                      {formatDate(row.created_at)}
+                    </td>
+                    <td className={tableCellClass}>
+                      <StatusDot status={row.event_type} />
+                    </td>
+                    <td className={`${tableCellClass} font-mono text-xs`}>
+                      {row.policy_id || "—"}
+                    </td>
+                    <td className={`${tableCellClass} font-mono text-xs`}>
+                      {row.rule_id || "—"}
+                    </td>
+                    <td className={`${tableCellClass} font-mono text-xs`}>
+                      {row.record_id || "—"}
+                    </td>
+                    <td className={tableCellClass}>{row.action || "—"}</td>
+                    <td className={`${tableCellClass} font-mono text-xs`}>
+                      <div className="whitespace-nowrap">
+                        {formatDate(schedule.gracePeriodEnds)}
+                      </div>
+                      {schedule.notifyAt ? (
+                        <div className="mt-0.5 whitespace-nowrap text-muted-fg">
+                          Notify {formatDate(schedule.notifyAt)}
+                        </div>
+                      ) : null}
+                    </td>
+                    <td className={`${tableCellClass} font-mono text-xs`}>
+                      {row.job_id || "—"}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </TableWrap>
