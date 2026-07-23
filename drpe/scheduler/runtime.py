@@ -11,10 +11,12 @@ from drpe.adapters.action_dispatchers import (
 )
 from drpe.adapters.http_webhook import HttpWebhookSender
 from drpe.adapters.memory_audit import InMemoryAuditStore
+from drpe.adapters.memory_grace_holds import InMemoryGraceHoldStore
 from drpe.adapters.memory_jobs import InMemoryEnforcementJobStore
 from drpe.adapters.memory_records import InMemoryRecordSource
 from drpe.adapters.memory_store import InMemoryPolicyStore
 from drpe.adapters.sqlalchemy_audit import SqlAlchemyAuditStore
+from drpe.adapters.sqlalchemy_grace_holds import SqlAlchemyGraceHoldStore
 from drpe.adapters.sqlalchemy_jobs import SqlAlchemyEnforcementJobStore
 from drpe.adapters.sqlalchemy_store import SqlAlchemyPolicyStore
 from drpe.api.settings import Settings
@@ -23,6 +25,7 @@ from drpe.core.evaluator import PolicyEvaluatorEngine
 from drpe.db.session import create_db_engine, create_session_factory
 from drpe.ports.action_dispatcher import ActionDispatcher
 from drpe.ports.audit_store import AuditStore
+from drpe.ports.grace_hold_store import GraceHoldStore
 from drpe.ports.job_store import EnforcementJobStore
 from drpe.ports.policy_store import PolicyStore
 from drpe.ports.record_source import RecordSource
@@ -37,6 +40,7 @@ class EnforcementRuntime:
     audit_store: AuditStore
     dispatcher: ActionDispatcher
     record_source: RecordSource
+    grace_hold_store: GraceHoldStore
     runner: EnforcementRunner
 
 
@@ -58,24 +62,35 @@ def build_runtime(
     audit_store: AuditStore | None = None,
     dispatcher: ActionDispatcher | None = None,
     record_source: RecordSource | None = None,
+    grace_hold_store: GraceHoldStore | None = None,
 ) -> EnforcementRuntime:
     settings = settings or Settings()
 
-    if policy_store is None or job_store is None or audit_store is None:
+    if (
+        policy_store is None
+        or job_store is None
+        or audit_store is None
+        or grace_hold_store is None
+    ):
         if settings.database_url:
             db_engine = create_db_engine(settings.database_url)
             session_factory = create_session_factory(db_engine)
             policy_store = policy_store or SqlAlchemyPolicyStore(session_factory)
             job_store = job_store or SqlAlchemyEnforcementJobStore(session_factory)
             audit_store = audit_store or SqlAlchemyAuditStore(session_factory)
+            grace_hold_store = grace_hold_store or SqlAlchemyGraceHoldStore(
+                session_factory
+            )
         else:
             policy_store = policy_store or InMemoryPolicyStore()
             job_store = job_store or InMemoryEnforcementJobStore()
             audit_store = audit_store or InMemoryAuditStore()
+            grace_hold_store = grace_hold_store or InMemoryGraceHoldStore()
 
     engine = engine or PolicyEvaluatorEngine(policy_store.list_retention_policies())
     dispatcher = dispatcher or build_dispatcher(settings)
     record_source = record_source or InMemoryRecordSource()
+    assert grace_hold_store is not None
 
     runner = EnforcementRunner(
         policy_store=policy_store,
@@ -84,6 +99,7 @@ def build_runtime(
         audit_store=audit_store,
         dispatcher=dispatcher,
         record_source=record_source,
+        grace_hold_store=grace_hold_store,
     )
     return EnforcementRuntime(
         settings=settings,
@@ -93,6 +109,7 @@ def build_runtime(
         audit_store=audit_store,
         dispatcher=dispatcher,
         record_source=record_source,
+        grace_hold_store=grace_hold_store,
         runner=runner,
     )
 
@@ -106,7 +123,6 @@ def get_enforcement_runtime() -> EnforcementRuntime:
     global _runtime
     if _runtime is None:
         _runtime = build_runtime()
-        # Keep engine policies in sync with store for worker-only processes
         for policy in _runtime.policy_store.list_retention_policies():
             _runtime.engine.add_policy(policy)
     return _runtime

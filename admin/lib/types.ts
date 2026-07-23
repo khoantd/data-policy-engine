@@ -29,6 +29,9 @@ export type DsarRequest = Schemas["DsarRequest"];
 export type AuditEventType = Schemas["AuditEventType"];
 export type AuditEntry = Schemas["AuditEntry"];
 
+export type GraceHoldStatus = Schemas["GraceHoldStatus"];
+export type GraceHold = Schemas["GraceHold"];
+
 export type JobStatus = Schemas["JobStatus"];
 export type JobProgress = Schemas["JobProgress"];
 export type EnforcementJob = Schemas["EnforcementJob"];

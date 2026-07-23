@@ -1,8 +1,9 @@
 import { drpe } from "@/lib/drpe-client";
-import { auditScheduleFields } from "@/lib/audit-payload";
+import { auditScheduleFields, auditHoldId } from "@/lib/audit-payload";
 import { formatDate } from "@/lib/utils";
 import { buildBreadcrumbs } from "@/lib/breadcrumbs";
 import { AuditFilters } from "@/components/dsar-audit-forms";
+import { GraceHoldActions } from "@/components/grace-hold-actions";
 import { StatusDot } from "@/components/status-dot";
 import {
   EmptyState,
@@ -55,7 +56,7 @@ export default async function AuditPage({
         <EmptyState message="No audit entries for this filter." />
       ) : (
         <TableWrap stickyHeader>
-          <table className="w-full min-w-[960px] text-left text-sm">
+          <table className="w-full min-w-[1100px] text-left text-sm">
             <thead className={tableHeaderClass}>
               <tr>
                 <th className={`${tableCellClass} font-medium`}>When</th>
@@ -66,11 +67,13 @@ export default async function AuditPage({
                 <th className={`${tableCellClass} font-medium`}>Action</th>
                 <th className={`${tableCellClass} font-medium`}>Grace ends</th>
                 <th className={`${tableCellClass} font-medium`}>Job</th>
+                <th className={`${tableCellClass} font-medium`}>Ops</th>
               </tr>
             </thead>
             <tbody>
               {logs.map((row) => {
                 const schedule = auditScheduleFields(row.payload);
+                const holdId = auditHoldId(row.payload);
                 return (
                   <tr key={row.id} className={tableRowClass}>
                     <td className={`${tableCellClass} font-mono text-xs whitespace-nowrap`}>
@@ -101,6 +104,13 @@ export default async function AuditPage({
                     </td>
                     <td className={`${tableCellClass} font-mono text-xs`}>
                       {row.job_id || "—"}
+                    </td>
+                    <td className={tableCellClass}>
+                      {row.event_type === "pending_grace" && holdId ? (
+                        <GraceHoldActions holdId={holdId} compact />
+                      ) : (
+                        "—"
+                      )}
                     </td>
                   </tr>
                 );

@@ -313,6 +313,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/grace-holds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Grace Holds */
+        get: operations["list_grace_holds_api_v1_grace_holds_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/grace-holds/{hold_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Grace Hold */
+        get: operations["get_grace_hold_api_v1_grace_holds__hold_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/grace-holds/{hold_id}/force": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Force Grace Hold */
+        post: operations["force_grace_hold_api_v1_grace_holds__hold_id__force_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/grace-holds/{hold_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Grace Hold */
+        post: operations["cancel_grace_hold_api_v1_grace_holds__hold_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/dsar/access": {
         parameters: {
             query?: never;
@@ -614,7 +682,7 @@ export interface components {
          * AuditEventType
          * @enum {string}
          */
-        AuditEventType: "evaluation" | "action" | "notify" | "pending_grace" | "flag" | "dsar_access" | "dsar_erasure";
+        AuditEventType: "evaluation" | "action" | "notify" | "pending_grace" | "flag" | "dsar_access" | "dsar_erasure" | "grace_cancelled";
         /** BatchClassificationRequest */
         BatchClassificationRequest: {
             /** Records */
@@ -1080,6 +1148,58 @@ export interface components {
             /** Value */
             value?: unknown;
         };
+        /** GraceHold */
+        GraceHold: {
+            /** Id */
+            id: string;
+            /** Policy Id */
+            policy_id: string;
+            /** Rule Id */
+            rule_id: string;
+            /** Record Id */
+            record_id: string;
+            /** Data Type */
+            data_type: string;
+            /** Action */
+            action: string;
+            /** Grace Period Ends */
+            grace_period_ends: string;
+            /** Notify At */
+            notify_at?: string | null;
+            /** @default active */
+            status: components["schemas"]["GraceHoldStatus"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Closed At */
+            closed_at?: string | null;
+            /** Requester */
+            requester?: string | null;
+            /** Source Job Id */
+            source_job_id?: string | null;
+            /** Evaluation Id */
+            evaluation_id?: string | null;
+        };
+        /**
+         * GraceHoldActionRequest
+         * @description Optional body for force / cancel.
+         */
+        GraceHoldActionRequest: {
+            /** Requester */
+            requester?: string | null;
+        };
+        /**
+         * GraceHoldStatus
+         * @enum {string}
+         */
+        GraceHoldStatus: "active" | "dispatched" | "forced" | "cancelled";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -2236,6 +2356,143 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnforcementJob"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_grace_holds_api_v1_grace_holds_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["GraceHoldStatus"] | null;
+                policy_id?: string | null;
+                record_id?: string | null;
+                rule_id?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraceHold"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_grace_hold_api_v1_grace_holds__hold_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hold_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraceHold"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    force_grace_hold_api_v1_grace_holds__hold_id__force_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hold_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["GraceHoldActionRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraceHold"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_grace_hold_api_v1_grace_holds__hold_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hold_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["GraceHoldActionRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraceHold"];
                 };
             };
             /** @description Validation Error */

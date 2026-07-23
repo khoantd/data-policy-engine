@@ -9,6 +9,7 @@ const NAV_HREFS = [
   "/audit",
   "/insights",
   "/enforce",
+  "/grace-holds",
   "/webhooks",
   "/evaluate",
   "/classify",

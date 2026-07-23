@@ -165,3 +165,33 @@ class WebhookRow(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+
+class GraceHoldRow(Base):
+    __tablename__ = "grace_holds"
+    __table_args__ = {"schema": SCHEMA}
+
+    id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    policy_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    rule_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    record_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    data_type: Mapped[str] = mapped_column(String(255), nullable=False)
+    action: Mapped[str] = mapped_column(String(64), nullable=False)
+    grace_period_ends: Mapped[str] = mapped_column(String(64), nullable=False)
+    notify_at: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    status: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+    closed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    requester: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    source_job_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    evaluation_id: Mapped[str | None] = mapped_column(String(255), nullable=True)

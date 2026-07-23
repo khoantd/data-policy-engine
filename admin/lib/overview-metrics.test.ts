@@ -107,6 +107,7 @@ describe("countByEventType", () => {
     expect(counts.action).toBe(0);
     expect(counts.pending_grace).toBe(0);
     expect(counts.dsar_erasure).toBe(0);
+    expect(counts.grace_cancelled).toBe(0);
   });
 
   it("tallies each event type", () => {

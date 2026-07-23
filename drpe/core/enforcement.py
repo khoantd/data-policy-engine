@@ -14,10 +14,16 @@ from drpe.models.enforcement import (
     RecordRef,
 )
 from drpe.models.enums import Action, PolicyStatus
+from drpe.models.grace_hold import (
+    GraceHold,
+    GraceHoldCreate,
+    GraceHoldStatus,
+)
 from drpe.models.policy import EvaluationRequest, EvaluationResponse, Policy
 from drpe.models.stored_policy import as_retention
 from drpe.ports.action_dispatcher import ActionDispatcher
 from drpe.ports.audit_store import AuditStore
+from drpe.ports.grace_hold_store import GraceHoldStore
 from drpe.ports.job_store import EnforcementJobStore
 from drpe.ports.policy_store import PolicyStore
 from drpe.ports.record_source import RecordSource
@@ -81,6 +87,21 @@ def decide_enforcement_outcome(
     return "dispatch", action
 
 
+def _with_schedule(
+    evaluation: EvaluationResponse,
+    *,
+    grace_period_ends: str | None,
+    notify_at: str | None,
+) -> EvaluationResponse:
+    detail = evaluation.result.model_copy(
+        update={
+            "grace_period_ends": grace_period_ends,
+            "notify_at": notify_at,
+        }
+    )
+    return evaluation.model_copy(update={"result": detail})
+
+
 class EnforcementRunner:
     def __init__(
         self,
@@ -91,6 +112,7 @@ class EnforcementRunner:
         audit_store: AuditStore,
         dispatcher: ActionDispatcher,
         record_source: RecordSource | None = None,
+        grace_hold_store: GraceHoldStore | None = None,
     ) -> None:
         self._policies = policy_store
         self._engine = engine
@@ -98,6 +120,7 @@ class EnforcementRunner:
         self._audit = audit_store
         self._dispatcher = dispatcher
         self._records = record_source
+        self._grace_holds = grace_hold_store
 
     def run_job(self, job_id: str, *, now: datetime | None = None) -> EnforcementJob:
         job = self._jobs.get(job_id)
@@ -124,6 +147,146 @@ class EnforcementRunner:
             job.finished_at = datetime.now(timezone.utc)
             self._jobs.update(job)
         return job
+
+    def force_dispatch_hold(
+        self,
+        hold_id: str,
+        *,
+        requester: str | None = None,
+        now: datetime | None = None,
+    ) -> GraceHold:
+        """Skip remaining grace and dispatch the hold's action immediately."""
+        if self._grace_holds is None:
+            raise RuntimeError("grace hold store is not configured")
+
+        hold = self._grace_holds.get(hold_id)
+        if hold is None:
+            raise KeyError(f"grace hold not found: {hold_id}")
+        if hold.status != GraceHoldStatus.ACTIVE:
+            raise ValueError(f"grace hold is not active: {hold.status.value}")
+
+        record = self._find_record(hold.record_id, hold.data_type)
+        if record is None:
+            raise LookupError(
+                f"record '{hold.record_id}' (data_type={hold.data_type}) "
+                "not available to the record source"
+            )
+
+        now = now or datetime.now(timezone.utc)
+        policy = self._policies.get(hold.policy_id)
+        retention = as_retention(policy) if policy is not None else None
+        if retention is None:
+            raise ValueError(f"policy not found or not retention: {hold.policy_id}")
+
+        request = EvaluationRequest(
+            data_type=record.data_type,
+            record_id=record.record_id,
+            metadata=record.metadata,
+            source=record.source,
+            jurisdiction=record.jurisdiction or retention.jurisdiction,
+            context={"requester": requester or "force_dispatch"},
+        )
+        evaluation = self._engine.evaluate(request, now=now)
+        if (
+            evaluation.result.matched_policy != hold.policy_id
+            or evaluation.result.matched_rule != hold.rule_id
+            or evaluation.result.action not in DESTRUCTIVE_ACTIONS
+        ):
+            # Still force the hold action even if re-eval drifted; use hold action.
+            evaluation = _with_schedule(
+                evaluation.model_copy(
+                    update={
+                        "result": evaluation.result.model_copy(
+                            update={
+                                "action": Action(hold.action),
+                                "matched_policy": hold.policy_id,
+                                "matched_rule": hold.rule_id,
+                                "grace_period_ends": None,
+                                "notify_at": None,
+                            }
+                        )
+                    }
+                ),
+                grace_period_ends=None,
+                notify_at=None,
+            )
+        else:
+            evaluation = _with_schedule(
+                evaluation, grace_period_ends=None, notify_at=None
+            )
+
+        action = Action(hold.action)
+        result = self._dispatcher.dispatch(action, record, evaluation)
+        req = normalize_requester(requester or "force_dispatch")
+        self._audit.append(
+            AuditEntryCreate(
+                event_type=AuditEventType.ACTION,
+                policy_id=hold.policy_id,
+                rule_id=hold.rule_id,
+                record_id=hold.record_id,
+                action=action.value,
+                payload={
+                    "dispatch": result.model_dump(mode="json"),
+                    "forced": True,
+                    "hold_id": hold.id,
+                },
+                evaluation_id=evaluation.evaluation_id,
+                requester=req,
+            )
+        )
+        if not result.ok:
+            raise RuntimeError(result.detail or "force dispatch failed")
+
+        hold.status = GraceHoldStatus.FORCED
+        hold.closed_at = datetime.now(timezone.utc)
+        hold.requester = req
+        return self._grace_holds.update(hold)
+
+    def cancel_hold(
+        self,
+        hold_id: str,
+        *,
+        requester: str | None = None,
+    ) -> GraceHold:
+        """Abort this grace cycle without dispatching."""
+        if self._grace_holds is None:
+            raise RuntimeError("grace hold store is not configured")
+
+        hold = self._grace_holds.get(hold_id)
+        if hold is None:
+            raise KeyError(f"grace hold not found: {hold_id}")
+        if hold.status != GraceHoldStatus.ACTIVE:
+            raise ValueError(f"grace hold is not active: {hold.status.value}")
+
+        req = normalize_requester(requester or "cancel_grace")
+        hold.status = GraceHoldStatus.CANCELLED
+        hold.closed_at = datetime.now(timezone.utc)
+        hold.requester = req
+        updated = self._grace_holds.update(hold)
+        self._audit.append(
+            AuditEntryCreate(
+                event_type=AuditEventType.GRACE_CANCELLED,
+                policy_id=hold.policy_id,
+                rule_id=hold.rule_id,
+                record_id=hold.record_id,
+                action=hold.action,
+                payload={
+                    "hold_id": hold.id,
+                    "grace_period_ends": hold.grace_period_ends,
+                    "notify_at": hold.notify_at,
+                },
+                requester=req,
+            )
+        )
+        return updated
+
+    def _find_record(self, record_id: str, data_type: str) -> RecordRef | None:
+        if self._records is None:
+            return None
+        for rec in self._records.iter_records(data_type):
+            if rec.record_id == record_id:
+                return rec
+        return None
 
     def _resolve_policies(self, policy_id: str | None) -> list[Policy]:
         if policy_id:
@@ -216,7 +379,6 @@ class EnforcementRunner:
             context={"requester": "enforcement_runner", "job_id": job.id},
         )
         requester = normalize_requester(request.context.get("requester"))
-        # Prefer engine policies; ensure current policy is considered via store list
         evaluation = self._engine.evaluate(request, now=now)
         job.progress.scanned += 1
 
@@ -238,11 +400,137 @@ class EnforcementRunner:
                 )
             )
 
+        evaluation, skip = self._apply_grace_hold(
+            job, policy, record, evaluation, now=now, requester=requester
+        )
+        if skip:
+            self._jobs.update(job)
+            return
+
         outcome, action = decide_enforcement_outcome(evaluation, now=now)
         self._apply_outcome(
-            job, record, evaluation, outcome, action, policy, requester=requester
+            job,
+            record,
+            evaluation,
+            outcome,
+            action,
+            policy,
+            requester=requester,
         )
         self._jobs.update(job)
+
+    def _apply_grace_hold(
+        self,
+        job: EnforcementJob,
+        policy: Policy,
+        record: RecordRef,
+        evaluation: EvaluationResponse,
+        *,
+        now: datetime,
+        requester: str | None,
+    ) -> tuple[EvaluationResponse, bool]:
+        """Return (evaluation_with_sticky_schedule, skip_further_processing)."""
+        if self._grace_holds is None:
+            return evaluation, False
+
+        matched_policy = evaluation.result.matched_policy
+        matched_rule = evaluation.result.matched_rule
+        action = evaluation.result.action
+
+        # No destructive match — drop cancelled hold if present for any prior key
+        if (
+            matched_policy is None
+            or matched_rule is None
+            or action not in DESTRUCTIVE_ACTIONS
+            or not evaluation.result.grace_period_ends
+        ):
+            return evaluation, False
+
+        hold = self._grace_holds.get_by_key(
+            policy_id=matched_policy,
+            rule_id=matched_rule,
+            record_id=record.record_id,
+        )
+
+        if hold is None:
+            hold = self._grace_holds.create(
+                GraceHoldCreate(
+                    policy_id=matched_policy,
+                    rule_id=matched_rule,
+                    record_id=record.record_id,
+                    data_type=record.data_type,
+                    action=action.value,
+                    grace_period_ends=evaluation.result.grace_period_ends,
+                    notify_at=evaluation.result.notify_at,
+                    requester=requester,
+                    source_job_id=job.id,
+                    evaluation_id=evaluation.evaluation_id,
+                )
+            )
+            evaluation = _with_schedule(
+                evaluation,
+                grace_period_ends=hold.grace_period_ends,
+                notify_at=hold.notify_at,
+            )
+            return evaluation, False
+
+        if hold.status == GraceHoldStatus.CANCELLED:
+            # Still matches → skip; when it stops matching, drop hold (checked below)
+            return evaluation, True
+
+        if hold.status in (GraceHoldStatus.DISPATCHED, GraceHoldStatus.FORCED):
+            # Rematch after close → fresh hold cycle
+            self._grace_holds.delete(hold.id)
+            hold = self._grace_holds.create(
+                GraceHoldCreate(
+                    policy_id=matched_policy,
+                    rule_id=matched_rule,
+                    record_id=record.record_id,
+                    data_type=record.data_type,
+                    action=action.value,
+                    grace_period_ends=evaluation.result.grace_period_ends,
+                    notify_at=evaluation.result.notify_at,
+                    requester=requester,
+                    source_job_id=job.id,
+                    evaluation_id=evaluation.evaluation_id,
+                )
+            )
+            evaluation = _with_schedule(
+                evaluation,
+                grace_period_ends=hold.grace_period_ends,
+                notify_at=hold.notify_at,
+            )
+            return evaluation, False
+
+        # Active hold — sticky schedule
+        evaluation = _with_schedule(
+            evaluation,
+            grace_period_ends=hold.grace_period_ends,
+            notify_at=hold.notify_at,
+        )
+        return evaluation, False
+
+    def _close_hold_if_dispatched(
+        self,
+        evaluation: EvaluationResponse,
+        record: RecordRef,
+        *,
+        status: GraceHoldStatus,
+    ) -> None:
+        if self._grace_holds is None:
+            return
+        policy_id = evaluation.result.matched_policy
+        rule_id = evaluation.result.matched_rule
+        if not policy_id or not rule_id:
+            return
+        hold = self._grace_holds.get_by_key(
+            policy_id=policy_id, rule_id=rule_id, record_id=record.record_id
+        )
+        if hold is None or hold.status != GraceHoldStatus.ACTIVE:
+            return
+        hold.status = status
+        hold.closed_at = datetime.now(timezone.utc)
+        self._grace_holds.update(hold)
 
     def _apply_outcome(
         self,
@@ -260,10 +548,20 @@ class EnforcementRunner:
             log_actions = policy.audit.log_actions
 
         if outcome == "retain":
+            # Rule no longer matches destructive+grace — drop cancelled holds for cleanup
+            self._drop_cancelled_if_unmatched(evaluation, record)
             return
 
         if outcome == "pending_grace":
             job.progress.pending_grace += 1
+            hold_id = None
+            if self._grace_holds is not None and evaluation.result.matched_policy:
+                hold = self._grace_holds.get_by_key(
+                    policy_id=evaluation.result.matched_policy,
+                    rule_id=evaluation.result.matched_rule or "",
+                    record_id=record.record_id,
+                )
+                hold_id = hold.id if hold else None
             if log_actions:
                 self._audit.append(
                     AuditEntryCreate(
@@ -275,6 +573,7 @@ class EnforcementRunner:
                         payload={
                             "grace_period_ends": evaluation.result.grace_period_ends,
                             "notify_at": evaluation.result.notify_at,
+                            "hold_id": hold_id,
                         },
                         job_id=job.id,
                         evaluation_id=evaluation.evaluation_id,
@@ -310,6 +609,10 @@ class EnforcementRunner:
             result = self._dispatcher.dispatch(action, record, evaluation)
             if result.ok:
                 job.progress.dispatched += 1
+                if outcome == "dispatch" and action in DESTRUCTIVE_ACTIONS:
+                    self._close_hold_if_dispatched(
+                        evaluation, record, status=GraceHoldStatus.DISPATCHED
+                    )
             else:
                 job.progress.errors += 1
             if log_actions:
@@ -332,3 +635,19 @@ class EnforcementRunner:
                     )
                 )
             return
+
+    def _drop_cancelled_if_unmatched(
+        self,
+        evaluation: EvaluationResponse,
+        record: RecordRef,
+    ) -> None:
+        """When record no longer matches, drop cancelled holds so rematch can restart."""
+        if self._grace_holds is None:
+            return
+        # Scan holds for this record that are cancelled and delete them
+        for hold in self._grace_holds.list_holds(
+            record_id=record.record_id,
+            status=GraceHoldStatus.CANCELLED,
+            limit=100,
+        ):
+            self._grace_holds.delete(hold.id)

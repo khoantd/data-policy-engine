@@ -35,8 +35,11 @@ function resolveTone(status: string): StatusTone {
     s === "partial" ||
     s === "draft" ||
     s === "pending" ||
+    s === "pending_grace" ||
     s === "skipped" ||
-    s === "off"
+    s === "off" ||
+    s === "forced" ||
+    s === "dispatched"
   ) {
     return "warning";
   }

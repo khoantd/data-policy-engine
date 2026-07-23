@@ -378,7 +378,7 @@ celery -A drpe.scheduler.celery_app.celery_app beat -l info
 
 Endpoints: `POST /api/v1/enforce`, `GET /api/v1/enforce/jobs`, `GET /api/v1/enforce/jobs/{id}`, `GET /api/v1/audit/logs`.
 
-Grace periods: destructive actions are audited as `pending_grace` until `grace_period_ends`; `notify` fires when `notify_at` is due.
+Grace periods: destructive actions open a sticky **grace hold** (`drpe.grace_holds`) and are audited as `pending_grace` until `grace_period_ends`; `notify` fires when `notify_at` is due. Admin **Grace holds** (and Audit row actions) can **Force** dispatch early or **Cancel** the cycle. Endpoints: `GET/POST /api/v1/grace-holds`.
 
 ## Webhook registration
 

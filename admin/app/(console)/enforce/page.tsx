@@ -36,6 +36,16 @@ export default async function EnforcePage() {
       <Panel title="Trigger" className="mb-6">
         <TriggerEnforceForm />
       </Panel>
+      <p className="mb-4 text-sm text-muted-fg">
+        Manage deferred deletions on{" "}
+        <Link
+          href="/grace-holds"
+          className="text-secondary hover:underline cursor-pointer"
+        >
+          Grace holds
+        </Link>
+        .
+      </p>
       <ContentCard title="Jobs">
         {jobs.length === 0 ? (
           <EmptyState message="No enforcement jobs yet." />

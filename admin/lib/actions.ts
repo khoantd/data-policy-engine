@@ -197,9 +197,44 @@ export async function triggerEnforceAction(
       policy_id: policy_id || undefined,
     });
     revalidatePath("/enforce");
+    revalidatePath("/grace-holds");
     redirect(`/enforce/${encodeURIComponent(res.job_id)}`);
   } catch (err) {
     rethrowRedirect(err);
+    return { error: errMsg(err) };
+  }
+}
+
+export async function forceGraceHoldAction(
+  _prev: { error?: string; ok?: boolean } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean }> {
+  const holdId = String(formData.get("hold_id") || "").trim();
+  if (!holdId) return { error: "Hold ID is required" };
+  try {
+    await drpe.forceGraceHold(holdId, { requester: "admin" });
+    revalidatePath("/grace-holds");
+    revalidatePath("/audit");
+    revalidatePath("/enforce");
+    return { ok: true };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
+export async function cancelGraceHoldAction(
+  _prev: { error?: string; ok?: boolean } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean }> {
+  const holdId = String(formData.get("hold_id") || "").trim();
+  if (!holdId) return { error: "Hold ID is required" };
+  try {
+    await drpe.cancelGraceHold(holdId, { requester: "admin" });
+    revalidatePath("/grace-holds");
+    revalidatePath("/audit");
+    revalidatePath("/enforce");
+    return { ok: true };
+  } catch (err) {
     return { error: errMsg(err) };
   }
 }

@@ -15,6 +15,7 @@ const ROUTE_LABELS: Record<string, string> = {
   classify: "Scan",
   observability: "Observability",
   enforce: "Enforce",
+  "grace-holds": "Grace holds",
 };
 
 function titleCaseSegment(segment: string): string {

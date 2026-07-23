@@ -12,6 +12,7 @@ from sqlalchemy.engine import Engine
 
 from drpe.adapters.memory_audit import InMemoryAuditStore
 from drpe.adapters.memory_dsar import InMemoryDsarStore
+from drpe.adapters.memory_grace_holds import InMemoryGraceHoldStore
 from drpe.adapters.memory_jobs import InMemoryEnforcementJobStore
 from drpe.adapters.memory_records import InMemoryRecordSource
 from drpe.adapters.memory_store import InMemoryPolicyStore
@@ -23,6 +24,7 @@ from drpe.adapters.redis_cache import (
 )
 from drpe.adapters.sqlalchemy_audit import SqlAlchemyAuditStore
 from drpe.adapters.sqlalchemy_dsar import SqlAlchemyDsarStore
+from drpe.adapters.sqlalchemy_grace_holds import SqlAlchemyGraceHoldStore
 from drpe.adapters.sqlalchemy_jobs import SqlAlchemyEnforcementJobStore
 from drpe.adapters.sqlalchemy_store import SqlAlchemyPolicyStore
 from drpe.adapters.sqlalchemy_webhooks import SqlAlchemyWebhookStore
@@ -30,6 +32,7 @@ from drpe.api.routes_audit import router as audit_router
 from drpe.api.routes_dsar import router as dsar_router
 from drpe.api.routes_enforce import router as enforce_router
 from drpe.api.routes_evaluate import router as evaluate_router
+from drpe.api.routes_grace_holds import router as grace_holds_router
 from drpe.api.routes_misc import health_router, jurisdictions_router
 from drpe.api.routes_classify import router as classify_router
 from drpe.api.routes_policies import router as policies_router
@@ -152,11 +155,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         audit_store = SqlAlchemyAuditStore(session_factory)
         dsar_store = SqlAlchemyDsarStore(session_factory)
         webhook_store = SqlAlchemyWebhookStore(session_factory)
+        grace_hold_store = SqlAlchemyGraceHoldStore(session_factory)
     else:
         job_store = InMemoryEnforcementJobStore()
         audit_store = InMemoryAuditStore()
         dsar_store = InMemoryDsarStore()
         webhook_store = InMemoryWebhookStore()
+        grace_hold_store = InMemoryGraceHoldStore()
 
     record_source = InMemoryRecordSource()
     dispatcher = build_dispatcher(settings)
@@ -168,6 +173,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         audit_store=audit_store,
         dispatcher=dispatcher,
         record_source=record_source,
+        grace_hold_store=grace_hold_store,
     )
     set_enforcement_runtime(runtime)
 
@@ -215,6 +221,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.webhook_store = webhook_store
     app.state.record_source = record_source
     app.state.dispatcher = dispatcher
+    app.state.grace_hold_store = grace_hold_store
     app.state.enforcement_runtime = runtime
     app.state.celery = celery
 
@@ -222,6 +229,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(classify_router, prefix="/api/v1")
     app.include_router(evaluate_router, prefix="/api/v1")
     app.include_router(enforce_router, prefix="/api/v1")
+    app.include_router(grace_holds_router, prefix="/api/v1")
     app.include_router(dsar_router, prefix="/api/v1")
     app.include_router(webhooks_router, prefix="/api/v1")
     app.include_router(audit_router, prefix="/api/v1")

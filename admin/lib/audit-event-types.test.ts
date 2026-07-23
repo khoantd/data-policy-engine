@@ -9,6 +9,7 @@ const API_ENUM = [
   "flag",
   "dsar_access",
   "dsar_erasure",
+  "grace_cancelled",
 ] as const;
 
 describe("AUDIT_EVENT_TYPE_OPTIONS", () => {

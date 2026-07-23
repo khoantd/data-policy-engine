@@ -25,7 +25,7 @@ export const AUDIT_EVENT_TYPE_OPTIONS: ReadonlyArray<{
   {
     value: "pending_grace",
     label: "Pending grace",
-    hint: "Record entered grace period — action deferred; see Grace ends column",
+    hint: "Record entered grace period — action deferred; see Grace ends / Force·Cancel",
   },
   {
     value: "flag",
@@ -41,5 +41,10 @@ export const AUDIT_EVENT_TYPE_OPTIONS: ReadonlyArray<{
     value: "dsar_erasure",
     label: "DSAR erasure",
     hint: "Erasure DSAR completed",
+  },
+  {
+    value: "grace_cancelled",
+    label: "Grace cancelled",
+    hint: "Operator cancelled a grace hold — deletion cycle aborted",
   },
 ];

@@ -9,6 +9,7 @@ import {
   FileUp,
   FlaskConical,
   GitFork,
+  Hourglass,
   LayoutDashboard,
   LineChart,
   Menu,
@@ -52,6 +53,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/audit", label: "Audit", icon: ClipboardList },
       { href: "/insights", label: "Insights", icon: GitFork },
       { href: "/enforce", label: "Enforce", icon: Activity },
+      { href: "/grace-holds", label: "Grace holds", icon: Hourglass },
     ],
   },
   {

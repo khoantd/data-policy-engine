@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auditScheduleFields } from "./audit-payload";
+import { auditHoldId, auditScheduleFields } from "./audit-payload";
 
 describe("auditScheduleFields", () => {
   it("reads grace_period_ends and notify_at strings", () => {
@@ -47,5 +47,13 @@ describe("auditScheduleFields", () => {
       gracePeriodEnds: "2026-08-21T00:00:00Z",
       notifyAt: null,
     });
+  });
+});
+
+describe("auditHoldId", () => {
+  it("reads hold_id", () => {
+    expect(auditHoldId({ hold_id: "gh_abc" })).toBe("gh_abc");
+    expect(auditHoldId({})).toBeNull();
+    expect(auditHoldId(null)).toBeNull();
   });
 });

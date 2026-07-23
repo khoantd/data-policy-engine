@@ -10,6 +10,7 @@ import {
   EnforcementJob,
   EvaluationRequest,
   EvaluationResponse,
+  GraceHold,
   HealthResponse,
   ImportResponse,
   Policy,
@@ -212,6 +213,21 @@ export const drpe = {
     drpeFetch<EnforceResponse>("/enforce", {
       method: "POST",
       body: JSON.stringify(body),
+    }),
+
+  listGraceHolds: (qs?: string) =>
+    drpeFetch<GraceHold[]>(`/grace-holds${qs ? `?${qs}` : ""}`),
+  getGraceHold: (id: string) =>
+    drpeFetch<GraceHold>(`/grace-holds/${encodeURIComponent(id)}`),
+  forceGraceHold: (id: string, body?: { requester?: string }) =>
+    drpeFetch<GraceHold>(`/grace-holds/${encodeURIComponent(id)}/force`, {
+      method: "POST",
+      body: JSON.stringify(body ?? {}),
+    }),
+  cancelGraceHold: (id: string, body?: { requester?: string }) =>
+    drpeFetch<GraceHold>(`/grace-holds/${encodeURIComponent(id)}/cancel`, {
+      method: "POST",
+      body: JSON.stringify(body ?? {}),
     }),
 
   evaluateOne: (body: EvaluationRequest) =>

@@ -23,3 +23,10 @@ export function auditScheduleFields(
     notifyAt: readOptionalString(payload, "notify_at"),
   };
 }
+
+/** Extract hold_id from pending_grace payload when present. */
+export function auditHoldId(
+  payload: Record<string, unknown> | null | undefined,
+): string | null {
+  return readOptionalString(payload, "hold_id");
+}
