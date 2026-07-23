@@ -39,7 +39,7 @@ Open `http://localhost:3000`, connect with your `DRPE_API_KEY` (or leave empty i
 
 Or import the repo in the Vercel dashboard under **Royal Platform**, set **Root Directory** to `admin`, and set `DRPE_API_URL` to your public FastAPI base URL. Full steps: [admin/README.md — Deploy on Vercel](admin/README.md#deploy-on-vercel).
 
-Optional **privacy-safe AI**: `pip install -e ".[ai]"` installs [privalyse-mask](https://github.com/khoantd/privalyse-mask) on the API so Policy Import and Evaluate mask PII before LiteLLM.
+Optional **privacy-safe AI** (local): `pip install -e ".[ai]"` then `python -m spacy download en_core_web_lg` installs [privalyse-mask](https://github.com/Privalyse/privalyse-mask) so Policy Import and Evaluate mask PII before LiteLLM.
 
 ### Docker
 
@@ -59,6 +59,7 @@ chmod +x scripts/docker-build.sh   # once
 
 TAG=v0.1.0 ./scripts/docker-build.sh          # custom tag
 NO_CACHE=1 ./scripts/docker-build.sh          # rebuild without cache
+INSTALL_AI=0 ./scripts/docker-build.sh api    # smaller API image without PII masking
 ```
 
 #### Backend only (VPS)
@@ -83,6 +84,13 @@ TAG=v0.1.0 ./scripts/build-backend.sh --registry docker.io/myuser --push
 docker pull docker.io/myuser/drpe-api:latest
 docker run -d --name drpe-api --restart unless-stopped \
   -p 8000:8000 --env-file /path/to/.env docker.io/myuser/drpe-api:latest
+# When REDIS_URL / CELERY_BROKER_URL is set (and DRPE_CELERY_EAGER is not true):
+docker run -d --name drpe-worker --restart unless-stopped \
+  --env-file /path/to/.env docker.io/myuser/drpe-api:latest \
+  celery -A drpe.scheduler.celery_app.celery_app worker -l info
+docker run -d --name drpe-beat --restart unless-stopped \
+  --env-file /path/to/.env docker.io/myuser/drpe-api:latest \
+  celery -A drpe.scheduler.celery_app.celery_app beat -l info
 ```
 
 **Tarball transfer** (no registry):
@@ -94,10 +102,17 @@ scp dist/drpe-api-latest.tar.gz user@vps:/tmp/
 gunzip -c /tmp/drpe-api-latest.tar.gz | docker load
 docker run -d --name drpe-api --restart unless-stopped \
   -p 8000:8000 --env-file /path/to/.env drpe-api:latest
-docker exec drpe-api alembic upgrade head   # when DATABASE_URL is set
+docker exec drpe-api alembic upgrade head   # when DATABASE_URL is set (through 006+)
+# When Redis/Celery broker is set, also run worker + beat (same image, no ports):
+docker run -d --name drpe-worker --restart unless-stopped \
+  --env-file /path/to/.env drpe-api:latest \
+  celery -A drpe.scheduler.celery_app.celery_app worker -l info
+docker run -d --name drpe-beat --restart unless-stopped \
+  --env-file /path/to/.env drpe-api:latest \
+  celery -A drpe.scheduler.celery_app.celery_app beat -l info
 ```
 
-Set `.env` with `DATABASE_URL`, `DRPE_API_KEY`, `DRPE_CORS_ORIGINS` for your Admin origin, etc.
+Set `.env` with `DATABASE_URL`, `DRPE_API_KEY`, `DRPE_CORS_ORIGINS` for your Admin origin, etc. If the env file sets `REDIS_URL` / `CELERY_BROKER_URL` without `DRPE_CELERY_EAGER=true`, you must run the worker (and beat for periodic scans) or enforce jobs stay `queued`.
 
 #### Admin UI (Vercel — Royal Platform)
 
@@ -114,8 +129,10 @@ Requires Vercel CLI login (`vercel login` or `VERCEL_TOKEN`) and access to the *
 Equivalent manual builds:
 
 ```bash
-# API (repo root Dockerfile)
+# API (repo root Dockerfile) — includes [ai]/privalyse-mask by default
 docker build -t drpe-api:latest -f Dockerfile .
+# Smaller image without PII masking:
+# docker build -t drpe-api:latest -f Dockerfile --build-arg INSTALL_AI=0 .
 
 # Admin (admin/Dockerfile)
 docker build -t drpe-admin:latest -f admin/Dockerfile ./admin
@@ -134,10 +151,20 @@ docker compose up --build
 # Admin http://localhost:3000
 ```
 
+If `.env` sets `REDIS_URL` or `CELERY_BROKER_URL` and you need live enforcement (not eager), also start Celery worker + beat:
+
+```bash
+docker compose --profile celery up --build
+```
+
+Alternatively, set `DRPE_CELERY_EAGER=true` so tasks run in-process inside the API container (fine for local smoke tests; not for production).
+
 After images are already built:
 
 ```bash
 docker compose up
+# or with Celery:
+docker compose --profile celery up
 ```
 
 Standalone containers (without Compose):
@@ -150,7 +177,7 @@ docker run --rm -p 3000:3000 \
   drpe-admin:latest
 ```
 
-With `DATABASE_URL` set, apply migrations before relying on the DB:
+With `DATABASE_URL` set, apply migrations before relying on the DB (includes `006_audit_requester` and later):
 
 ```bash
 docker compose run --rm api alembic upgrade head
@@ -336,7 +363,7 @@ Defaults: `DRPE_REDIS_TTL_SECONDS=300`, `DRPE_REDIS_KEY_PREFIX=drpe`. Requires a
 
 Periodic and on-demand retention scans:
 
-1. Set `REDIS_URL` (or `CELERY_BROKER_URL`) for a real broker; without it, tasks run **eager** in-process (fine for tests/dev).
+1. Set `REDIS_URL` (or `CELERY_BROKER_URL`) for a real broker. **When a broker is set, you must run a Celery worker** — otherwise jobs stay `queued` forever. Without a broker (or with `DRPE_CELERY_EAGER=true`), tasks run **eager** in-process (fine for tests/dev).
 2. Optionally set `DRPE_WEBHOOK_URL` to POST dispatched actions; otherwise a logging dispatcher is used.
 3. Inject records via a pluggable `RecordSource`, or pass an inline `records` batch to `POST /api/v1/enforce`.
 
@@ -344,7 +371,7 @@ Periodic and on-demand retention scans:
 # API (creates jobs + enqueues tasks)
 uvicorn drpe.api.app:app --port 8000
 
-# Worker + beat (when using Redis broker)
+# Worker + beat (required when using Redis / CELERY_BROKER_URL)
 celery -A drpe.scheduler.celery_app.celery_app worker -l info
 celery -A drpe.scheduler.celery_app.celery_app beat -l info
 ```

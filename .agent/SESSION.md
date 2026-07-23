@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Updated** | 2026-07-22 |
+| **Updated** | 2026-07-23 |
 | **Phase** | build |
 | **Tool** | cursor |
 | **Persona** | backend |
@@ -46,21 +46,24 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **Admin Vercel readiness** — `admin/vercel.json` (framework nextjs); `engines.node >=20`; dual-target `next.config` (standalone when not `VERCEL`); docs for Root Directory=`admin` + `DRPE_API_URL`; build/tests green
 - **Backend VPS build** — `scripts/build-backend.sh` builds API image only; `--save` writes `dist/drpe-api-<tag>.tar.gz` for scp/load on VPS
 - **Admin Vercel deploy** — `scripts/deploy-admin.sh` defaults to **Royal Platform** (`SCOPE=royal-platform`, project `ros-policy-admin`); `--link --yes` creates/links; preview / `--prod`
+- **Celery worker boot** — lazy imports in `drpe.api` / `drpe.scheduler` break circular import so `celery -A drpe.scheduler.celery_app.celery_app worker` starts; README notes worker is required when Redis broker is set
+- **API Docker alignment** — `INSTALL_AI` build-arg; Compose `worker`/`beat` via `--profile celery`; README + `build-backend.sh` VPS recipes document Redis+worker; smoke OK (`celery`/`alembic`/`006`/health)
 
 ## In progress
 
 - _(none)_
-- **Blockers:** Supabase/local DB still needs Alembic `005_policy_kind` applied anywhere the old schema is running
+- **Blockers:** Supabase/local DB may need `alembic upgrade head` (through `006_audit_requester`) where schema is behind
 
 ## Next
 
-1. Apply Alembic `005_policy_kind` anywhere the classification schema is not yet migrated
+1. Apply `alembic upgrade head` anywhere the DB schema is not yet at 006+
 2. Set `DRPE_API_URL` on Vercel project `royal-platform/ros-policy-admin` (Production/Preview), then redeploy
-3. Optional: AI assist on policy detail editor (same BFF)
-4. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
-5. Optional: JWT OAuth2 scopes
-6. Optional: audit_logs monthly partitioning
-7. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
+3. When Redis/Celery broker is set: `docker compose --profile celery up` (or separate worker/beat containers); else `DRPE_CELERY_EAGER=true`
+4. Optional: AI assist on policy detail editor (same BFF)
+5. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
+6. Optional: JWT OAuth2 scopes
+7. Optional: audit_logs monthly partitioning
+8. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
 
 ## Decisions
 
@@ -83,6 +86,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 
 ## Gotchas
 
+- Audit log is **not** an HTTP access log: only `EnforcementRunner` + `DsarService` call `AuditStore.append`. Privacy/evaluate/policies/classify GETs write nothing. Live `POST /enforce` stays `queued` until a Celery worker consumes Redis (or eager mode); DSAR is sync and audits immediately.
 - Use project venv: `source .venv/bin/activate` then `python -m pip` / `python -m pytest`
 - httpx `ASGITransport` is async-only; SDK tests inject FastAPI `TestClient` as `http_client`
 - Policies load eagerly in `create_app()`; DB mode seeds YAML only when store empty (or `DRPE_SEED_YAML=true`)

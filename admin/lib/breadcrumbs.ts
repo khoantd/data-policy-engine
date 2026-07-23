@@ -9,6 +9,7 @@ const ROUTE_LABELS: Record<string, string> = {
   import: "Import",
   dsar: "DSAR",
   audit: "Audit",
+  insights: "Insights",
   webhooks: "Webhooks",
   evaluate: "Evaluate",
   classify: "Scan",

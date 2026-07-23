@@ -46,12 +46,37 @@ def test_audit_append_and_list(session_factory: sessionmaker) -> None:  # type: 
             record_id="r1",
             action="delete",
             job_id="job_1",
+            requester="enforcement_runner",
         )
     )
     assert entry.id.startswith("aud_")
     logs = store.list_logs(policy_id="pol_1")
     assert len(logs) == 1
     assert logs[0].record_id == "r1"
+    assert logs[0].requester == "enforcement_runner"
+
+
+def test_audit_filter_by_requester(session_factory: sessionmaker) -> None:  # type: ignore[type-arg]
+    store = SqlAlchemyAuditStore(session_factory)
+    store.append(
+        AuditEntryCreate(
+            event_type=AuditEventType.EVALUATION,
+            policy_id="pol_1",
+            action="delete",
+            requester="crm_cleanup_job",
+        )
+    )
+    store.append(
+        AuditEntryCreate(
+            event_type=AuditEventType.EVALUATION,
+            policy_id="pol_1",
+            action="retain",
+            requester="enforcement_runner",
+        )
+    )
+    filtered = store.list_logs(requester="crm_cleanup_job")
+    assert len(filtered) == 1
+    assert filtered[0].requester == "crm_cleanup_job"
 
 
 def test_job_lifecycle(session_factory: sessionmaker) -> None:  # type: ignore[type-arg]

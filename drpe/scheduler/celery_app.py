@@ -52,5 +52,5 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
     return configure_celery(settings)
 
 
-# Default configuration for `celery -A drpe.scheduler.celery_app worker`
+# Default configuration for `celery -A drpe.scheduler.celery_app.celery_app worker`
 configure_celery()

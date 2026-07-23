@@ -32,6 +32,7 @@ class AuditEntry(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
     job_id: str | None = None
     evaluation_id: str | None = None
+    requester: str | None = None
 
 
 class AuditEntryCreate(BaseModel):
@@ -45,3 +46,14 @@ class AuditEntryCreate(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
     job_id: str | None = None
     evaluation_id: str | None = None
+    requester: str | None = None
+
+
+def normalize_requester(value: Any, *, max_len: int = 255) -> str | None:
+    """Coerce evaluate/enforce context requester into a storeable string."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    return text[:max_len]

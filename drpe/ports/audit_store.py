@@ -18,6 +18,7 @@ class AuditStore(Protocol):
         record_id: str | None = None,
         job_id: str | None = None,
         event_type: AuditEventType | None = None,
+        requester: str | None = None,
         since: datetime | None = None,
         until: datetime | None = None,
         limit: int = 100,

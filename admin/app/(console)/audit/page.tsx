@@ -21,6 +21,7 @@ export default async function AuditPage({
     policy_id?: string;
     record_id?: string;
     job_id?: string;
+    requester?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -30,6 +31,7 @@ export default async function AuditPage({
   if (sp.policy_id) qs.set("policy_id", sp.policy_id);
   if (sp.record_id) qs.set("record_id", sp.record_id);
   if (sp.job_id) qs.set("job_id", sp.job_id);
+  if (sp.requester) qs.set("requester", sp.requester);
 
   let error: string | null = null;
   let logs: Awaited<ReturnType<typeof drpe.listAudit>> = [];

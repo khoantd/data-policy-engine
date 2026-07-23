@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from typing import Any
 
 _masker: Any | None = None
@@ -23,7 +24,12 @@ def get_masker(
     languages: list[str] | None = None,
     allow_list: list[str] | None = None,
 ) -> Any:
-    """Return a configured PrivalyseMasker or raise ImportError."""
+    """Return a configured PrivalyseMasker or raise ImportError.
+
+    ``model_size`` is accepted for API/settings compatibility. Current
+    ``privalyse-mask`` (0.1.x) always uses spaCy ``*_lg`` models and ignores
+    this argument unless a future release adds the parameter.
+    """
     global _masker, _masker_config
 
     from privalyse_mask import PrivalyseMasker
@@ -35,11 +41,15 @@ def get_masker(
     if _masker is not None and _masker_config == config_key:
         return _masker
 
-    _masker = PrivalyseMasker(
-        model_size=model_size,
-        languages=list(langs),
-        allow_list=list(allow),
-    )
+    kwargs: dict[str, Any] = {
+        "languages": list(langs),
+        "allow_list": list(allow),
+    }
+    # Forward model_size only when the installed package supports it.
+    if "model_size" in inspect.signature(PrivalyseMasker.__init__).parameters:
+        kwargs["model_size"] = model_size
+
+    _masker = PrivalyseMasker(**kwargs)
     _masker_config = config_key
     return _masker
 

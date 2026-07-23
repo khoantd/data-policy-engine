@@ -8,6 +8,7 @@ import {
   FileKey2,
   FileUp,
   FlaskConical,
+  GitFork,
   LayoutDashboard,
   LineChart,
   Menu,
@@ -49,6 +50,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/dsar", label: "DSAR", icon: FileKey2 },
       { href: "/audit", label: "Audit", icon: ClipboardList },
+      { href: "/insights", label: "Insights", icon: GitFork },
       { href: "/enforce", label: "Enforce", icon: Activity },
     ],
   },

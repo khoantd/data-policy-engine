@@ -607,6 +607,8 @@ export interface components {
             job_id?: string | null;
             /** Evaluation Id */
             evaluation_id?: string | null;
+            /** Requester */
+            requester?: string | null;
         };
         /**
          * AuditEventType
@@ -2548,6 +2550,7 @@ export interface operations {
                 record_id?: string | null;
                 job_id?: string | null;
                 event_type?: components["schemas"]["AuditEventType"] | null;
+                requester?: string | null;
                 since?: string | null;
                 until?: string | null;
                 limit?: number;

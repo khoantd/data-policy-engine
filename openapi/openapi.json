@@ -1725,6 +1725,22 @@
             }
           },
           {
+            "name": "requester",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Requester"
+            }
+          },
+          {
             "name": "since",
             "in": "query",
             "required": false,
@@ -2177,6 +2193,17 @@
               }
             ],
             "title": "Evaluation Id"
+          },
+          "requester": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requester"
           }
         },
         "type": "object",
@@ -4848,7 +4875,7 @@
   "servers": [
     {
       "url": "http://localhost:8000",
-      "description": "Local ROS Policy API"
+      "description": "Local DRPE API"
     }
   ]
 }

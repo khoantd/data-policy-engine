@@ -6,7 +6,15 @@ WORKDIR /build
 COPY pyproject.toml README.md ./
 COPY drpe/ drpe/
 
-RUN pip install --no-cache-dir .
+# INSTALL_AI=1 (default) includes privalyse-mask + spaCy NER model for /privacy/*
+# Set --build-arg INSTALL_AI=0 for a smaller image without PII masking.
+ARG INSTALL_AI=1
+RUN if [ "$INSTALL_AI" = "1" ]; then \
+      pip install --no-cache-dir ".[ai]" \
+      && python -m spacy download en_core_web_lg; \
+    else \
+      pip install --no-cache-dir .; \
+    fi
 
 # --- runtime ---
 FROM python:3.11-slim AS api

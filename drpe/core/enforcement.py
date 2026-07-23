@@ -6,7 +6,7 @@ import logging
 from datetime import datetime, timezone
 
 from drpe.core.evaluator import PolicyEvaluatorEngine
-from drpe.models.audit import AuditEntryCreate, AuditEventType
+from drpe.models.audit import AuditEntryCreate, AuditEventType, normalize_requester
 from drpe.models.enforcement import (
     EnforcementJob,
     JobProgress,
@@ -171,6 +171,7 @@ class EnforcementRunner:
                             policy_id=policy.id,
                             record_id=record.record_id,
                             job_id=job.id,
+                            requester="enforcement_runner",
                             payload={"error": str(exc)},
                         )
                     )
@@ -214,6 +215,7 @@ class EnforcementRunner:
             jurisdiction=record.jurisdiction or policy.jurisdiction,
             context={"requester": "enforcement_runner", "job_id": job.id},
         )
+        requester = normalize_requester(request.context.get("requester"))
         # Prefer engine policies; ensure current policy is considered via store list
         evaluation = self._engine.evaluate(request, now=now)
         job.progress.scanned += 1
@@ -232,11 +234,14 @@ class EnforcementRunner:
                     payload={"evaluation": evaluation.model_dump(mode="json")},
                     job_id=job.id,
                     evaluation_id=evaluation.evaluation_id,
+                    requester=requester,
                 )
             )
 
         outcome, action = decide_enforcement_outcome(evaluation, now=now)
-        self._apply_outcome(job, record, evaluation, outcome, action, policy)
+        self._apply_outcome(
+            job, record, evaluation, outcome, action, policy, requester=requester
+        )
         self._jobs.update(job)
 
     def _apply_outcome(
@@ -247,6 +252,8 @@ class EnforcementRunner:
         outcome: str,
         action: Action | None,
         policy: Policy,
+        *,
+        requester: str | None = None,
     ) -> None:
         log_actions = True
         if policy.audit is not None:
@@ -271,6 +278,7 @@ class EnforcementRunner:
                         },
                         job_id=job.id,
                         evaluation_id=evaluation.evaluation_id,
+                        requester=requester,
                     )
                 )
             return
@@ -293,6 +301,7 @@ class EnforcementRunner:
                         payload={"dispatch": result.model_dump(mode="json")},
                         job_id=job.id,
                         evaluation_id=evaluation.evaluation_id,
+                        requester=requester,
                     )
                 )
             return
@@ -319,6 +328,7 @@ class EnforcementRunner:
                         payload={"dispatch": result.model_dump(mode="json")},
                         job_id=job.id,
                         evaluation_id=evaluation.evaluation_id,
+                        requester=requester,
                     )
                 )
             return

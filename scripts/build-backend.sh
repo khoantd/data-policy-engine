@@ -20,6 +20,7 @@
 #   SAVE=1       Write dist/drpe-api-<tag>.tar.gz after build
 #   OUT_DIR      Tarball directory (default: dist)
 #   NO_CACHE=1   Pass --no-cache to docker build
+#   INSTALL_AI=0 Skip privalyse-mask / spaCy (smaller image; privacy mask 503)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -32,6 +33,7 @@ REGISTRY="${REGISTRY:-}"
 PLATFORM="${PLATFORM:-}"
 SAVE="${SAVE:-0}"
 PUSH="${PUSH:-0}"
+INSTALL_AI="${INSTALL_AI:-1}"
 
 usage() {
   sed -n '2,22p' "$0"
@@ -112,10 +114,12 @@ if [[ -n "$REGISTRY" ]]; then
 fi
 
 if [[ -n "$PLATFORM" ]]; then
-  echo "==> Building backend ${LOCAL_REF} (${PLATFORM})"
+  echo "==> Building backend ${LOCAL_REF} (${PLATFORM}, INSTALL_AI=${INSTALL_AI})"
 else
-  echo "==> Building backend ${LOCAL_REF}"
+  echo "==> Building backend ${LOCAL_REF} (INSTALL_AI=${INSTALL_AI})"
 fi
+
+AI_BUILD_ARGS=(--build-arg "INSTALL_AI=${INSTALL_AI}")
 
 # Cross-platform builds need buildx so the image can be loaded/pushed reliably
 # (e.g. Apple Silicon → linux/amd64 VPS).
@@ -127,6 +131,7 @@ if [[ -n "$PLATFORM" ]]; then
     docker buildx build \
       ${CACHE_ARGS[@]+"${CACHE_ARGS[@]}"} \
       ${PLATFORM_ARGS[@]+"${PLATFORM_ARGS[@]}"} \
+      "${AI_BUILD_ARGS[@]}" \
       -f Dockerfile \
       -t "${REMOTE_REF}" \
       --push \
@@ -139,6 +144,7 @@ if [[ -n "$PLATFORM" ]]; then
     docker buildx build \
       ${CACHE_ARGS[@]+"${CACHE_ARGS[@]}"} \
       ${PLATFORM_ARGS[@]+"${PLATFORM_ARGS[@]}"} \
+      "${AI_BUILD_ARGS[@]}" \
       -f Dockerfile \
       "${TAG_ARGS[@]}" \
       --load \
@@ -147,6 +153,7 @@ if [[ -n "$PLATFORM" ]]; then
 else
   docker build \
     ${CACHE_ARGS[@]+"${CACHE_ARGS[@]}"} \
+    "${AI_BUILD_ARGS[@]}" \
     -f Dockerfile \
     -t "${LOCAL_REF}" \
     .
@@ -190,24 +197,36 @@ fi
 echo
 echo "Local smoke test:"
 echo "  docker run --rm -p 8000:8000 --env-file .env ${LOCAL_REF}"
+echo "  # If .env has REDIS_URL/CELERY_BROKER_URL without DRPE_CELERY_EAGER=true,"
+echo "  # also run worker (+ beat) or enforce jobs stay queued."
 echo
 
 RUN_REF="${REMOTE_REF:-$LOCAL_REF}"
+print_vps_run() {
+  local ref="$1"
+  echo "  docker run -d --name drpe-api --restart unless-stopped \\"
+  echo "    -p 8000:8000 --env-file /path/to/.env ${ref}"
+  echo "  # With DB: docker exec drpe-api alembic upgrade head"
+  echo "  # When REDIS_URL / CELERY_BROKER_URL is set (and DRPE_CELERY_EAGER is not true):"
+  echo "  docker run -d --name drpe-worker --restart unless-stopped \\"
+  echo "    --env-file /path/to/.env ${ref} \\"
+  echo "    celery -A drpe.scheduler.celery_app.celery_app worker -l info"
+  echo "  docker run -d --name drpe-beat --restart unless-stopped \\"
+  echo "    --env-file /path/to/.env ${ref} \\"
+  echo "    celery -A drpe.scheduler.celery_app.celery_app beat -l info"
+}
+
 if [[ -n "$ARTIFACT" ]]; then
   echo "Transfer to VPS:"
   echo "  scp ${ARTIFACT} user@vps:/tmp/"
   echo
   echo "On the VPS:"
   echo "  gunzip -c /tmp/$(basename "$ARTIFACT") | docker load"
-  echo "  docker run -d --name drpe-api --restart unless-stopped \\"
-  echo "    -p 8000:8000 --env-file /path/to/.env ${RUN_REF}"
-  echo "  # With DB: docker exec drpe-api alembic upgrade head"
+  print_vps_run "${RUN_REF}"
 elif [[ "$PUSH" == "1" ]]; then
   echo "On the VPS:"
   echo "  docker pull ${REMOTE_REF}"
-  echo "  docker run -d --name drpe-api --restart unless-stopped \\"
-  echo "    -p 8000:8000 --env-file /path/to/.env ${REMOTE_REF}"
-  echo "  # With DB: docker exec drpe-api alembic upgrade head"
+  print_vps_run "${REMOTE_REF}"
 else
   echo "Package for VPS transfer:"
   echo "  ./scripts/build-backend.sh --platform linux/amd64 --save"

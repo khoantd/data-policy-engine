@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/utils";
 import { buildBreadcrumbs } from "@/lib/breadcrumbs";
 import { CreateDsarForm } from "@/components/dsar-audit-forms";
 import { StatusDot } from "@/components/status-dot";
+import type { PolicyListItem } from "@/lib/types";
 import {
   ContentCard,
   EmptyState,
@@ -19,8 +20,14 @@ import {
 export default async function DsarPage() {
   let error: string | null = null;
   let requests: Awaited<ReturnType<typeof drpe.listDsar>> = [];
+  let policies: PolicyListItem[] = [];
   try {
-    requests = await drpe.listDsar("limit=100");
+    const [listedRequests, listedPolicies] = await Promise.all([
+      drpe.listDsar("limit=100"),
+      drpe.listPolicies("active", "retention"),
+    ]);
+    requests = listedRequests;
+    policies = listedPolicies;
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load DSAR";
   }
@@ -34,7 +41,7 @@ export default async function DsarPage() {
       />
       {error && <ErrorAlert message={error} />}
       <Panel title="Create request" className="mb-6">
-        <CreateDsarForm />
+        <CreateDsarForm policies={policies} />
       </Panel>
       <ContentCard title="Recent requests">
         {requests.length === 0 ? (

@@ -24,6 +24,7 @@ def _row_to_entry(row: AuditLogRow) -> AuditEntry:
         payload=row.payload or {},
         job_id=row.job_id,
         evaluation_id=row.evaluation_id,
+        requester=row.requester,
     )
 
 
@@ -43,6 +44,7 @@ class SqlAlchemyAuditStore:
             payload=dict(entry.payload),
             job_id=entry.job_id,
             evaluation_id=entry.evaluation_id,
+            requester=entry.requester,
         )
         with self._session_factory() as session:
             session.add(row)
@@ -57,6 +59,7 @@ class SqlAlchemyAuditStore:
         record_id: str | None = None,
         job_id: str | None = None,
         event_type: AuditEventType | None = None,
+        requester: str | None = None,
         since: datetime | None = None,
         until: datetime | None = None,
         limit: int = 100,
@@ -71,6 +74,8 @@ class SqlAlchemyAuditStore:
             stmt = stmt.where(AuditLogRow.job_id == job_id)
         if event_type is not None:
             stmt = stmt.where(AuditLogRow.event_type == event_type.value)
+        if requester is not None:
+            stmt = stmt.where(AuditLogRow.requester == requester)
         if since is not None:
             stmt = stmt.where(AuditLogRow.created_at >= since)
         if until is not None:

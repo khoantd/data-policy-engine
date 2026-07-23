@@ -26,6 +26,7 @@ class InMemoryAuditStore:
             payload=dict(entry.payload),
             job_id=entry.job_id,
             evaluation_id=entry.evaluation_id,
+            requester=entry.requester,
         )
         with self._lock:
             self._entries.append(created)
@@ -38,6 +39,7 @@ class InMemoryAuditStore:
         record_id: str | None = None,
         job_id: str | None = None,
         event_type: AuditEventType | None = None,
+        requester: str | None = None,
         since: datetime | None = None,
         until: datetime | None = None,
         limit: int = 100,
@@ -54,6 +56,8 @@ class InMemoryAuditStore:
             if job_id is not None and e.job_id != job_id:
                 return False
             if event_type is not None and e.event_type != event_type:
+                return False
+            if requester is not None and e.requester != requester:
                 return False
             if since is not None and e.created_at < since:
                 return False

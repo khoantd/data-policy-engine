@@ -1,11 +1,17 @@
 # Minimal local stack: FastAPI API + Next.js Admin UI.
-# Postgres / Redis / Celery stay optional via .env (e.g. Supabase).
+# Postgres / Redis stay optional via .env (e.g. Supabase).
+# When REDIS_URL / CELERY_BROKER_URL is set, also run:
+#   docker compose --profile celery up
+# Or set DRPE_CELERY_EAGER=true for single-process eager tasks.
 
 services:
   api:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Set INSTALL_AI=0 for a smaller API image without PII masking
+        INSTALL_AI: ${INSTALL_AI:-1}
     ports:
       - "8000:8000"
     env_file:
@@ -13,6 +19,54 @@ services:
         required: false
     environment:
       DRPE_POLICIES_DIR: config
+
+  worker:
+    profiles: [celery]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        INSTALL_AI: ${INSTALL_AI:-1}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DRPE_POLICIES_DIR: config
+    command:
+      [
+        "celery",
+        "-A",
+        "drpe.scheduler.celery_app.celery_app",
+        "worker",
+        "-l",
+        "info",
+      ]
+    depends_on:
+      - api
+
+  beat:
+    profiles: [celery]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        INSTALL_AI: ${INSTALL_AI:-1}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DRPE_POLICIES_DIR: config
+    command:
+      [
+        "celery",
+        "-A",
+        "drpe.scheduler.celery_app.celery_app",
+        "beat",
+        "-l",
+        "info",
+      ]
+    depends_on:
+      - api
 
   admin:
     build:

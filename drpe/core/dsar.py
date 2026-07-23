@@ -30,6 +30,7 @@ from drpe.ports.dsar_store import DsarRequestStore
 from drpe.ports.policy_store import PolicyStore
 from drpe.ports.record_source import RecordSource
 
+DSAR_REQUESTER = "dsar_workflow"
 
 class DsarRightsError(PermissionError):
     """Raised when policy DSAR rights disallow the requested operation."""
@@ -172,6 +173,7 @@ class DsarService:
                 event_type=AuditEventType.DSAR_ACCESS,
                 policy_id=policy_id,
                 record_id=subject_id,
+                requester=DSAR_REQUESTER,
                 payload={
                     "request_id": request.id,
                     "subject_id": subject_id,
@@ -236,6 +238,7 @@ class DsarService:
                         record_id=rec.record_id,
                         action=Action.DELETE.value,
                         evaluation_id=evaluation.evaluation_id,
+                        requester=DSAR_REQUESTER,
                         payload={
                             "request_id": request.id,
                             "source": "dsar_erasure",
@@ -268,6 +271,7 @@ class DsarService:
                 policy_id=policy_id,
                 record_id=subject_id,
                 action=Action.DELETE.value,
+                requester=DSAR_REQUESTER,
                 payload={
                     "request_id": request.id,
                     "subject_id": subject_id,

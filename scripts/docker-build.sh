@@ -13,6 +13,7 @@
 #   API_IMAGE    API image name (default: drpe-api)
 #   ADMIN_IMAGE  Admin image name (default: drpe-admin)
 #   NO_CACHE=1   Pass --no-cache to docker build / compose
+#   INSTALL_AI=0 Skip privalyse-mask / spaCy (smaller API image; privacy mask 503)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -22,6 +23,7 @@ TAG="${TAG:-latest}"
 API_IMAGE="${API_IMAGE:-drpe-api}"
 ADMIN_IMAGE="${ADMIN_IMAGE:-drpe-admin}"
 TARGET="${1:-both}"
+INSTALL_AI="${INSTALL_AI:-1}"
 
 CACHE_ARGS=()
 if [[ "${NO_CACHE:-}" == "1" ]]; then
@@ -34,8 +36,10 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 build_api() {
-  echo "==> Building ${API_IMAGE}:${TAG}"
-  docker build "${CACHE_ARGS[@]}" \
+  echo "==> Building ${API_IMAGE}:${TAG} (INSTALL_AI=${INSTALL_AI})"
+  docker build \
+    ${CACHE_ARGS[@]+"${CACHE_ARGS[@]}"} \
+    --build-arg "INSTALL_AI=${INSTALL_AI}" \
     -f Dockerfile \
     -t "${API_IMAGE}:${TAG}" \
     .
@@ -43,7 +47,8 @@ build_api() {
 
 build_admin() {
   echo "==> Building ${ADMIN_IMAGE}:${TAG}"
-  docker build "${CACHE_ARGS[@]}" \
+  docker build \
+    ${CACHE_ARGS[@]+"${CACHE_ARGS[@]}"} \
     -f admin/Dockerfile \
     -t "${ADMIN_IMAGE}:${TAG}" \
     ./admin
@@ -55,7 +60,7 @@ build_compose() {
     exit 1
   fi
   echo "==> Building via docker compose"
-  docker compose build "${CACHE_ARGS[@]}"
+  docker compose build ${CACHE_ARGS[@]+"${CACHE_ARGS[@]}"}
 }
 
 case "$TARGET" in

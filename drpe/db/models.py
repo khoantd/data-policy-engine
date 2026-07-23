@@ -93,6 +93,7 @@ class AuditLogRow(Base):
     payload: Mapped[dict[str, Any]] = mapped_column(JsonType, nullable=False, default=dict)
     job_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     evaluation_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    requester: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
 class EnforcementJobRow(Base):

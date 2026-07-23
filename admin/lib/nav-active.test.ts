@@ -7,6 +7,7 @@ const NAV_HREFS = [
   "/policies/import",
   "/dsar",
   "/audit",
+  "/insights",
   "/enforce",
   "/webhooks",
   "/evaluate",

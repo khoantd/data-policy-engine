@@ -43,7 +43,9 @@ def _require_masker(
         raise PrivacyMaskUnavailable("Privacy masking is disabled")
     if not is_privalyse_available():
         raise PrivacyMaskUnavailable(
-            "privalyse-mask is not installed. Run: pip install -e \".[ai]\""
+            "privalyse-mask is not installed. "
+            'Local: pip install -e ".[ai]" && python -m spacy download en_core_web_lg. '
+            "Docker: rebuild the API image with INSTALL_AI=1 (default)."
         )
     try:
         return get_masker(
