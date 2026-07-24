@@ -2752,6 +2752,13 @@
             "type": "array",
             "title": "Text Fields",
             "description": "Metadata field paths scanned with NER when privalyse is available"
+          },
+          "reference_sources": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceSource"
+            },
+            "type": "array",
+            "title": "Reference Sources"
           }
         },
         "type": "object",
@@ -4075,6 +4082,13 @@
           "yaml": {
             "type": "string",
             "title": "Yaml"
+          },
+          "reference_sources": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceSource"
+            },
+            "type": "array",
+            "title": "Reference Sources"
           }
         },
         "type": "object",
@@ -4361,6 +4375,13 @@
                 "type": "null"
               }
             ]
+          },
+          "reference_sources": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceSource"
+            },
+            "type": "array",
+            "title": "Reference Sources"
           }
         },
         "type": "object",
@@ -4875,6 +4896,47 @@
         ],
         "title": "RecordRef",
         "description": "A record reference for enforcement scans."
+      },
+      "ReferenceSource": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Url"
+          },
+          "snippet": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Snippet",
+            "default": ""
+          },
+          "domain": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Domain",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "url"
+        ],
+        "title": "ReferenceSource",
+        "description": "AI web-research citation attached as policy provenance metadata."
       },
       "ScopeExclude": {
         "properties": {

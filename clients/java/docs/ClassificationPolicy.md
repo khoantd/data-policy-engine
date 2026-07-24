@@ -22,6 +22,7 @@ Full classification policy definition.
 |**entities** | [**List&lt;ClassificationEntity&gt;**](ClassificationEntity.md) |  |  |
 |**rules** | [**List&lt;ClassificationRule&gt;**](ClassificationRule.md) |  |  |
 |**textFields** | **List&lt;String&gt;** | Metadata field paths scanned with NER when privalyse is available |  [optional] |
+|**referenceSources** | [**List&lt;ReferenceSource&gt;**](ReferenceSource.md) |  |  [optional] |
 
 
 

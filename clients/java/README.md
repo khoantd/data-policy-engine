@@ -2,7 +2,7 @@
 
 ROS Policy
 - API version: 0.1.0
-  - Build date: 2026-07-22T15:59:15.048403+07:00[Asia/Ho_Chi_Minh]
+  - Build date: 2026-07-24T11:39:51.464132+07:00[Asia/Ho_Chi_Minh]
   - Generator version: 7.14.0
 
 Define, evaluate, and enforce data retention policies
@@ -102,12 +102,13 @@ public class Example {
     String recordId = "recordId_example"; // String | 
     String jobId = "jobId_example"; // String | 
     AuditEventType eventType = AuditEventType.fromValue("evaluation"); // AuditEventType | 
+    String requester = "requester_example"; // String | 
     OffsetDateTime since = OffsetDateTime.now(); // OffsetDateTime | 
     OffsetDateTime until = OffsetDateTime.now(); // OffsetDateTime | 
     Integer limit = 100; // Integer | 
     Integer offset = 0; // Integer | 
     try {
-      List<AuditEntry> result = apiInstance.listAuditLogsApiV1AuditLogsGet(policyId, recordId, jobId, eventType, since, until, limit, offset);
+      List<AuditEntry> result = apiInstance.listAuditLogsApiV1AuditLogsGet(policyId, recordId, jobId, eventType, requester, since, until, limit, offset);
       System.out.println(result);
     } catch (ApiException e) {
       System.err.println("Exception when calling AuditApi#listAuditLogsApiV1AuditLogsGet");
@@ -141,6 +142,10 @@ Class | Method | HTTP request | Description
 *EvaluateApi* | [**evaluateBatchApiV1EvaluateBatchPost**](docs/EvaluateApi.md#evaluateBatchApiV1EvaluateBatchPost) | **POST** /api/v1/evaluate/batch | Evaluate Batch
 *EvaluateApi* | [**evaluateDryRunApiV1EvaluateDryRunPost**](docs/EvaluateApi.md#evaluateDryRunApiV1EvaluateDryRunPost) | **POST** /api/v1/evaluate/dry-run | Evaluate Dry Run
 *EvaluateApi* | [**evaluateOneApiV1EvaluatePost**](docs/EvaluateApi.md#evaluateOneApiV1EvaluatePost) | **POST** /api/v1/evaluate | Evaluate One
+*GraceHoldsApi* | [**cancelGraceHoldApiV1GraceHoldsHoldIdCancelPost**](docs/GraceHoldsApi.md#cancelGraceHoldApiV1GraceHoldsHoldIdCancelPost) | **POST** /api/v1/grace-holds/{hold_id}/cancel | Cancel Grace Hold
+*GraceHoldsApi* | [**forceGraceHoldApiV1GraceHoldsHoldIdForcePost**](docs/GraceHoldsApi.md#forceGraceHoldApiV1GraceHoldsHoldIdForcePost) | **POST** /api/v1/grace-holds/{hold_id}/force | Force Grace Hold
+*GraceHoldsApi* | [**getGraceHoldApiV1GraceHoldsHoldIdGet**](docs/GraceHoldsApi.md#getGraceHoldApiV1GraceHoldsHoldIdGet) | **GET** /api/v1/grace-holds/{hold_id} | Get Grace Hold
+*GraceHoldsApi* | [**listGraceHoldsApiV1GraceHoldsGet**](docs/GraceHoldsApi.md#listGraceHoldsApiV1GraceHoldsGet) | **GET** /api/v1/grace-holds | List Grace Holds
 *HealthApi* | [**healthApiV1HealthGet**](docs/HealthApi.md#healthApiV1HealthGet) | **GET** /api/v1/health | Health
 *HealthApi* | [**readyApiV1HealthReadyGet**](docs/HealthApi.md#readyApiV1HealthReadyGet) | **GET** /api/v1/health/ready | Ready
 *JurisdictionsApi* | [**getOneApiV1JurisdictionsCodeGet**](docs/JurisdictionsApi.md#getOneApiV1JurisdictionsCodeGet) | **GET** /api/v1/jurisdictions/{code} | Get One
@@ -206,6 +211,9 @@ Class | Method | HTTP request | Description
  - [EvaluationResultDetail](docs/EvaluationResultDetail.md)
  - [ExpiresAt](docs/ExpiresAt.md)
  - [FieldCondition](docs/FieldCondition.md)
+ - [GraceHold](docs/GraceHold.md)
+ - [GraceHoldActionRequest](docs/GraceHoldActionRequest.md)
+ - [GraceHoldStatus](docs/GraceHoldStatus.md)
  - [HTTPValidationError](docs/HTTPValidationError.md)
  - [HealthResponse](docs/HealthResponse.md)
  - [ImportRequest](docs/ImportRequest.md)
@@ -231,6 +239,7 @@ Class | Method | HTTP request | Description
  - [PrivacyStatusResponse](docs/PrivacyStatusResponse.md)
  - [ReadyResponse](docs/ReadyResponse.md)
  - [RecordRef](docs/RecordRef.md)
+ - [ReferenceSource](docs/ReferenceSource.md)
  - [ScopeExclude](docs/ScopeExclude.md)
  - [Sensitivity](docs/Sensitivity.md)
  - [UnmaskRequest](docs/UnmaskRequest.md)

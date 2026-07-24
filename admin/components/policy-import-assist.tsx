@@ -762,6 +762,11 @@ export function PolicyImportAssist({
 
       <form action={importAction} className="flex flex-col gap-3">
         <input type="hidden" name="yaml" value={yaml} />
+        <input
+          type="hidden"
+          name="reference_sources"
+          value={JSON.stringify(sources)}
+        />
         {(importState?.error || valState?.error) && (
           <ErrorAlert
             message={(importState?.error || valState?.error)!}

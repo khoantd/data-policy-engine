@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 ## ListAuditLogsApiV1AuditLogsGet
 
-> []AuditEntry ListAuditLogsApiV1AuditLogsGet(ctx).PolicyId(policyId).RecordId(recordId).JobId(jobId).EventType(eventType).Since(since).Until(until).Limit(limit).Offset(offset).Execute()
+> []AuditEntry ListAuditLogsApiV1AuditLogsGet(ctx).PolicyId(policyId).RecordId(recordId).JobId(jobId).EventType(eventType).Requester(requester).Since(since).Until(until).Limit(limit).Offset(offset).Execute()
 
 List Audit Logs
 
@@ -32,6 +32,7 @@ func main() {
 	recordId := "recordId_example" // string |  (optional)
 	jobId := "jobId_example" // string |  (optional)
 	eventType := openapiclient.AuditEventType("evaluation") // AuditEventType |  (optional)
+	requester := "requester_example" // string |  (optional)
 	since := time.Now() // time.Time |  (optional)
 	until := time.Now() // time.Time |  (optional)
 	limit := int32(56) // int32 |  (optional) (default to 100)
@@ -39,7 +40,7 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.AuditAPI.ListAuditLogsApiV1AuditLogsGet(context.Background()).PolicyId(policyId).RecordId(recordId).JobId(jobId).EventType(eventType).Since(since).Until(until).Limit(limit).Offset(offset).Execute()
+	resp, r, err := apiClient.AuditAPI.ListAuditLogsApiV1AuditLogsGet(context.Background()).PolicyId(policyId).RecordId(recordId).JobId(jobId).EventType(eventType).Requester(requester).Since(since).Until(until).Limit(limit).Offset(offset).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `AuditAPI.ListAuditLogsApiV1AuditLogsGet``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -64,6 +65,7 @@ Name | Type | Description  | Notes
  **recordId** | **string** |  | 
  **jobId** | **string** |  | 
  **eventType** | [**AuditEventType**](AuditEventType.md) |  | 
+ **requester** | **string** |  | 
  **since** | **time.Time** |  | 
  **until** | **time.Time** |  | 
  **limit** | **int32** |  | [default to 100]

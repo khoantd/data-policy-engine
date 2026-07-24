@@ -32,6 +32,7 @@ type AuditEntry struct {
 	Payload map[string]interface{} `json:"payload,omitempty"`
 	JobId NullableString `json:"job_id,omitempty"`
 	EvaluationId NullableString `json:"evaluation_id,omitempty"`
+	Requester NullableString `json:"requester,omitempty"`
 }
 
 type _AuditEntry AuditEntry
@@ -412,6 +413,48 @@ func (o *AuditEntry) UnsetEvaluationId() {
 	o.EvaluationId.Unset()
 }
 
+// GetRequester returns the Requester field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *AuditEntry) GetRequester() string {
+	if o == nil || IsNil(o.Requester.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.Requester.Get()
+}
+
+// GetRequesterOk returns a tuple with the Requester field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AuditEntry) GetRequesterOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Requester.Get(), o.Requester.IsSet()
+}
+
+// HasRequester returns a boolean if a field has been set.
+func (o *AuditEntry) HasRequester() bool {
+	if o != nil && o.Requester.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetRequester gets a reference to the given NullableString and assigns it to the Requester field.
+func (o *AuditEntry) SetRequester(v string) {
+	o.Requester.Set(&v)
+}
+// SetRequesterNil sets the value for Requester to be an explicit nil
+func (o *AuditEntry) SetRequesterNil() {
+	o.Requester.Set(nil)
+}
+
+// UnsetRequester ensures that no value is present for Requester, not even an explicit nil
+func (o *AuditEntry) UnsetRequester() {
+	o.Requester.Unset()
+}
+
 func (o AuditEntry) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -445,6 +488,9 @@ func (o AuditEntry) ToMap() (map[string]interface{}, error) {
 	}
 	if o.EvaluationId.IsSet() {
 		toSerialize["evaluation_id"] = o.EvaluationId.Get()
+	}
+	if o.Requester.IsSet() {
+		toSerialize["requester"] = o.Requester.Get()
 	}
 	return toSerialize, nil
 }

@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from drpe.models.classification_policy import ClassificationPolicy, ClassificationRequest
 from drpe.models.enums import PolicyKind, PolicyStatus
-from drpe.models.policy import EvaluationRequest, Policy
+from drpe.models.policy import EvaluationRequest, Policy, ReferenceSource
 from drpe.models.policy_version import (
     PolicyDiffChange,
     PolicyDiffRequest,
@@ -70,6 +70,7 @@ class BatchClassificationRequest(BaseModel):
 
 class ImportRequest(BaseModel):
     yaml: str
+    reference_sources: list[ReferenceSource] = Field(default_factory=list)
 
 
 class ImportResponse(BaseModel):

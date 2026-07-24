@@ -53,7 +53,7 @@ import com.drpe.client.JSON;
 /**
  * Request to classify a record against classification policies.
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-22T15:59:15.048403+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-24T11:39:51.464132+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class ClassificationRequest {
   public static final String SERIALIZED_NAME_DATA_TYPE = "data_type";
   @SerializedName(SERIALIZED_NAME_DATA_TYPE)

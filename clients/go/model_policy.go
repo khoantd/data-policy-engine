@@ -36,6 +36,7 @@ type Policy struct {
 	Rules []PolicyRule `json:"rules"`
 	Dsar NullableDsarConfig `json:"dsar,omitempty"`
 	Audit NullableAuditConfig `json:"audit,omitempty"`
+	ReferenceSources []ReferenceSource `json:"reference_sources,omitempty"`
 }
 
 type _Policy Policy
@@ -556,6 +557,38 @@ func (o *Policy) UnsetAudit() {
 	o.Audit.Unset()
 }
 
+// GetReferenceSources returns the ReferenceSources field value if set, zero value otherwise.
+func (o *Policy) GetReferenceSources() []ReferenceSource {
+	if o == nil || IsNil(o.ReferenceSources) {
+		var ret []ReferenceSource
+		return ret
+	}
+	return o.ReferenceSources
+}
+
+// GetReferenceSourcesOk returns a tuple with the ReferenceSources field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Policy) GetReferenceSourcesOk() ([]ReferenceSource, bool) {
+	if o == nil || IsNil(o.ReferenceSources) {
+		return nil, false
+	}
+	return o.ReferenceSources, true
+}
+
+// HasReferenceSources returns a boolean if a field has been set.
+func (o *Policy) HasReferenceSources() bool {
+	if o != nil && !IsNil(o.ReferenceSources) {
+		return true
+	}
+
+	return false
+}
+
+// SetReferenceSources gets a reference to the given []ReferenceSource and assigns it to the ReferenceSources field.
+func (o *Policy) SetReferenceSources(v []ReferenceSource) {
+	o.ReferenceSources = v
+}
+
 func (o Policy) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -600,6 +633,9 @@ func (o Policy) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Audit.IsSet() {
 		toSerialize["audit"] = o.Audit.Get()
+	}
+	if !IsNil(o.ReferenceSources) {
+		toSerialize["reference_sources"] = o.ReferenceSources
 	}
 	return toSerialize, nil
 }

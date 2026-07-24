@@ -23,10 +23,31 @@ from drpe.core.policy_diff import diff_policies
 from drpe.dsl.parser import PolicyParseError, parse_yaml
 from drpe.models.classification_policy import ClassificationDocument, ClassificationPolicy
 from drpe.models.enums import PolicyKind
-from drpe.models.policy import Policy, PolicyDocument
+from drpe.models.policy import Policy, PolicyDocument, ReferenceSource
 from drpe.models.stored_policy import StoredPolicy, as_retention, is_classification_policy, policy_kind_of
 
 router = APIRouter(prefix="/policies", tags=["policies"])
+
+
+def _preserve_reference_sources(
+    policy: StoredPolicy, existing: StoredPolicy | None
+) -> StoredPolicy:
+    """Keep AI provenance when YAML rebuild omits reference_sources."""
+    if policy.reference_sources:
+        return policy
+    if existing is None or not existing.reference_sources:
+        return policy
+    return policy.model_copy(
+        update={"reference_sources": list(existing.reference_sources)}
+    )
+
+
+def _attach_import_reference_sources(
+    policy: StoredPolicy, sources: list[ReferenceSource]
+) -> StoredPolicy:
+    if not sources:
+        return policy
+    return policy.model_copy(update={"reference_sources": list(sources)})
 
 
 def _policy_from_body(body: PolicyCreateRequest | ValidateRequest) -> StoredPolicy:
@@ -127,6 +148,10 @@ def import_policies(
         policy = parse_yaml(body.yaml)
     except PolicyParseError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if body.reference_sources:
+        policy = _attach_import_reference_sources(policy, body.reference_sources)
+    else:
+        policy = _preserve_reference_sources(policy, store.get(policy.id))
     stored = store.upsert(policy)
     _register_policy(stored, engine, classifier)
     return ImportResponse(imported=[stored.id], count=1)
@@ -190,6 +215,7 @@ def update_policy(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if policy.id != policy_id:
         raise HTTPException(status_code=400, detail="policy id mismatch")
+    policy = _preserve_reference_sources(policy, existing)
     policy = policy.model_copy(update={"version": existing.version})
     stored = store.upsert(policy)
     _register_policy(stored, engine, classifier)

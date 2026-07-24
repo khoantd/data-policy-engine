@@ -25,6 +25,7 @@ export interface ListAuditLogsApiV1AuditLogsGetRequest {
     recordId?: string | null;
     jobId?: string | null;
     eventType?: AuditEventType | null;
+    requester?: string | null;
     since?: string | null;
     until?: string | null;
     limit?: number;
@@ -56,6 +57,10 @@ export class AuditApi extends runtime.BaseAPI {
 
         if (requestParameters['eventType'] != null) {
             queryParameters['event_type'] = requestParameters['eventType'];
+        }
+
+        if (requestParameters['requester'] != null) {
+            queryParameters['requester'] = requestParameters['requester'];
         }
 
         if (requestParameters['since'] != null) {

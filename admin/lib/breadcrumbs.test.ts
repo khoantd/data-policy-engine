@@ -33,4 +33,12 @@ describe("buildBreadcrumbs", () => {
       { label: "Import" },
     ]);
   });
+
+  it("builds structure graph under policies", () => {
+    expect(buildBreadcrumbs("/policies/graph")).toEqual([
+      { label: "ROS Policy", href: "/" },
+      { label: "Policies", href: "/policies" },
+      { label: "Structure graph" },
+    ]);
+  });
 });

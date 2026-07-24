@@ -39,6 +39,9 @@ class PolicyRow(Base):
     text_fields: Mapped[list[Any] | None] = mapped_column(JsonType, nullable=True)
     dsar: Mapped[dict[str, Any] | None] = mapped_column(JsonType, nullable=True)
     audit: Mapped[dict[str, Any] | None] = mapped_column(JsonType, nullable=True)
+    reference_sources: Mapped[list[Any]] = mapped_column(
+        JsonType, nullable=False, default=list
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

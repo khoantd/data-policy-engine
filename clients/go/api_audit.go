@@ -30,6 +30,7 @@ type ApiListAuditLogsApiV1AuditLogsGetRequest struct {
 	recordId *string
 	jobId *string
 	eventType *AuditEventType
+	requester *string
 	since *time.Time
 	until *time.Time
 	limit *int32
@@ -53,6 +54,11 @@ func (r ApiListAuditLogsApiV1AuditLogsGetRequest) JobId(jobId string) ApiListAud
 
 func (r ApiListAuditLogsApiV1AuditLogsGetRequest) EventType(eventType AuditEventType) ApiListAuditLogsApiV1AuditLogsGetRequest {
 	r.eventType = &eventType
+	return r
+}
+
+func (r ApiListAuditLogsApiV1AuditLogsGetRequest) Requester(requester string) ApiListAuditLogsApiV1AuditLogsGetRequest {
+	r.requester = &requester
 	return r
 }
 
@@ -125,6 +131,9 @@ func (a *AuditAPIService) ListAuditLogsApiV1AuditLogsGetExecute(r ApiListAuditLo
 	}
 	if r.eventType != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "event_type", r.eventType, "form", "")
+	}
+	if r.requester != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "requester", r.requester, "form", "")
 	}
 	if r.since != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "since", r.since, "form", "")

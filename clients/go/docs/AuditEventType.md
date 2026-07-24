@@ -17,6 +17,8 @@
 
 * `DSAR_ERASURE` (value: `"dsar_erasure"`)
 
+* `GRACE_CANCELLED` (value: `"grace_cancelled"`)
+
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -50,15 +50,17 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **API Docker alignment** — `INSTALL_AI` build-arg; Compose `worker`/`beat` via `--profile celery`; README + `build-backend.sh` VPS recipes document Redis+worker; smoke OK (`celery`/`alembic`/`006`/health)
 - **Admin load UX** — `(console)/loading.tsx` + `PageSkeleton`; Overview/Insights Suspense streaming; Overview single audit fetch (limit 250) + lazy Recharts; Evaluate/Classify list+lazy `GET /api/policies/[id]` + parallel privacy probe; policy detail `Promise.all` get+versions
 - **Admin list pagination** — shared `admin/lib/pagination.ts` + `PaginationBar` / `PaginationControls`; `?page=` on Policies (client slice), Audit/DSAR/Enforce/Grace holds/Webhooks (API `limit`/`offset` over-fetch), Observability traces (client slice); page size 25
+- **AI reference sources persistence** — Import posts Tavily `reference_sources` with YAML; stored on Policy/ClassificationPolicy + DB column `008`; detail page shows saved `AiSourceReferences` (collapsed); YAML editor strips provenance
+- **Policy structure network graph** — Admin `/policies/graph` (fleet) + Structure panel on policy detail via `reagraph`; shared `buildPolicyStructureGraph` + adjacency a11y; Insights remains ReactFlow
 
 ## In progress
 
 - _(none)_
-- **Blockers:** Supabase/local DB may need `alembic upgrade head` (through `006_audit_requester`) where schema is behind
+- **Blockers:** Supabase/local DB may need `alembic upgrade head` (through `008_policy_reference_sources`) where schema is behind
 
 ## Next
 
-1. Apply `alembic upgrade head` anywhere the DB schema is not yet at 006+
+1. Apply `alembic upgrade head` anywhere the DB schema is not yet at 008+
 2. Set `DRPE_API_URL` on Vercel project `royal-platform/ros-policy-admin` (Production/Preview), then redeploy
 3. When Redis/Celery broker is set: `docker compose --profile celery up` (or separate worker/beat containers); else `DRPE_CELERY_EAGER=true`
 4. Optional: AI assist on policy detail editor (same BFF)
@@ -68,6 +70,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 8. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
 9. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
 10. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
+11. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
 
 ## Decisions
 
@@ -86,6 +89,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - Policy activate = rollback-as-new-version (never rewrite `policy_versions` history)
 - Admin UI: Next.js App Router BFF in `admin/` (not static html-tailwind); API key in httpOnly cookie
 - Policy Import AI: Admin BFF → remote LiteLLM (OpenAI-compatible); FastAPI stays validate/import only; never auto-import AI drafts
+- AI reference sources: provenance metadata on the policy (not YAML DSL / not `scope.sources`); HTTPS-only URLs; preserved across YAML re-saves
 - Product name: **ROS Policy** (display); technical package/env remain `drpe` / `DRPE_*` unless a breaking rebrand is desired
 - Admin load UX: prefer `loading.tsx` + Suspense over `revalidate` for ops freshness; playgrounds use list metadata + lazy full policy
 - List pagination: URL `?page=` (1-based), default 25 rows; API lists over-fetch `pageSize+1` for `hasNext` (no total in API); Policies/Observability slice client-side after filter
@@ -105,6 +109,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - Admin AI assist: set `LITELLM_BASE_URL`, `LITELLM_API_KEY`, `LITELLM_MODEL` in `admin/.env.local`; import still works without them
 - Admin unit tests: `cd admin && npm test` (vitest)
 - OpenAPI clients: `npm run openapi` from repo root (venv active); regenerates `openapi/openapi.json` + `clients/*` + `admin/lib/generated/schema.d.ts`
+- AI references: require migration `008_policy_reference_sources`; Import body optional `reference_sources`; detail Provenance panel only when non-empty
 
 ## Pointers
 
@@ -116,4 +121,6 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 | Key files | `drpe/api/app.py` (CORS), `admin/lib/drpe-client.ts`, `admin/middleware.ts`, `openapi/openapi.json`, `clients/` |
 | Load UX | `admin/app/(console)/loading.tsx`, `admin/components/ui/page-skeleton.tsx`, `admin/lib/use-lazy-policy.ts` |
 | Pagination | `admin/lib/pagination.ts`, `admin/components/ui/pagination.tsx` |
+| AI references | `drpe/models/policy.py` (`ReferenceSource`), `008_policy_reference_sources`, `admin/components/ai-source-references.tsx`, `admin/lib/reference-sources.ts` |
+| Policy structure graph | `admin/lib/policy-structure-graph.ts`, `admin/components/policy-structure-graph.tsx`, `/policies/graph`, design `admin/design-system/pages/policy-graph.md` |
 | Tests | `python -m pytest tests/ -v` |

@@ -41,7 +41,9 @@ public enum AuditEventType {
   
   DSAR_ACCESS("dsar_access"),
   
-  DSAR_ERASURE("dsar_erasure");
+  DSAR_ERASURE("dsar_erasure"),
+  
+  GRACE_CANCELLED("grace_cancelled");
 
   private String value;
 

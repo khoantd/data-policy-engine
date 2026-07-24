@@ -116,10 +116,12 @@ export function Panel({
   children,
   className,
   title,
+  actions,
 }: {
   children: React.ReactNode;
   className?: string;
   title?: string;
+  actions?: React.ReactNode;
 }) {
   return (
     <section
@@ -128,8 +130,15 @@ export function Panel({
         className,
       )}
     >
-      {title && (
-        <h2 className="mb-3 text-sm font-medium text-foreground">{title}</h2>
+      {(title || actions) && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          {title ? (
+            <h2 className="text-sm font-medium text-foreground">{title}</h2>
+          ) : (
+            <span />
+          )}
+          {actions}
+        </div>
       )}
       {children}
     </section>

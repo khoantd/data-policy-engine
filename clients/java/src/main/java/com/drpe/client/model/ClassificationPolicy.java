@@ -21,6 +21,7 @@ import com.drpe.client.model.ExpiresAt;
 import com.drpe.client.model.PolicyKind;
 import com.drpe.client.model.PolicyScope;
 import com.drpe.client.model.PolicyStatus;
+import com.drpe.client.model.ReferenceSource;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
@@ -58,7 +59,7 @@ import com.drpe.client.JSON;
 /**
  * Full classification policy definition.
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-22T15:59:15.048403+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-24T11:39:51.464132+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class ClassificationPolicy {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
@@ -129,6 +130,11 @@ public class ClassificationPolicy {
   @SerializedName(SERIALIZED_NAME_TEXT_FIELDS)
   @javax.annotation.Nullable
   private List<String> textFields = new ArrayList<>();
+
+  public static final String SERIALIZED_NAME_REFERENCE_SOURCES = "reference_sources";
+  @SerializedName(SERIALIZED_NAME_REFERENCE_SOURCES)
+  @javax.annotation.Nullable
+  private List<ReferenceSource> referenceSources = new ArrayList<>();
 
   public ClassificationPolicy() {
   }
@@ -431,6 +437,33 @@ public class ClassificationPolicy {
   }
 
 
+  public ClassificationPolicy referenceSources(@javax.annotation.Nullable List<ReferenceSource> referenceSources) {
+    this.referenceSources = referenceSources;
+    return this;
+  }
+
+  public ClassificationPolicy addReferenceSourcesItem(ReferenceSource referenceSourcesItem) {
+    if (this.referenceSources == null) {
+      this.referenceSources = new ArrayList<>();
+    }
+    this.referenceSources.add(referenceSourcesItem);
+    return this;
+  }
+
+  /**
+   * Get referenceSources
+   * @return referenceSources
+   */
+  @javax.annotation.Nullable
+  public List<ReferenceSource> getReferenceSources() {
+    return referenceSources;
+  }
+
+  public void setReferenceSources(@javax.annotation.Nullable List<ReferenceSource> referenceSources) {
+    this.referenceSources = referenceSources;
+  }
+
+
 
   @Override
   public boolean equals(Object o) {
@@ -454,7 +487,8 @@ public class ClassificationPolicy {
         Objects.equals(this.scope, classificationPolicy.scope) &&
         Objects.equals(this.entities, classificationPolicy.entities) &&
         Objects.equals(this.rules, classificationPolicy.rules) &&
-        Objects.equals(this.textFields, classificationPolicy.textFields);
+        Objects.equals(this.textFields, classificationPolicy.textFields) &&
+        Objects.equals(this.referenceSources, classificationPolicy.referenceSources);
   }
 
   private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
@@ -463,7 +497,7 @@ public class ClassificationPolicy {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, version, status, jurisdiction, policyKind, owner, effectiveFrom, expiresAt, tags, scope, entities, rules, textFields);
+    return Objects.hash(id, name, version, status, jurisdiction, policyKind, owner, effectiveFrom, expiresAt, tags, scope, entities, rules, textFields, referenceSources);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -491,6 +525,7 @@ public class ClassificationPolicy {
     sb.append("    entities: ").append(toIndentedString(entities)).append("\n");
     sb.append("    rules: ").append(toIndentedString(rules)).append("\n");
     sb.append("    textFields: ").append(toIndentedString(textFields)).append("\n");
+    sb.append("    referenceSources: ").append(toIndentedString(referenceSources)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -512,7 +547,7 @@ public class ClassificationPolicy {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "version", "status", "jurisdiction", "policy_kind", "owner", "effective_from", "expires_at", "tags", "scope", "entities", "rules", "text_fields"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "version", "status", "jurisdiction", "policy_kind", "owner", "effective_from", "expires_at", "tags", "scope", "entities", "rules", "text_fields", "reference_sources"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "jurisdiction", "entities", "rules"));
@@ -605,6 +640,20 @@ public class ClassificationPolicy {
       // ensure the optional json data is an array if present
       if (jsonObj.get("text_fields") != null && !jsonObj.get("text_fields").isJsonNull() && !jsonObj.get("text_fields").isJsonArray()) {
         throw new IllegalArgumentException(String.format("Expected the field `text_fields` to be an array in the JSON string but got `%s`", jsonObj.get("text_fields").toString()));
+      }
+      if (jsonObj.get("reference_sources") != null && !jsonObj.get("reference_sources").isJsonNull()) {
+        JsonArray jsonArrayreferenceSources = jsonObj.getAsJsonArray("reference_sources");
+        if (jsonArrayreferenceSources != null) {
+          // ensure the json data is an array
+          if (!jsonObj.get("reference_sources").isJsonArray()) {
+            throw new IllegalArgumentException(String.format("Expected the field `reference_sources` to be an array in the JSON string but got `%s`", jsonObj.get("reference_sources").toString()));
+          }
+
+          // validate the optional field `reference_sources` (array)
+          for (int i = 0; i < jsonArrayreferenceSources.size(); i++) {
+            ReferenceSource.validateJsonElement(jsonArrayreferenceSources.get(i));
+          };
+        }
       }
   }
 

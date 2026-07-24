@@ -27,6 +27,7 @@ from drpe.models.policy import (
     Policy,
     PolicyDocument,
     PolicyRule,
+    ReferenceSource,
 )
 from drpe.models.policy_version import (
     PolicyDiffChange,
@@ -77,6 +78,7 @@ __all__ = [
     "PolicyStatus",
     "PolicyVersionInfo",
     "RecordRef",
+    "ReferenceSource",
     "WebhookCreateRequest",
     "WebhookCreateResponse",
     "WebhookRegistration",

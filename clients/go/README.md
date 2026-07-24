@@ -92,6 +92,10 @@ Class | Method | HTTP request | Description
 *EvaluateAPI* | [**EvaluateBatchApiV1EvaluateBatchPost**](docs/EvaluateAPI.md#evaluatebatchapiv1evaluatebatchpost) | **Post** /api/v1/evaluate/batch | Evaluate Batch
 *EvaluateAPI* | [**EvaluateDryRunApiV1EvaluateDryRunPost**](docs/EvaluateAPI.md#evaluatedryrunapiv1evaluatedryrunpost) | **Post** /api/v1/evaluate/dry-run | Evaluate Dry Run
 *EvaluateAPI* | [**EvaluateOneApiV1EvaluatePost**](docs/EvaluateAPI.md#evaluateoneapiv1evaluatepost) | **Post** /api/v1/evaluate | Evaluate One
+*GraceHoldsAPI* | [**CancelGraceHoldApiV1GraceHoldsHoldIdCancelPost**](docs/GraceHoldsAPI.md#cancelgraceholdapiv1graceholdsholdidcancelpost) | **Post** /api/v1/grace-holds/{hold_id}/cancel | Cancel Grace Hold
+*GraceHoldsAPI* | [**ForceGraceHoldApiV1GraceHoldsHoldIdForcePost**](docs/GraceHoldsAPI.md#forcegraceholdapiv1graceholdsholdidforcepost) | **Post** /api/v1/grace-holds/{hold_id}/force | Force Grace Hold
+*GraceHoldsAPI* | [**GetGraceHoldApiV1GraceHoldsHoldIdGet**](docs/GraceHoldsAPI.md#getgraceholdapiv1graceholdsholdidget) | **Get** /api/v1/grace-holds/{hold_id} | Get Grace Hold
+*GraceHoldsAPI* | [**ListGraceHoldsApiV1GraceHoldsGet**](docs/GraceHoldsAPI.md#listgraceholdsapiv1graceholdsget) | **Get** /api/v1/grace-holds | List Grace Holds
 *HealthAPI* | [**HealthApiV1HealthGet**](docs/HealthAPI.md#healthapiv1healthget) | **Get** /api/v1/health | Health
 *HealthAPI* | [**ReadyApiV1HealthReadyGet**](docs/HealthAPI.md#readyapiv1healthreadyget) | **Get** /api/v1/health/ready | Ready
 *JurisdictionsAPI* | [**GetOneApiV1JurisdictionsCodeGet**](docs/JurisdictionsAPI.md#getoneapiv1jurisdictionscodeget) | **Get** /api/v1/jurisdictions/{code} | Get One
@@ -157,6 +161,9 @@ Class | Method | HTTP request | Description
  - [EvaluationResultDetail](docs/EvaluationResultDetail.md)
  - [ExpiresAt](docs/ExpiresAt.md)
  - [FieldCondition](docs/FieldCondition.md)
+ - [GraceHold](docs/GraceHold.md)
+ - [GraceHoldActionRequest](docs/GraceHoldActionRequest.md)
+ - [GraceHoldStatus](docs/GraceHoldStatus.md)
  - [HTTPValidationError](docs/HTTPValidationError.md)
  - [HealthResponse](docs/HealthResponse.md)
  - [ImportRequest](docs/ImportRequest.md)
@@ -182,6 +189,7 @@ Class | Method | HTTP request | Description
  - [PrivacyStatusResponse](docs/PrivacyStatusResponse.md)
  - [ReadyResponse](docs/ReadyResponse.md)
  - [RecordRef](docs/RecordRef.md)
+ - [ReferenceSource](docs/ReferenceSource.md)
  - [ScopeExclude](docs/ScopeExclude.md)
  - [Sensitivity](docs/Sensitivity.md)
  - [UnmaskRequest](docs/UnmaskRequest.md)

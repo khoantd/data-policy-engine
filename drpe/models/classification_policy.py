@@ -15,7 +15,7 @@ from drpe.models.enums import (
     PolicyStatus,
     Sensitivity,
 )
-from drpe.models.policy import ConditionGroup, PolicyScope
+from drpe.models.policy import ConditionGroup, PolicyScope, ReferenceSource
 
 
 class EntityDetection(BaseModel):
@@ -69,6 +69,7 @@ class ClassificationPolicy(BaseModel):
         default_factory=list,
         description="Metadata field paths scanned with NER when privalyse is available",
     )
+    reference_sources: list[ReferenceSource] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_entities_and_rules(self) -> ClassificationPolicy:

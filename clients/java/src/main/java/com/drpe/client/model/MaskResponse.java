@@ -52,7 +52,7 @@ import com.drpe.client.JSON;
 /**
  * MaskResponse
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-22T15:59:15.048403+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-24T11:39:51.464132+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class MaskResponse {
   public static final String SERIALIZED_NAME_MASKED_TEXT = "masked_text";
   @SerializedName(SERIALIZED_NAME_MASKED_TEXT)

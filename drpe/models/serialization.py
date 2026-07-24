@@ -47,12 +47,14 @@ def stored_policy_to_columns(policy: StoredPolicy) -> dict[str, Any]:
         "audit": data.get("audit") if isinstance(policy, Policy) else None,
         "entities": data.get("entities") if isinstance(policy, ClassificationPolicy) else None,
         "text_fields": data.get("text_fields") if isinstance(policy, ClassificationPolicy) else None,
+        "reference_sources": data.get("reference_sources") or [],
     }
     return base
 
 
 def row_to_stored_policy(row: Any) -> StoredPolicy:
     kind = getattr(row, "policy_kind", PolicyKind.RETENTION.value)
+    reference_sources = getattr(row, "reference_sources", None) or []
     if kind == PolicyKind.CLASSIFICATION.value:
         return ClassificationPolicy.model_validate(
             {
@@ -69,6 +71,7 @@ def row_to_stored_policy(row: Any) -> StoredPolicy:
                 "entities": row.entities or [],
                 "rules": row.rules,
                 "text_fields": getattr(row, "text_fields", None) or [],
+                "reference_sources": reference_sources,
             }
         )
     return Policy.model_validate(
@@ -88,6 +91,7 @@ def row_to_stored_policy(row: Any) -> StoredPolicy:
             "rules": row.rules,
             "dsar": row.dsar,
             "audit": row.audit,
+            "reference_sources": reference_sources,
         }
     )
 

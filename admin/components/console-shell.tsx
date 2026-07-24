@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   LineChart,
   Menu,
+  Network,
   ScanSearch,
   Shield,
   Webhook,
@@ -43,6 +44,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Policies",
     items: [
       { href: "/policies", label: "All policies", icon: Shield },
+      { href: "/policies/graph", label: "Structure graph", icon: Network },
       { href: "/policies/import", label: "Import", icon: FileUp },
     ],
   },

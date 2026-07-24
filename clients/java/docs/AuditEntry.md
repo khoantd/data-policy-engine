@@ -18,6 +18,7 @@ Immutable audit log entry.
 |**payload** | **Map&lt;String, Object&gt;** |  |  [optional] |
 |**jobId** | **String** |  |  [optional] |
 |**evaluationId** | **String** |  |  [optional] |
+|**requester** | **String** |  |  [optional] |
 
 
 

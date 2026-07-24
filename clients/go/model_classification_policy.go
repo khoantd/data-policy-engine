@@ -36,6 +36,7 @@ type ClassificationPolicy struct {
 	Rules []ClassificationRule `json:"rules"`
 	// Metadata field paths scanned with NER when privalyse is available
 	TextFields []string `json:"text_fields,omitempty"`
+	ReferenceSources []ReferenceSource `json:"reference_sources,omitempty"`
 }
 
 type _ClassificationPolicy ClassificationPolicy
@@ -504,6 +505,38 @@ func (o *ClassificationPolicy) SetTextFields(v []string) {
 	o.TextFields = v
 }
 
+// GetReferenceSources returns the ReferenceSources field value if set, zero value otherwise.
+func (o *ClassificationPolicy) GetReferenceSources() []ReferenceSource {
+	if o == nil || IsNil(o.ReferenceSources) {
+		var ret []ReferenceSource
+		return ret
+	}
+	return o.ReferenceSources
+}
+
+// GetReferenceSourcesOk returns a tuple with the ReferenceSources field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ClassificationPolicy) GetReferenceSourcesOk() ([]ReferenceSource, bool) {
+	if o == nil || IsNil(o.ReferenceSources) {
+		return nil, false
+	}
+	return o.ReferenceSources, true
+}
+
+// HasReferenceSources returns a boolean if a field has been set.
+func (o *ClassificationPolicy) HasReferenceSources() bool {
+	if o != nil && !IsNil(o.ReferenceSources) {
+		return true
+	}
+
+	return false
+}
+
+// SetReferenceSources gets a reference to the given []ReferenceSource and assigns it to the ReferenceSources field.
+func (o *ClassificationPolicy) SetReferenceSources(v []ReferenceSource) {
+	o.ReferenceSources = v
+}
+
 func (o ClassificationPolicy) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -545,6 +578,9 @@ func (o ClassificationPolicy) ToMap() (map[string]interface{}, error) {
 	toSerialize["rules"] = o.Rules
 	if !IsNil(o.TextFields) {
 		toSerialize["text_fields"] = o.TextFields
+	}
+	if !IsNil(o.ReferenceSources) {
+		toSerialize["reference_sources"] = o.ReferenceSources
 	}
 	return toSerialize, nil
 }

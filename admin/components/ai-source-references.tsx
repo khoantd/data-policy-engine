@@ -7,21 +7,50 @@ import { cn } from "@/lib/utils";
 
 type AiSourceReferencesProps = {
   sources: WebSearchSource[];
-  webSearchConfigured: boolean;
-  webSearchEnabled: boolean;
-  searching: boolean;
   className?: string;
-};
+} & (
+  | {
+      mode?: "compose";
+      webSearchConfigured: boolean;
+      webSearchEnabled: boolean;
+      searching: boolean;
+      defaultOpen?: boolean;
+    }
+  | {
+      mode: "saved";
+      webSearchConfigured?: never;
+      webSearchEnabled?: never;
+      searching?: never;
+      defaultOpen?: boolean;
+    }
+);
 
-export function AiSourceReferences({
-  sources,
-  webSearchConfigured,
-  webSearchEnabled,
-  searching,
-  className,
-}: AiSourceReferencesProps) {
+export function AiSourceReferences(props: AiSourceReferencesProps) {
+  const {
+    sources,
+    className,
+    mode = "compose",
+    defaultOpen,
+  } = props;
   const panelId = useId();
-  const [open, setOpen] = useState(true);
+  const initiallyOpen = defaultOpen ?? mode === "compose";
+  const [open, setOpen] = useState(initiallyOpen);
+
+  if (mode === "saved") {
+    if (sources.length === 0) return null;
+    return (
+      <ReferencesPanel
+        panelId={panelId}
+        open={open}
+        onToggle={() => setOpen((prev) => !prev)}
+        sources={sources}
+        title={`AI research references (${sources.length})`}
+        className={className}
+      />
+    );
+  }
+
+  const { webSearchConfigured, webSearchEnabled, searching } = props;
 
   if (!webSearchConfigured) {
     return (
@@ -71,6 +100,33 @@ export function AiSourceReferences({
   }
 
   return (
+    <ReferencesPanel
+      panelId={panelId}
+      open={open}
+      onToggle={() => setOpen((prev) => !prev)}
+      sources={sources}
+      title={`References (${sources.length})`}
+      className={className}
+    />
+  );
+}
+
+function ReferencesPanel({
+  panelId,
+  open,
+  onToggle,
+  sources,
+  title,
+  className,
+}: {
+  panelId: string;
+  open: boolean;
+  onToggle: () => void;
+  sources: WebSearchSource[];
+  title: string;
+  className?: string;
+}) {
+  return (
     <div
       className={cn(
         "rounded-md border border-border bg-muted/30 motion-safe:transition-shadow",
@@ -82,14 +138,14 @@ export function AiSourceReferences({
         className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={onToggle}
       >
         {open ? (
           <ChevronDown className="size-3.5 shrink-0" aria-hidden />
         ) : (
           <ChevronRight className="size-3.5 shrink-0" aria-hidden />
         )}
-        References ({sources.length})
+        {title}
       </button>
       {open && (
         <ul

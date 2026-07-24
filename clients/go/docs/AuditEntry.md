@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **Payload** | Pointer to **map[string]interface{}** |  | [optional] 
 **JobId** | Pointer to **NullableString** |  | [optional] 
 **EvaluationId** | Pointer to **NullableString** |  | [optional] 
+**Requester** | Pointer to **NullableString** |  | [optional] 
 
 ## Methods
 
@@ -329,6 +330,41 @@ HasEvaluationId returns a boolean if a field has been set.
 `func (o *AuditEntry) UnsetEvaluationId()`
 
 UnsetEvaluationId ensures that no value is present for EvaluationId, not even an explicit nil
+### GetRequester
+
+`func (o *AuditEntry) GetRequester() string`
+
+GetRequester returns the Requester field if non-nil, zero value otherwise.
+
+### GetRequesterOk
+
+`func (o *AuditEntry) GetRequesterOk() (*string, bool)`
+
+GetRequesterOk returns a tuple with the Requester field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRequester
+
+`func (o *AuditEntry) SetRequester(v string)`
+
+SetRequester sets Requester field to given value.
+
+### HasRequester
+
+`func (o *AuditEntry) HasRequester() bool`
+
+HasRequester returns a boolean if a field has been set.
+
+### SetRequesterNil
+
+`func (o *AuditEntry) SetRequesterNil(b bool)`
+
+ SetRequesterNil sets the value for Requester to be an explicit nil
+
+### UnsetRequester
+`func (o *AuditEntry) UnsetRequester()`
+
+UnsetRequester ensures that no value is present for Requester, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

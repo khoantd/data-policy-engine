@@ -7,6 +7,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "": "Overview",
   policies: "Policies",
   import: "Import",
+  graph: "Structure graph",
   dsar: "DSAR",
   audit: "Audit",
   insights: "Insights",

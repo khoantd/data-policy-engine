@@ -81,6 +81,7 @@ public class AuditApi {
      * @param recordId  (optional)
      * @param jobId  (optional)
      * @param eventType  (optional)
+     * @param requester  (optional)
      * @param since  (optional)
      * @param until  (optional)
      * @param limit  (optional, default to 100)
@@ -96,7 +97,7 @@ public class AuditApi {
         <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listAuditLogsApiV1AuditLogsGetCall(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listAuditLogsApiV1AuditLogsGetCall(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable String requester, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -137,6 +138,10 @@ public class AuditApi {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("event_type", eventType));
         }
 
+        if (requester != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("requester", requester));
+        }
+
         if (since != null) {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("since", since));
         }
@@ -173,8 +178,8 @@ public class AuditApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listAuditLogsApiV1AuditLogsGetValidateBeforeCall(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset, final ApiCallback _callback) throws ApiException {
-        return listAuditLogsApiV1AuditLogsGetCall(policyId, recordId, jobId, eventType, since, until, limit, offset, _callback);
+    private okhttp3.Call listAuditLogsApiV1AuditLogsGetValidateBeforeCall(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable String requester, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset, final ApiCallback _callback) throws ApiException {
+        return listAuditLogsApiV1AuditLogsGetCall(policyId, recordId, jobId, eventType, requester, since, until, limit, offset, _callback);
 
     }
 
@@ -185,6 +190,7 @@ public class AuditApi {
      * @param recordId  (optional)
      * @param jobId  (optional)
      * @param eventType  (optional)
+     * @param requester  (optional)
      * @param since  (optional)
      * @param until  (optional)
      * @param limit  (optional, default to 100)
@@ -199,8 +205,8 @@ public class AuditApi {
         <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
      </table>
      */
-    public List<AuditEntry> listAuditLogsApiV1AuditLogsGet(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset) throws ApiException {
-        ApiResponse<List<AuditEntry>> localVarResp = listAuditLogsApiV1AuditLogsGetWithHttpInfo(policyId, recordId, jobId, eventType, since, until, limit, offset);
+    public List<AuditEntry> listAuditLogsApiV1AuditLogsGet(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable String requester, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset) throws ApiException {
+        ApiResponse<List<AuditEntry>> localVarResp = listAuditLogsApiV1AuditLogsGetWithHttpInfo(policyId, recordId, jobId, eventType, requester, since, until, limit, offset);
         return localVarResp.getData();
     }
 
@@ -211,6 +217,7 @@ public class AuditApi {
      * @param recordId  (optional)
      * @param jobId  (optional)
      * @param eventType  (optional)
+     * @param requester  (optional)
      * @param since  (optional)
      * @param until  (optional)
      * @param limit  (optional, default to 100)
@@ -225,8 +232,8 @@ public class AuditApi {
         <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<AuditEntry>> listAuditLogsApiV1AuditLogsGetWithHttpInfo(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset) throws ApiException {
-        okhttp3.Call localVarCall = listAuditLogsApiV1AuditLogsGetValidateBeforeCall(policyId, recordId, jobId, eventType, since, until, limit, offset, null);
+    public ApiResponse<List<AuditEntry>> listAuditLogsApiV1AuditLogsGetWithHttpInfo(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable String requester, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset) throws ApiException {
+        okhttp3.Call localVarCall = listAuditLogsApiV1AuditLogsGetValidateBeforeCall(policyId, recordId, jobId, eventType, requester, since, until, limit, offset, null);
         Type localVarReturnType = new TypeToken<List<AuditEntry>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
@@ -238,6 +245,7 @@ public class AuditApi {
      * @param recordId  (optional)
      * @param jobId  (optional)
      * @param eventType  (optional)
+     * @param requester  (optional)
      * @param since  (optional)
      * @param until  (optional)
      * @param limit  (optional, default to 100)
@@ -253,9 +261,9 @@ public class AuditApi {
         <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listAuditLogsApiV1AuditLogsGetAsync(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset, final ApiCallback<List<AuditEntry>> _callback) throws ApiException {
+    public okhttp3.Call listAuditLogsApiV1AuditLogsGetAsync(@javax.annotation.Nullable String policyId, @javax.annotation.Nullable String recordId, @javax.annotation.Nullable String jobId, @javax.annotation.Nullable AuditEventType eventType, @javax.annotation.Nullable String requester, @javax.annotation.Nullable OffsetDateTime since, @javax.annotation.Nullable OffsetDateTime until, @javax.annotation.Nullable Integer limit, @javax.annotation.Nullable Integer offset, final ApiCallback<List<AuditEntry>> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = listAuditLogsApiV1AuditLogsGetValidateBeforeCall(policyId, recordId, jobId, eventType, since, until, limit, offset, _callback);
+        okhttp3.Call localVarCall = listAuditLogsApiV1AuditLogsGetValidateBeforeCall(policyId, recordId, jobId, eventType, requester, since, until, limit, offset, _callback);
         Type localVarReturnType = new TypeToken<List<AuditEntry>>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;

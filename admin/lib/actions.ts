@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { drpe } from "@/lib/drpe-client";
+import { parseReferenceSources } from "@/lib/reference-sources";
 import { DrpeApiError, PolicyStatus } from "@/lib/types";
 
 function errMsg(err: unknown): string {
@@ -32,8 +33,11 @@ export async function importPolicyAction(
 ): Promise<{ error?: string; ok?: boolean }> {
   const yaml = String(formData.get("yaml") || "");
   if (!yaml.trim()) return { error: "YAML is required" };
+  const referenceSources = parseReferenceSources(
+    formData.get("reference_sources"),
+  );
   try {
-    const res = await drpe.importYaml(yaml);
+    const res = await drpe.importYaml(yaml, referenceSources);
     revalidatePath("/policies");
     if (res.imported[0]) {
       redirect(`/policies/${encodeURIComponent(res.imported[0])}`);

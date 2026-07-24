@@ -22,6 +22,7 @@ var _ MappedNullable = &ImportRequest{}
 // ImportRequest struct for ImportRequest
 type ImportRequest struct {
 	Yaml string `json:"yaml"`
+	ReferenceSources []ReferenceSource `json:"reference_sources,omitempty"`
 }
 
 type _ImportRequest ImportRequest
@@ -68,6 +69,38 @@ func (o *ImportRequest) SetYaml(v string) {
 	o.Yaml = v
 }
 
+// GetReferenceSources returns the ReferenceSources field value if set, zero value otherwise.
+func (o *ImportRequest) GetReferenceSources() []ReferenceSource {
+	if o == nil || IsNil(o.ReferenceSources) {
+		var ret []ReferenceSource
+		return ret
+	}
+	return o.ReferenceSources
+}
+
+// GetReferenceSourcesOk returns a tuple with the ReferenceSources field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ImportRequest) GetReferenceSourcesOk() ([]ReferenceSource, bool) {
+	if o == nil || IsNil(o.ReferenceSources) {
+		return nil, false
+	}
+	return o.ReferenceSources, true
+}
+
+// HasReferenceSources returns a boolean if a field has been set.
+func (o *ImportRequest) HasReferenceSources() bool {
+	if o != nil && !IsNil(o.ReferenceSources) {
+		return true
+	}
+
+	return false
+}
+
+// SetReferenceSources gets a reference to the given []ReferenceSource and assigns it to the ReferenceSources field.
+func (o *ImportRequest) SetReferenceSources(v []ReferenceSource) {
+	o.ReferenceSources = v
+}
+
 func (o ImportRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -79,6 +112,9 @@ func (o ImportRequest) MarshalJSON() ([]byte, error) {
 func (o ImportRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["yaml"] = o.Yaml
+	if !IsNil(o.ReferenceSources) {
+		toSerialize["reference_sources"] = o.ReferenceSources
+	}
 	return toSerialize, nil
 }
 

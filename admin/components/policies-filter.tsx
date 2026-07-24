@@ -10,10 +10,13 @@ export function PoliciesFilter({
   initialQ,
   initialStatus,
   initialKind,
+  basePath = "/policies",
 }: {
   initialQ: string;
   initialStatus: string;
   initialKind: string;
+  /** Target path for filter query params (e.g. `/policies/graph`). */
+  basePath?: string;
 }) {
   const router = useRouter();
   const [q, setQ] = useState(initialQ);
@@ -26,7 +29,8 @@ export function PoliciesFilter({
     if (q) params.set("q", q);
     if (status) params.set("status", status);
     if (kind) params.set("kind", kind);
-    router.push(`/policies?${params.toString()}`);
+    const qs = params.toString();
+    router.push(qs ? `${basePath}?${qs}` : basePath);
   }
 
   return (

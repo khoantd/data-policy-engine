@@ -775,6 +775,8 @@ export interface components {
              * @description Metadata field paths scanned with NER when privalyse is available
              */
             text_fields?: string[];
+            /** Reference Sources */
+            reference_sources?: components["schemas"]["ReferenceSource"][];
         };
         /**
          * ClassificationPolicyScopeSummary
@@ -1219,6 +1221,8 @@ export interface components {
         ImportRequest: {
             /** Yaml */
             yaml: string;
+            /** Reference Sources */
+            reference_sources?: components["schemas"]["ReferenceSource"][];
         };
         /** ImportResponse */
         ImportResponse: {
@@ -1326,6 +1330,8 @@ export interface components {
             rules: components["schemas"]["PolicyRule"][];
             dsar?: components["schemas"]["DsarConfig"] | null;
             audit?: components["schemas"]["AuditConfig"] | null;
+            /** Reference Sources */
+            reference_sources?: components["schemas"]["ReferenceSource"][];
         };
         /**
          * PolicyCreateRequest
@@ -1501,6 +1507,28 @@ export interface components {
             source?: string | null;
             /** Jurisdiction */
             jurisdiction?: string | null;
+        };
+        /**
+         * ReferenceSource
+         * @description AI web-research citation attached as policy provenance metadata.
+         */
+        ReferenceSource: {
+            /** Id */
+            id: number;
+            /** Title */
+            title: string;
+            /** Url */
+            url: string;
+            /**
+             * Snippet
+             * @default
+             */
+            snippet: string;
+            /**
+             * Domain
+             * @default
+             */
+            domain: string;
         };
         /** ScopeExclude */
         ScopeExclude: {

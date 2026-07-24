@@ -107,6 +107,12 @@ export interface AuditEntry {
      * @memberof AuditEntry
      */
     evaluationId?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditEntry
+     */
+    requester?: string | null;
 }
 
 
@@ -122,7 +128,8 @@ export const AuditEventType = {
     PendingGrace: 'pending_grace',
     Flag: 'flag',
     DsarAccess: 'dsar_access',
-    DsarErasure: 'dsar_erasure'
+    DsarErasure: 'dsar_erasure',
+    GraceCancelled: 'grace_cancelled'
 } as const;
 export type AuditEventType = typeof AuditEventType[keyof typeof AuditEventType];
 
@@ -345,6 +352,12 @@ export interface ClassificationPolicy {
      * @memberof ClassificationPolicy
      */
     textFields?: Array<string>;
+    /**
+     * 
+     * @type {Array<ReferenceSource>}
+     * @memberof ClassificationPolicy
+     */
+    referenceSources?: Array<ReferenceSource>;
 }
 
 
@@ -1307,6 +1320,131 @@ export interface FieldCondition {
 /**
  * 
  * @export
+ * @interface GraceHold
+ */
+export interface GraceHold {
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    policyId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    ruleId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    recordId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    dataType: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    action: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    gracePeriodEnds: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    notifyAt?: string | null;
+    /**
+     * 
+     * @type {GraceHoldStatus}
+     * @memberof GraceHold
+     */
+    status?: GraceHoldStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    createdAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    updatedAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    closedAt?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    requester?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    sourceJobId?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHold
+     */
+    evaluationId?: string | null;
+}
+
+
+/**
+ * Optional body for force / cancel.
+ * @export
+ * @interface GraceHoldActionRequest
+ */
+export interface GraceHoldActionRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof GraceHoldActionRequest
+     */
+    requester?: string | null;
+}
+
+/**
+ * 
+ * @export
+ */
+export const GraceHoldStatus = {
+    Active: 'active',
+    Dispatched: 'dispatched',
+    Forced: 'forced',
+    Cancelled: 'cancelled'
+} as const;
+export type GraceHoldStatus = typeof GraceHoldStatus[keyof typeof GraceHoldStatus];
+
+/**
+ * 
+ * @export
  * @interface HTTPValidationError
  */
 export interface HTTPValidationError {
@@ -1348,6 +1486,12 @@ export interface ImportRequest {
      * @memberof ImportRequest
      */
     yaml: string;
+    /**
+     * 
+     * @type {Array<ReferenceSource>}
+     * @memberof ImportRequest
+     */
+    referenceSources?: Array<ReferenceSource>;
 }
 /**
  * 
@@ -1598,6 +1742,12 @@ export interface Policy {
      * @memberof Policy
      */
     audit?: AuditConfig | null;
+    /**
+     * 
+     * @type {Array<ReferenceSource>}
+     * @memberof Policy
+     */
+    referenceSources?: Array<ReferenceSource>;
 }
 
 
@@ -2056,6 +2206,43 @@ export interface RecordRef {
      * @memberof RecordRef
      */
     jurisdiction?: string | null;
+}
+/**
+ * AI web-research citation attached as policy provenance metadata.
+ * @export
+ * @interface ReferenceSource
+ */
+export interface ReferenceSource {
+    /**
+     * 
+     * @type {number}
+     * @memberof ReferenceSource
+     */
+    id: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReferenceSource
+     */
+    title: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReferenceSource
+     */
+    url: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReferenceSource
+     */
+    snippet?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReferenceSource
+     */
+    domain?: string;
 }
 /**
  * 

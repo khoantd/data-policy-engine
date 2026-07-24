@@ -676,6 +676,182 @@ paths:
       summary: Get Job
       tags:
       - enforce
+  /api/v1/grace-holds:
+    get:
+      operationId: list_grace_holds_api_v1_grace_holds_get
+      parameters:
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/GraceHoldStatus"
+        style: form
+      - explode: true
+        in: query
+        name: policy_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: record_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: rule_id
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/GraceHold"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Grace Holds
+      tags:
+      - grace-holds
+  /api/v1/grace-holds/{hold_id}:
+    get:
+      operationId: get_grace_hold_api_v1_grace_holds__hold_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: hold_id
+        required: true
+        schema:
+          title: Hold Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraceHold"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get Grace Hold
+      tags:
+      - grace-holds
+  /api/v1/grace-holds/{hold_id}/force:
+    post:
+      operationId: force_grace_hold_api_v1_grace_holds__hold_id__force_post
+      parameters:
+      - explode: false
+        in: path
+        name: hold_id
+        required: true
+        schema:
+          title: Hold Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraceHoldActionRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraceHold"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Force Grace Hold
+      tags:
+      - grace-holds
+  /api/v1/grace-holds/{hold_id}/cancel:
+    post:
+      operationId: cancel_grace_hold_api_v1_grace_holds__hold_id__cancel_post
+      parameters:
+      - explode: false
+        in: path
+        name: hold_id
+        required: true
+        schema:
+          title: Hold Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraceHoldActionRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraceHold"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Cancel Grace Hold
+      tags:
+      - grace-holds
   /api/v1/dsar/access:
     post:
       operationId: submit_access_api_v1_dsar_access_post
@@ -1041,6 +1217,14 @@ paths:
         style: form
       - explode: true
         in: query
+        name: requester
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
         name: since
         required: false
         schema:
@@ -1277,6 +1461,7 @@ components:
       description: Immutable audit log entry.
       example:
         rule_id: rule_id
+        requester: requester
         record_id: record_id
         evaluation_id: evaluation_id
         event_type: evaluation
@@ -1319,6 +1504,9 @@ components:
         evaluation_id:
           nullable: true
           type: string
+        requester:
+          nullable: true
+          type: string
       required:
       - created_at
       - event_type
@@ -1333,6 +1521,7 @@ components:
       - flag
       - dsar_access
       - dsar_erasure
+      - grace_cancelled
       title: AuditEventType
       type: string
     BatchClassificationRequest:
@@ -1488,6 +1677,17 @@ components:
       description: Full classification policy definition.
       example:
         owner: owner
+        reference_sources:
+        - snippet: ""
+          domain: ""
+          id: 1
+          title: title
+          url: url
+        - snippet: ""
+          domain: ""
+          id: 1
+          title: title
+          url: url
         jurisdiction: jurisdiction
         text_fields:
         - text_fields
@@ -1533,7 +1733,7 @@ components:
           handling: handling
           id: id
           priority: 1
-        version: 1
+        version: 5
         tags:
         - tags
         - tags
@@ -1635,6 +1835,10 @@ components:
           description: Metadata field paths scanned with NER when privalyse is available
           items:
             type: string
+          type: array
+        reference_sources:
+          items:
+            $ref: "#/components/schemas/ReferenceSource"
           type: array
       required:
       - entities
@@ -2551,6 +2755,100 @@ components:
       - field
       - operator
       title: FieldCondition
+    GraceHold:
+      example:
+        requester: requester
+        evaluation_id: evaluation_id
+        closed_at: 2000-01-23T04:56:07.000+00:00
+        policy_id: policy_id
+        source_job_id: source_job_id
+        created_at: 2000-01-23T04:56:07.000+00:00
+        rule_id: rule_id
+        record_id: record_id
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        notify_at: notify_at
+        data_type: data_type
+        action: action
+        id: id
+        grace_period_ends: grace_period_ends
+        status: active
+      properties:
+        id:
+          title: Id
+          type: string
+        policy_id:
+          title: Policy Id
+          type: string
+        rule_id:
+          title: Rule Id
+          type: string
+        record_id:
+          title: Record Id
+          type: string
+        data_type:
+          title: Data Type
+          type: string
+        action:
+          title: Action
+          type: string
+        grace_period_ends:
+          title: Grace Period Ends
+          type: string
+        notify_at:
+          nullable: true
+          type: string
+        status:
+          $ref: "#/components/schemas/GraceHoldStatus"
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+        closed_at:
+          format: date-time
+          nullable: true
+          type: string
+        requester:
+          nullable: true
+          type: string
+        source_job_id:
+          nullable: true
+          type: string
+        evaluation_id:
+          nullable: true
+          type: string
+      required:
+      - action
+      - created_at
+      - data_type
+      - grace_period_ends
+      - id
+      - policy_id
+      - record_id
+      - rule_id
+      - updated_at
+      title: GraceHold
+    GraceHoldActionRequest:
+      description: Optional body for force / cancel.
+      example:
+        requester: requester
+      properties:
+        requester:
+          maxLength: 255
+          nullable: true
+          type: string
+      title: GraceHoldActionRequest
+    GraceHoldStatus:
+      enum:
+      - active
+      - dispatched
+      - forced
+      - cancelled
+      title: GraceHoldStatus
+      type: string
     HTTPValidationError:
       example:
         detail:
@@ -2591,11 +2889,26 @@ components:
       title: HealthResponse
     ImportRequest:
       example:
+        reference_sources:
+        - snippet: ""
+          domain: ""
+          id: 1
+          title: title
+          url: url
+        - snippet: ""
+          domain: ""
+          id: 1
+          title: title
+          url: url
         yaml: yaml
       properties:
         yaml:
           title: Yaml
           type: string
+        reference_sources:
+          items:
+            $ref: "#/components/schemas/ReferenceSource"
+          type: array
       required:
       - yaml
       title: ImportRequest
@@ -2727,6 +3040,17 @@ components:
       description: Full retention policy definition.
       example:
         owner: owner
+        reference_sources:
+        - snippet: ""
+          domain: ""
+          id: 1
+          title: title
+          url: url
+        - snippet: ""
+          domain: ""
+          id: 1
+          title: title
+          url: url
         jurisdiction: jurisdiction
         rules:
         - requires_approval: false
@@ -2855,6 +3179,10 @@ components:
           $ref: "#/components/schemas/DsarConfig"
         audit:
           $ref: "#/components/schemas/AuditConfig"
+        reference_sources:
+          items:
+            $ref: "#/components/schemas/ReferenceSource"
+          type: array
       required:
       - data_classification
       - id
@@ -3239,6 +3567,44 @@ components:
       - data_type
       - record_id
       title: RecordRef
+    ReferenceSource:
+      description: AI web-research citation attached as policy provenance metadata.
+      example:
+        snippet: ""
+        domain: ""
+        id: 1
+        title: title
+        url: url
+      properties:
+        id:
+          minimum: 1.0
+          title: Id
+          type: integer
+        title:
+          maxLength: 512
+          minLength: 1
+          title: Title
+          type: string
+        url:
+          maxLength: 2048
+          minLength: 1
+          title: Url
+          type: string
+        snippet:
+          default: ""
+          maxLength: 2000
+          title: Snippet
+          type: string
+        domain:
+          default: ""
+          maxLength: 255
+          title: Domain
+          type: string
+      required:
+      - id
+      - title
+      - url
+      title: ReferenceSource
     ScopeExclude:
       example:
         sources:
@@ -3315,6 +3681,17 @@ components:
         policy_kind: null
         classification_policy:
           owner: owner
+          reference_sources:
+          - snippet: ""
+            domain: ""
+            id: 1
+            title: title
+            url: url
+          - snippet: ""
+            domain: ""
+            id: 1
+            title: title
+            url: url
           jurisdiction: jurisdiction
           text_fields:
           - text_fields
@@ -3360,7 +3737,7 @@ components:
             handling: handling
             id: id
             priority: 1
-          version: 1
+          version: 5
           tags:
           - tags
           - tags
@@ -3422,6 +3799,17 @@ components:
         - errors
         policy:
           owner: owner
+          reference_sources:
+          - snippet: ""
+            domain: ""
+            id: 1
+            title: title
+            url: url
+          - snippet: ""
+            domain: ""
+            id: 1
+            title: title
+            url: url
           jurisdiction: jurisdiction
           rules:
           - requires_approval: false

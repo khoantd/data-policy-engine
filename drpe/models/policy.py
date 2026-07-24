@@ -98,6 +98,23 @@ class AuditConfig(BaseModel):
     retention_of_audit_logs: str | None = None
 
 
+class ReferenceSource(BaseModel):
+    """AI web-research citation attached as policy provenance metadata."""
+
+    id: int = Field(ge=1)
+    title: str = Field(min_length=1, max_length=512)
+    url: str = Field(min_length=1, max_length=2048)
+    snippet: str = Field(default="", max_length=2000)
+    domain: str = Field(default="", max_length=255)
+
+    @field_validator("url")
+    @classmethod
+    def require_https(cls, v: str) -> str:
+        if not v.startswith("https://"):
+            raise ValueError("reference source url must use https")
+        return v
+
+
 class Policy(BaseModel):
     """Full retention policy definition."""
 
@@ -116,6 +133,7 @@ class Policy(BaseModel):
     rules: list[PolicyRule] = Field(min_length=1)
     dsar: DsarConfig | None = None
     audit: AuditConfig | None = None
+    reference_sources: list[ReferenceSource] = Field(default_factory=list)
 
 
 class PolicyDocument(BaseModel):

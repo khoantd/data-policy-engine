@@ -53,7 +53,7 @@ import com.drpe.client.JSON;
 /**
  * Immutable audit log entry.
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-22T15:59:15.048403+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-24T11:39:51.464132+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class AuditEntry {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
@@ -104,6 +104,11 @@ public class AuditEntry {
   @SerializedName(SERIALIZED_NAME_EVALUATION_ID)
   @javax.annotation.Nullable
   private String evaluationId;
+
+  public static final String SERIALIZED_NAME_REQUESTER = "requester";
+  @SerializedName(SERIALIZED_NAME_REQUESTER)
+  @javax.annotation.Nullable
+  private String requester;
 
   public AuditEntry() {
   }
@@ -306,6 +311,25 @@ public class AuditEntry {
   }
 
 
+  public AuditEntry requester(@javax.annotation.Nullable String requester) {
+    this.requester = requester;
+    return this;
+  }
+
+  /**
+   * Get requester
+   * @return requester
+   */
+  @javax.annotation.Nullable
+  public String getRequester() {
+    return requester;
+  }
+
+  public void setRequester(@javax.annotation.Nullable String requester) {
+    this.requester = requester;
+  }
+
+
 
   @Override
   public boolean equals(Object o) {
@@ -325,7 +349,8 @@ public class AuditEntry {
         Objects.equals(this.action, auditEntry.action) &&
         Objects.equals(this.payload, auditEntry.payload) &&
         Objects.equals(this.jobId, auditEntry.jobId) &&
-        Objects.equals(this.evaluationId, auditEntry.evaluationId);
+        Objects.equals(this.evaluationId, auditEntry.evaluationId) &&
+        Objects.equals(this.requester, auditEntry.requester);
   }
 
   private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
@@ -334,7 +359,7 @@ public class AuditEntry {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, createdAt, eventType, policyId, ruleId, recordId, action, payload, jobId, evaluationId);
+    return Objects.hash(id, createdAt, eventType, policyId, ruleId, recordId, action, payload, jobId, evaluationId, requester);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -358,6 +383,7 @@ public class AuditEntry {
     sb.append("    payload: ").append(toIndentedString(payload)).append("\n");
     sb.append("    jobId: ").append(toIndentedString(jobId)).append("\n");
     sb.append("    evaluationId: ").append(toIndentedString(evaluationId)).append("\n");
+    sb.append("    requester: ").append(toIndentedString(requester)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -379,7 +405,7 @@ public class AuditEntry {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "created_at", "event_type", "policy_id", "rule_id", "record_id", "action", "payload", "job_id", "evaluation_id"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "created_at", "event_type", "policy_id", "rule_id", "record_id", "action", "payload", "job_id", "evaluation_id", "requester"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "created_at", "event_type"));
@@ -435,6 +461,9 @@ public class AuditEntry {
       }
       if ((jsonObj.get("evaluation_id") != null && !jsonObj.get("evaluation_id").isJsonNull()) && !jsonObj.get("evaluation_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `evaluation_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("evaluation_id").toString()));
+      }
+      if ((jsonObj.get("requester") != null && !jsonObj.get("requester").isJsonNull()) && !jsonObj.get("requester").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `requester` to be a primitive type in the JSON string but got `%s`", jsonObj.get("requester").toString()));
       }
   }
 

@@ -19,5 +19,7 @@
 
 * `DSAR_ERASURE` (value: `"dsar_erasure"`)
 
+* `GRACE_CANCELLED` (value: `"grace_cancelled"`)
+
 
 

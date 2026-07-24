@@ -20,6 +20,7 @@ import {
   PolicyStatus,
   ReadyResponse,
   RecordRef,
+  ReferenceSource,
   ValidateResponse,
   WebhookCreateResponse,
   WebhookResponse,
@@ -102,10 +103,18 @@ export const drpe = {
       method: "POST",
       body: JSON.stringify({ yaml }),
     }),
-  importYaml: (yaml: string) =>
+  importYaml: (
+    yaml: string,
+    referenceSources?: ReferenceSource[],
+  ) =>
     drpeFetch<ImportResponse>("/policies/import", {
       method: "POST",
-      body: JSON.stringify({ yaml }),
+      body: JSON.stringify({
+        yaml,
+        ...(referenceSources && referenceSources.length > 0
+          ? { reference_sources: referenceSources }
+          : {}),
+      }),
     }),
   updatePolicyYaml: (id: string, yaml: string) =>
     drpeFetch<Policy>(`/policies/${encodeURIComponent(id)}`, {

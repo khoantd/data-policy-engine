@@ -23,6 +23,7 @@ import com.drpe.client.model.PolicyKind;
 import com.drpe.client.model.PolicyRule;
 import com.drpe.client.model.PolicyScope;
 import com.drpe.client.model.PolicyStatus;
+import com.drpe.client.model.ReferenceSource;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
@@ -60,7 +61,7 @@ import com.drpe.client.JSON;
 /**
  * Full retention policy definition.
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-22T15:59:15.048403+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-24T11:39:51.464132+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class Policy {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
@@ -136,6 +137,11 @@ public class Policy {
   @SerializedName(SERIALIZED_NAME_AUDIT)
   @javax.annotation.Nullable
   private AuditConfig audit;
+
+  public static final String SERIALIZED_NAME_REFERENCE_SOURCES = "reference_sources";
+  @SerializedName(SERIALIZED_NAME_REFERENCE_SOURCES)
+  @javax.annotation.Nullable
+  private List<ReferenceSource> referenceSources = new ArrayList<>();
 
   public Policy() {
   }
@@ -441,6 +447,33 @@ public class Policy {
   }
 
 
+  public Policy referenceSources(@javax.annotation.Nullable List<ReferenceSource> referenceSources) {
+    this.referenceSources = referenceSources;
+    return this;
+  }
+
+  public Policy addReferenceSourcesItem(ReferenceSource referenceSourcesItem) {
+    if (this.referenceSources == null) {
+      this.referenceSources = new ArrayList<>();
+    }
+    this.referenceSources.add(referenceSourcesItem);
+    return this;
+  }
+
+  /**
+   * Get referenceSources
+   * @return referenceSources
+   */
+  @javax.annotation.Nullable
+  public List<ReferenceSource> getReferenceSources() {
+    return referenceSources;
+  }
+
+  public void setReferenceSources(@javax.annotation.Nullable List<ReferenceSource> referenceSources) {
+    this.referenceSources = referenceSources;
+  }
+
+
 
   @Override
   public boolean equals(Object o) {
@@ -465,7 +498,8 @@ public class Policy {
         Objects.equals(this.scope, policy.scope) &&
         Objects.equals(this.rules, policy.rules) &&
         Objects.equals(this.dsar, policy.dsar) &&
-        Objects.equals(this.audit, policy.audit);
+        Objects.equals(this.audit, policy.audit) &&
+        Objects.equals(this.referenceSources, policy.referenceSources);
   }
 
   private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
@@ -474,7 +508,7 @@ public class Policy {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, version, status, jurisdiction, policyKind, dataClassification, owner, effectiveFrom, expiresAt, tags, scope, rules, dsar, audit);
+    return Objects.hash(id, name, version, status, jurisdiction, policyKind, dataClassification, owner, effectiveFrom, expiresAt, tags, scope, rules, dsar, audit, referenceSources);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -503,6 +537,7 @@ public class Policy {
     sb.append("    rules: ").append(toIndentedString(rules)).append("\n");
     sb.append("    dsar: ").append(toIndentedString(dsar)).append("\n");
     sb.append("    audit: ").append(toIndentedString(audit)).append("\n");
+    sb.append("    referenceSources: ").append(toIndentedString(referenceSources)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -524,7 +559,7 @@ public class Policy {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "version", "status", "jurisdiction", "policy_kind", "data_classification", "owner", "effective_from", "expires_at", "tags", "scope", "rules", "dsar", "audit"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "version", "status", "jurisdiction", "policy_kind", "data_classification", "owner", "effective_from", "expires_at", "tags", "scope", "rules", "dsar", "audit", "reference_sources"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "jurisdiction", "data_classification", "rules"));
@@ -613,6 +648,20 @@ public class Policy {
       // validate the optional field `audit`
       if (jsonObj.get("audit") != null && !jsonObj.get("audit").isJsonNull()) {
         AuditConfig.validateJsonElement(jsonObj.get("audit"));
+      }
+      if (jsonObj.get("reference_sources") != null && !jsonObj.get("reference_sources").isJsonNull()) {
+        JsonArray jsonArrayreferenceSources = jsonObj.getAsJsonArray("reference_sources");
+        if (jsonArrayreferenceSources != null) {
+          // ensure the json data is an array
+          if (!jsonObj.get("reference_sources").isJsonArray()) {
+            throw new IllegalArgumentException(String.format("Expected the field `reference_sources` to be an array in the JSON string but got `%s`", jsonObj.get("reference_sources").toString()));
+          }
+
+          // validate the optional field `reference_sources` (array)
+          for (int i = 0; i < jsonArrayreferenceSources.size(); i++) {
+            ReferenceSource.validateJsonElement(jsonArrayreferenceSources.get(i));
+          };
+        }
       }
   }
 

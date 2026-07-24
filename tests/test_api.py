@@ -404,3 +404,85 @@ def test_uvicorn_lazy_app_attr_is_fastapi(monkeypatch: pytest.MonkeyPatch) -> No
     app = getattr(app_module, "app")
     assert isinstance(app, FastAPI)
     assert callable(app)
+
+
+_REF_SOURCE = {
+    "id": 1,
+    "title": "GDPR Art. 5",
+    "url": "https://gdpr.eu/article-5-how-to-process-personal-data/",
+    "snippet": "Principles relating to processing of personal data.",
+    "domain": "gdpr.eu",
+}
+
+_IMPORT_YAML = """
+policy:
+  id: pol_ai_refs
+  name: AI Refs Policy
+  status: draft
+  jurisdiction: EU_GDPR
+  data_classification: PII
+  scope:
+    data_types: [customer_profile]
+  rules:
+    - id: rule_retain
+      priority: 1
+      condition:
+        all:
+          - field: status
+            operator: eq
+            value: active
+      action: retain
+"""
+
+
+def test_import_persists_reference_sources(client: TestClient) -> None:
+    imp = client.post(
+        "/api/v1/policies/import",
+        json={"yaml": _IMPORT_YAML, "reference_sources": [_REF_SOURCE]},
+    )
+    assert imp.status_code == 200
+    assert imp.json()["imported"] == ["pol_ai_refs"]
+
+    got = client.get("/api/v1/policies/pol_ai_refs")
+    assert got.status_code == 200
+    body = got.json()
+    assert body["reference_sources"] == [_REF_SOURCE]
+
+
+def test_import_without_reference_sources_defaults_empty(client: TestClient) -> None:
+    yaml = _IMPORT_YAML.replace("pol_ai_refs", "pol_ai_refs_empty")
+    imp = client.post("/api/v1/policies/import", json={"yaml": yaml})
+    assert imp.status_code == 200
+    got = client.get("/api/v1/policies/pol_ai_refs_empty")
+    assert got.status_code == 200
+    assert got.json()["reference_sources"] == []
+
+
+def test_yaml_update_preserves_reference_sources(client: TestClient) -> None:
+    imp = client.post(
+        "/api/v1/policies/import",
+        json={"yaml": _IMPORT_YAML, "reference_sources": [_REF_SOURCE]},
+    )
+    assert imp.status_code == 200
+
+    updated_yaml = _IMPORT_YAML.replace("AI Refs Policy", "AI Refs Policy v2")
+    put = client.put(
+        "/api/v1/policies/pol_ai_refs",
+        json={"yaml": updated_yaml},
+    )
+    assert put.status_code == 200
+    body = put.json()
+    assert body["name"] == "AI Refs Policy v2"
+    assert body["reference_sources"] == [_REF_SOURCE]
+
+
+def test_import_rejects_non_https_reference_url(client: TestClient) -> None:
+    bad = {**_REF_SOURCE, "url": "http://example.com/insecure"}
+    imp = client.post(
+        "/api/v1/policies/import",
+        json={
+            "yaml": _IMPORT_YAML.replace("pol_ai_refs", "pol_ai_refs_bad"),
+            "reference_sources": [bad],
+        },
+    )
+    assert imp.status_code == 422

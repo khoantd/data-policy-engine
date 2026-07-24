@@ -1,12 +1,17 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { dump as yamlDump } from "js-yaml";
 import { drpe } from "@/lib/drpe-client";
 import { DrpeApiError, PolicyStatus } from "@/lib/types";
 import { buildBreadcrumbs } from "@/lib/breadcrumbs";
+import { policyForYamlDump } from "@/lib/reference-sources";
 import { PolicyYamlEditor } from "@/components/policy-forms";
 import { PolicyStatusActions } from "@/components/policy-status-actions";
 import { VersionsPanel } from "@/components/versions-panel";
 import { StatusDot } from "@/components/status-dot";
+import { AiSourceReferences } from "@/components/ai-source-references";
+import { PolicyStructureGraph } from "@/components/policy-structure-graph";
+import { Button } from "@/components/ui/button";
 import {
   ErrorAlert,
   PageHeader,
@@ -15,10 +20,13 @@ import {
 
 export default async function PolicyDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ focus?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
   let error: string | null = null;
   let policy: Awaited<ReturnType<typeof drpe.getPolicy>> | null = null;
   let versions: Awaited<ReturnType<typeof drpe.listVersions>> = [];
@@ -45,7 +53,7 @@ export default async function PolicyDetailPage({
   }
 
   const initialYaml = yamlDump(
-    { policy },
+    { policy: policyForYamlDump(policy) },
     { lineWidth: 100, noRefs: true, sortKeys: false },
   );
 
@@ -55,6 +63,8 @@ export default async function PolicyDetailPage({
       : "data_classification" in policy
         ? policy.data_classification
         : policy.policy_kind;
+
+  const referenceSources = policy.reference_sources ?? [];
 
   return (
     <>
@@ -85,17 +95,52 @@ export default async function PolicyDetailPage({
           </span>
         )}
       </div>
+      <div className="mb-6">
+        <Panel
+          title="Structure"
+          actions={
+            <Link href="/policies/graph">
+              <Button variant="ghost" className="text-xs">
+                Fleet graph
+              </Button>
+            </Link>
+          }
+        >
+          <PolicyStructureGraph
+            mode="detail"
+            policy={policy}
+            initialFocus={sp.focus || null}
+          />
+        </Panel>
+      </div>
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Definition">
           <PolicyYamlEditor policyId={policy.id} initialYaml={initialYaml} />
         </Panel>
-        <Panel title="Version history">
-          <VersionsPanel
-            policyId={policy.id}
-            versions={versions}
-            currentVersion={policy.version}
-          />
-        </Panel>
+        <div className="flex flex-col gap-6">
+          {referenceSources.length > 0 && (
+            <Panel title="Provenance">
+              <AiSourceReferences
+                mode="saved"
+                sources={referenceSources.map((s) => ({
+                  id: s.id,
+                  title: s.title,
+                  url: s.url,
+                  snippet: s.snippet ?? "",
+                  domain: s.domain ?? "",
+                }))}
+                defaultOpen={false}
+              />
+            </Panel>
+          )}
+          <Panel title="Version history">
+            <VersionsPanel
+              policyId={policy.id}
+              versions={versions}
+              currentVersion={policy.version}
+            />
+          </Panel>
+        </div>
       </div>
     </>
   );

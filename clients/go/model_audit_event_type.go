@@ -27,6 +27,7 @@ const (
 	FLAG AuditEventType = "flag"
 	DSAR_ACCESS AuditEventType = "dsar_access"
 	DSAR_ERASURE AuditEventType = "dsar_erasure"
+	GRACE_CANCELLED AuditEventType = "grace_cancelled"
 )
 
 // All allowed values of AuditEventType enum
@@ -38,6 +39,7 @@ var AllowedAuditEventTypeEnumValues = []AuditEventType{
 	"flag",
 	"dsar_access",
 	"dsar_erasure",
+	"grace_cancelled",
 }
 
 func (v *AuditEventType) UnmarshalJSON(src []byte) error {

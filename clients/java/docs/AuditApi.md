@@ -9,7 +9,7 @@ All URIs are relative to *http://localhost:8000*
 
 <a id="listAuditLogsApiV1AuditLogsGet"></a>
 # **listAuditLogsApiV1AuditLogsGet**
-> List&lt;AuditEntry&gt; listAuditLogsApiV1AuditLogsGet(policyId, recordId, jobId, eventType, since, until, limit, offset)
+> List&lt;AuditEntry&gt; listAuditLogsApiV1AuditLogsGet(policyId, recordId, jobId, eventType, requester, since, until, limit, offset)
 
 List Audit Logs
 
@@ -37,12 +37,13 @@ public class Example {
     String recordId = "recordId_example"; // String | 
     String jobId = "jobId_example"; // String | 
     AuditEventType eventType = AuditEventType.fromValue("evaluation"); // AuditEventType | 
+    String requester = "requester_example"; // String | 
     OffsetDateTime since = OffsetDateTime.now(); // OffsetDateTime | 
     OffsetDateTime until = OffsetDateTime.now(); // OffsetDateTime | 
     Integer limit = 100; // Integer | 
     Integer offset = 0; // Integer | 
     try {
-      List<AuditEntry> result = apiInstance.listAuditLogsApiV1AuditLogsGet(policyId, recordId, jobId, eventType, since, until, limit, offset);
+      List<AuditEntry> result = apiInstance.listAuditLogsApiV1AuditLogsGet(policyId, recordId, jobId, eventType, requester, since, until, limit, offset);
       System.out.println(result);
     } catch (ApiException e) {
       System.err.println("Exception when calling AuditApi#listAuditLogsApiV1AuditLogsGet");
@@ -62,7 +63,8 @@ public class Example {
 | **policyId** | **String**|  | [optional] |
 | **recordId** | **String**|  | [optional] |
 | **jobId** | **String**|  | [optional] |
-| **eventType** | [**AuditEventType**](.md)|  | [optional] [enum: evaluation, action, notify, pending_grace, flag, dsar_access, dsar_erasure] |
+| **eventType** | [**AuditEventType**](.md)|  | [optional] [enum: evaluation, action, notify, pending_grace, flag, dsar_access, dsar_erasure, grace_cancelled] |
+| **requester** | **String**|  | [optional] |
 | **since** | **OffsetDateTime**|  | [optional] |
 | **until** | **OffsetDateTime**|  | [optional] |
 | **limit** | **Integer**|  | [optional] [default to 100] |

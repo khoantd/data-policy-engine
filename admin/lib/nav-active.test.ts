@@ -4,6 +4,7 @@ import { isNavActive, matchesNavHref } from "./nav-active";
 const NAV_HREFS = [
   "/",
   "/policies",
+  "/policies/graph",
   "/policies/import",
   "/dsar",
   "/audit",
@@ -45,6 +46,13 @@ describe("isNavActive", () => {
   it("activates only Import on /policies/import", () => {
     expect(isNavActive("/policies/import", "/policies", NAV_HREFS)).toBe(false);
     expect(isNavActive("/policies/import", "/policies/import", NAV_HREFS)).toBe(
+      true,
+    );
+  });
+
+  it("activates only Structure graph on /policies/graph", () => {
+    expect(isNavActive("/policies/graph", "/policies", NAV_HREFS)).toBe(false);
+    expect(isNavActive("/policies/graph", "/policies/graph", NAV_HREFS)).toBe(
       true,
     );
   });
