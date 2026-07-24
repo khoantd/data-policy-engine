@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { drpe } from "@/lib/drpe-client";
 import { DrpeApiError } from "@/lib/types";
@@ -8,6 +9,7 @@ import {
   OVERVIEW_AUDIT_WINDOW_DAYS,
   OVERVIEW_DSAR_LIMIT,
   OVERVIEW_JOBS_LIMIT,
+  OVERVIEW_RECENT_AUDIT_ROWS,
   auditSinceIso,
   bucketAuditByDay,
   buildAttentionItems,
@@ -17,8 +19,9 @@ import {
   summarizeJobs,
 } from "@/lib/overview-metrics";
 import { OverviewAttention } from "@/components/overview-attention";
-import { OverviewCharts } from "@/components/overview-charts";
+import { OverviewChartsLazy } from "@/components/overview-charts-lazy";
 import { StatusDot } from "@/components/status-dot";
+import { ContentSkeleton } from "@/components/ui/page-skeleton";
 import {
   ContentCard,
   EmptyState,
@@ -32,7 +35,22 @@ import {
   TableWrap,
 } from "@/components/ui/layout";
 
-export default async function OverviewPage() {
+export default function OverviewPage() {
+  return (
+    <>
+      <PageHeader
+        title="Overview"
+        description="Monitor policy traffic, enforce jobs, and early signs of trouble."
+        breadcrumbs={buildBreadcrumbs("/")}
+      />
+      <Suspense fallback={<ContentSkeleton kpiCount={6} rows={6} />}>
+        <OverviewContent />
+      </Suspense>
+    </>
+  );
+}
+
+async function OverviewContent() {
   let healthStatus = "unknown";
   let readyStatus = "unknown";
   let policiesLoaded = 0;
@@ -56,7 +74,7 @@ export default async function OverviewPage() {
 
   try {
     const since = auditSinceIso(OVERVIEW_AUDIT_WINDOW_DAYS);
-    const [health, ready, policies, dsar, jobs, auditWindow, audit] =
+    const [health, ready, policies, dsar, jobs, auditWindow] =
       await Promise.all([
         drpe.health().catch(() => ({ status: "down" })),
         drpe.ready().catch(() => ({ status: "not_ready", policies_loaded: 0 })),
@@ -66,7 +84,6 @@ export default async function OverviewPage() {
         drpe.listAudit(
           `since=${encodeURIComponent(since)}&limit=${OVERVIEW_AUDIT_LIMIT}`,
         ),
-        drpe.listAudit("limit=15"),
       ]);
     healthStatus = health.status;
     readyStatus = ready.status;
@@ -86,7 +103,7 @@ export default async function OverviewPage() {
       pendingGrace: eventCounts.pending_grace,
       actions: eventCounts.action,
     });
-    recentAudit = audit;
+    recentAudit = auditWindow.slice(0, OVERVIEW_RECENT_AUDIT_ROWS);
   } catch (err) {
     error =
       err instanceof DrpeApiError
@@ -105,11 +122,6 @@ export default async function OverviewPage() {
 
   return (
     <>
-      <PageHeader
-        title="Overview"
-        description="Monitor policy traffic, enforce jobs, and early signs of trouble."
-        breadcrumbs={buildBreadcrumbs("/")}
-      />
       {error && <ErrorAlert message={error} />}
       <KpiStrip>
         <Kpi
@@ -157,7 +169,7 @@ export default async function OverviewPage() {
 
       <OverviewAttention items={attention} />
 
-      <OverviewCharts
+      <OverviewChartsLazy
         dayBuckets={dayBuckets}
         eventCounts={eventCounts}
         jobSummary={jobSummary}

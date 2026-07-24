@@ -5,24 +5,26 @@ import { isLiteLLMConfigured } from "@/lib/ai/litellm";
 import { isPrivacyMaskConfigured } from "@/lib/ai/privalyse";
 import { EvaluatePlayground } from "@/components/evaluate-form";
 import { ErrorAlert, PageHeader } from "@/components/ui/layout";
-import type { Policy } from "@/lib/types";
+import type { PolicyListItem } from "@/lib/types";
 
 export default async function EvaluatePage() {
   let error: string | null = null;
-  let policies: Policy[] = [];
+  let policies: PolicyListItem[] = [];
+  let privacyConfigured = false;
+
   try {
-    const listed = await drpe.listPolicies("active", "retention");
-    policies = (await Promise.all(
-      listed.map((p) => drpe.getPolicy(p.id)),
-    )) as Policy[];
+    const [listed, privacy] = await Promise.all([
+      drpe.listPolicies("active", "retention"),
+      isPrivacyMaskConfigured(),
+    ]);
+    policies = listed;
+    privacyConfigured = privacy;
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load policies";
   }
 
-  const active = policies.filter((p) => p.status === "active");
   const aiConfigured = isLiteLLMConfigured();
   const tracingConfigured = isLangSmithConfigured();
-  const privacyConfigured = await isPrivacyMaskConfigured();
 
   return (
     <>
@@ -33,7 +35,7 @@ export default async function EvaluatePage() {
       />
       {error && <ErrorAlert message={error} />}
       <EvaluatePlayground
-        policies={active}
+        policies={policies}
         aiConfigured={aiConfigured}
         tracingConfigured={tracingConfigured}
         privacyConfigured={privacyConfigured}

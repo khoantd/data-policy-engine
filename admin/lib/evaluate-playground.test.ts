@@ -36,6 +36,26 @@ describe("applyPolicyDefaults", () => {
       source: "crm_system",
     });
   });
+
+  it("derives defaults from PolicyListItem fields", () => {
+    expect(
+      applyPolicyDefaults({
+        id: "pol_list",
+        name: "List",
+        version: 1,
+        status: "active",
+        jurisdiction: "VN_PDPD",
+        policy_kind: "retention",
+        rule_count: 2,
+        scope_data_types: ["employee_record"],
+        scope_sources: ["hr_system"],
+      }),
+    ).toEqual({
+      jurisdiction: "VN_PDPD",
+      dataType: "employee_record",
+      source: "hr_system",
+    });
+  });
 });
 
 describe("trimPolicyForSample", () => {

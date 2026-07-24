@@ -9,7 +9,10 @@ import type {
 } from "@/lib/types";
 
 export const OVERVIEW_AUDIT_WINDOW_DAYS = 7;
-export const OVERVIEW_AUDIT_LIMIT = 1000;
+/** Cap for chart + recent-table sample (single audit fetch). */
+export const OVERVIEW_AUDIT_LIMIT = 250;
+/** Rows shown in the Overview recent-audit table (sliced from the window sample). */
+export const OVERVIEW_RECENT_AUDIT_ROWS = 15;
 export const OVERVIEW_JOBS_LIMIT = 50;
 export const OVERVIEW_DSAR_LIMIT = 50;
 

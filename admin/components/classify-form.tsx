@@ -18,18 +18,19 @@ import {
   type ClassifySampleRecord,
   type ClassifySampleScenario,
 } from "@/lib/ai/classify-sample-schema";
-import type { ClassificationPolicy } from "@/lib/types";
+import type { ClassificationPolicy, PolicyListItem } from "@/lib/types";
 import {
   applyClassificationPolicyDefaults,
   applyClassifySampleRecordToForm,
   asScopePolicyView,
   buildMaskedMetadataSuggestion,
   checkPolicyScope,
-  explainScopeReason,
-  getResultViewState,
   getSelectedPolicy,
   trimClassificationPolicyForSample,
+  explainScopeReason,
+  getResultViewState,
 } from "@/lib/classify-playground";
+import { useLazyPolicy } from "@/lib/use-lazy-policy";
 import { AiPrivacyBadge } from "@/components/ai-privacy-badge";
 import { AiPrivacyFootnote } from "@/components/ai-privacy-footnote";
 import { AiTracingFootnote } from "@/components/ai-tracing-footnote";
@@ -140,7 +141,7 @@ export function ClassifyPlayground({
   tracingConfigured,
   privacyConfigured,
 }: {
-  policies: ClassificationPolicy[];
+  policies: PolicyListItem[];
   aiConfigured: boolean;
   tracingConfigured: boolean;
   privacyConfigured: boolean;
@@ -163,11 +164,16 @@ export function ClassifyPlayground({
     FormData
   >(classifyAction, null);
 
-  const selectedPolicy = getSelectedPolicy(policies, policyId);
-  const scopeView = selectedPolicy
-    ? asScopePolicyView(selectedPolicy)
+  const selectedListItem = getSelectedPolicy(policies, policyId);
+  const {
+    policy: selectedFullPolicy,
+    loading: fullPolicyLoading,
+    error: fullPolicyError,
+  } = useLazyPolicy<ClassificationPolicy>(policyId || null);
+  const scopeView = selectedListItem
+    ? asScopePolicyView(selectedListItem)
     : undefined;
-  const scopeCheck = checkPolicyScope(selectedPolicy, {
+  const scopeCheck = checkPolicyScope(selectedListItem, {
     dataType,
     jurisdiction,
     source,
@@ -225,7 +231,7 @@ export function ClassifyPlayground({
   );
 
   const generateSampleData = useCallback(async () => {
-    if (!aiConfigured || generating || !selectedPolicy) return;
+    if (!aiConfigured || generating || !selectedFullPolicy) return;
 
     setAiError(null);
     setGenerating(true);
@@ -237,7 +243,7 @@ export function ClassifyPlayground({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           scenario,
-          policy: trimClassificationPolicyForSample(selectedPolicy),
+          policy: trimClassificationPolicyForSample(selectedFullPolicy),
         }),
       });
 
@@ -260,7 +266,7 @@ export function ClassifyPlayground({
       setDataType(applied.dataType);
       setRecordId(applied.recordId);
       setSource(applied.source);
-      setJurisdiction(applied.jurisdiction || selectedPolicy.jurisdiction);
+      setJurisdiction(applied.jurisdiction || selectedFullPolicy.jurisdiction);
       setMetadata(applied.metadata);
       setAiStatus("AI sample ready — review before scan");
     } catch (err) {
@@ -271,7 +277,7 @@ export function ClassifyPlayground({
     } finally {
       setGenerating(false);
     }
-  }, [aiConfigured, generating, scenario, selectedPolicy]);
+  }, [aiConfigured, generating, scenario, selectedFullPolicy]);
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1.2fr]">
@@ -286,7 +292,8 @@ export function ClassifyPlayground({
                 disabled={
                   !aiConfigured ||
                   generating ||
-                  !selectedPolicy ||
+                  fullPolicyLoading ||
+                  !selectedFullPolicy ||
                   policies.length === 0
                 }
                 aria-busy={generating}
@@ -399,12 +406,12 @@ export function ClassifyPlayground({
             ))}
           </Select>
 
-          {selectedPolicy && (
+          {selectedListItem && (
             <div className="rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-fg">
               <p className="font-medium text-foreground">Selected policy scope</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <span className="rounded-md border border-border px-2 py-0.5">
-                  Jurisdiction: {selectedPolicy.jurisdiction}
+                  Jurisdiction: {selectedListItem.jurisdiction}
                 </span>
                 <span className="rounded-md border border-border px-2 py-0.5">
                   Data types:{" "}
@@ -419,9 +426,17 @@ export function ClassifyPlayground({
                     : "Any"}
                 </span>
                 <span className="rounded-md border border-border px-2 py-0.5">
-                  Entities: {selectedPolicy.entities.length}
+                  Entities:{" "}
+                  {selectedFullPolicy?.entities.length ??
+                    selectedListItem.entity_count ??
+                    (fullPolicyLoading ? "…" : "—")}
                 </span>
               </div>
+              {fullPolicyError && (
+                <p className="mt-2 text-destructive" role="alert">
+                  {fullPolicyError}
+                </p>
+              )}
             </div>
           )}
 
@@ -432,7 +447,7 @@ export function ClassifyPlayground({
             disabled={generating}
             onChange={(e) => setDataType(e.target.value)}
           />
-          {selectedPolicy && selectedDataTypes.length > 0 && (
+          {selectedListItem && selectedDataTypes.length > 0 && (
             <div className="-mt-2 flex flex-wrap gap-2">
               {selectedDataTypes.map((value) => (
                 <Button
@@ -475,7 +490,7 @@ export function ClassifyPlayground({
                 : "Optional source"
             }
           />
-          {selectedPolicy && selectedSources.length > 0 && (
+          {selectedListItem && selectedSources.length > 0 && (
             <div className="-mt-2 flex flex-wrap gap-2">
               {selectedSources.map((value) => (
                 <Button
@@ -492,7 +507,7 @@ export function ClassifyPlayground({
               ))}
             </div>
           )}
-          {selectedPolicy && !scopeCheck.inScope && (
+          {selectedListItem && !scopeCheck.inScope && (
             <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
               {explainScopeReason(activeReason)} Allowed data types:{" "}
               {selectedDataTypes.join(", ") || "any"}.

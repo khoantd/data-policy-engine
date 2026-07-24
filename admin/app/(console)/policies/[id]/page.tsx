@@ -24,8 +24,12 @@ export default async function PolicyDetailPage({
   let versions: Awaited<ReturnType<typeof drpe.listVersions>> = [];
 
   try {
-    policy = await drpe.getPolicy(id);
-    versions = await drpe.listVersions(id);
+    const [loaded, versionsLoaded] = await Promise.all([
+      drpe.getPolicy(id),
+      drpe.listVersions(id),
+    ]);
+    policy = loaded;
+    versions = versionsLoaded;
   } catch (err) {
     if (err instanceof DrpeApiError && err.status === 404) notFound();
     error = err instanceof Error ? err.message : "Failed to load policy";

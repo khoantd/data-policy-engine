@@ -5,27 +5,26 @@ import { isLiteLLMConfigured } from "@/lib/ai/litellm";
 import { isPrivacyMaskConfigured } from "@/lib/ai/privalyse";
 import { ClassifyPlayground } from "@/components/classify-form";
 import { ErrorAlert, PageHeader } from "@/components/ui/layout";
-import type { ClassificationPolicy } from "@/lib/types";
+import type { PolicyListItem } from "@/lib/types";
 
 export default async function ClassifyPage() {
   let error: string | null = null;
-  let policies: ClassificationPolicy[] = [];
+  let policies: PolicyListItem[] = [];
+  let privacyConfigured = false;
+
   try {
-    const listed = await drpe.listPolicies("active", "classification");
-    policies = (
-      await Promise.all(listed.map((p) => drpe.getPolicy(p.id)))
-    ).filter(
-      (policy): policy is ClassificationPolicy =>
-        policy.policy_kind === "classification" &&
-        Array.isArray((policy as ClassificationPolicy).entities),
-    );
+    const [listed, privacy] = await Promise.all([
+      drpe.listPolicies("active", "classification"),
+      isPrivacyMaskConfigured(),
+    ]);
+    policies = listed.filter((p) => p.policy_kind === "classification");
+    privacyConfigured = privacy;
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load policies";
   }
 
   const aiConfigured = isLiteLLMConfigured();
   const tracingConfigured = isLangSmithConfigured();
-  const privacyConfigured = await isPrivacyMaskConfigured();
 
   return (
     <>

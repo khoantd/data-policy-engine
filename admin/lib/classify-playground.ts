@@ -221,16 +221,25 @@ export function checkPolicyScope(
 }
 
 export function applyClassificationPolicyDefaults(
-  policy: ClassificationPolicy,
+  policy: ClassificationPolicy | PolicyListItem,
 ): {
   jurisdiction: string;
   dataType: string;
   source: string;
 } {
+  if ("entities" in policy && Array.isArray(policy.entities)) {
+    const full = policy as ClassificationPolicy;
+    return {
+      jurisdiction: full.jurisdiction,
+      dataType: full.scope?.data_types?.[0] ?? "",
+      source: full.scope?.sources?.[0] ?? "",
+    };
+  }
+  const listItem = policy as PolicyListItem;
   return {
-    jurisdiction: policy.jurisdiction,
-    dataType: policy.scope?.data_types?.[0] ?? "",
-    source: policy.scope?.sources?.[0] ?? "",
+    jurisdiction: listItem.jurisdiction,
+    dataType: listItem.scope_data_types?.[0] ?? "",
+    source: listItem.scope_sources?.[0] ?? "",
   };
 }
 

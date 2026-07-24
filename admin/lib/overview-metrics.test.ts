@@ -1,9 +1,8 @@
-import { describe, expect, it } from "vitest";
-import type { AuditEntry, EnforcementJob } from "@/lib/types";
 import {
   OVERVIEW_AUDIT_LIMIT,
   OVERVIEW_AUDIT_WINDOW_DAYS,
   OVERVIEW_JOBS_LIMIT,
+  OVERVIEW_RECENT_AUDIT_ROWS,
   bucketAuditByDay,
   buildAttentionItems,
   countByEventType,
@@ -12,6 +11,8 @@ import {
   summarizeJobs,
   type OverviewAttentionInput,
 } from "./overview-metrics";
+import type { AuditEntry, EnforcementJob } from "@/lib/types";
+import { describe, expect, it } from "vitest";
 
 function audit(
   partial: Partial<AuditEntry> & Pick<AuditEntry, "id" | "event_type" | "created_at">,
@@ -31,7 +32,8 @@ function job(
 describe("overview-metrics constants", () => {
   it("documents the Overview sample windows", () => {
     expect(OVERVIEW_AUDIT_WINDOW_DAYS).toBe(7);
-    expect(OVERVIEW_AUDIT_LIMIT).toBe(1000);
+    expect(OVERVIEW_AUDIT_LIMIT).toBe(250);
+    expect(OVERVIEW_RECENT_AUDIT_ROWS).toBe(15);
     expect(OVERVIEW_JOBS_LIMIT).toBe(50);
   });
 });

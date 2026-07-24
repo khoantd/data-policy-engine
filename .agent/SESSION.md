@@ -6,10 +6,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Updated** | 2026-07-23 |
+| **Updated** | 2026-07-24 |
 | **Phase** | build |
 | **Tool** | cursor |
-| **Persona** | backend |
+| **Persona** | frontend |
 
 ## Goal
 
@@ -48,6 +48,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **Admin Vercel deploy** — `scripts/deploy-admin.sh` defaults to **Royal Platform** (`SCOPE=royal-platform`, project `ros-policy-admin`); `--link --yes` creates/links; preview / `--prod`
 - **Celery worker boot** — lazy imports in `drpe.api` / `drpe.scheduler` break circular import so `celery -A drpe.scheduler.celery_app.celery_app worker` starts; README notes worker is required when Redis broker is set
 - **API Docker alignment** — `INSTALL_AI` build-arg; Compose `worker`/`beat` via `--profile celery`; README + `build-backend.sh` VPS recipes document Redis+worker; smoke OK (`celery`/`alembic`/`006`/health)
+- **Admin load UX** — `(console)/loading.tsx` + `PageSkeleton`; Overview/Insights Suspense streaming; Overview single audit fetch (limit 250) + lazy Recharts; Evaluate/Classify list+lazy `GET /api/policies/[id]` + parallel privacy probe; policy detail `Promise.all` get+versions
 
 ## In progress
 
@@ -64,6 +65,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 6. Optional: JWT OAuth2 scopes
 7. Optional: audit_logs monthly partitioning
 8. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
+9. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
 
 ## Decisions
 
@@ -82,7 +84,8 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - Policy activate = rollback-as-new-version (never rewrite `policy_versions` history)
 - Admin UI: Next.js App Router BFF in `admin/` (not static html-tailwind); API key in httpOnly cookie
 - Policy Import AI: Admin BFF → remote LiteLLM (OpenAI-compatible); FastAPI stays validate/import only; never auto-import AI drafts
-- Product name: **ROS Policy** (display); technical package/env remain `drpe` / `DRPE_*` unless a breaking rebrand is requested
+- Product name: **ROS Policy** (display); technical package/env remain `drpe` / `DRPE_*` unless a breaking rebrand is desired
+- Admin load UX: prefer `loading.tsx` + Suspense over `revalidate` for ops freshness; playgrounds use list metadata + lazy full policy
 
 ## Gotchas
 
@@ -108,4 +111,5 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 | Tasks | `tasks/todo.md` |
 | Admin UI | `admin/` (Next.js), `admin/design-system/MASTER.md` |
 | Key files | `drpe/api/app.py` (CORS), `admin/lib/drpe-client.ts`, `admin/middleware.ts`, `openapi/openapi.json`, `clients/` |
+| Load UX | `admin/app/(console)/loading.tsx`, `admin/components/ui/page-skeleton.tsx`, `admin/lib/use-lazy-policy.ts` |
 | Tests | `python -m pytest tests/ -v` |

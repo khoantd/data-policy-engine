@@ -1,11 +1,24 @@
-import type { Policy } from "@/lib/types";
+import type { Policy, PolicyListItem } from "@/lib/types";
 import type { EvaluateSampleRecord } from "@/lib/ai/evaluate-sample-schema";
 
-export function applyPolicyDefaults(policy: Policy): {
+function isPolicyListItem(
+  policy: Policy | PolicyListItem,
+): policy is PolicyListItem {
+  return !("rules" in policy);
+}
+
+export function applyPolicyDefaults(policy: Policy | PolicyListItem): {
   jurisdiction: string;
   dataType: string;
   source: string;
 } {
+  if (isPolicyListItem(policy)) {
+    return {
+      jurisdiction: policy.jurisdiction,
+      dataType: policy.scope_data_types?.[0] ?? "",
+      source: policy.scope_sources?.[0] ?? "",
+    };
+  }
   return {
     jurisdiction: policy.jurisdiction,
     dataType: policy.scope?.data_types?.[0] ?? "",

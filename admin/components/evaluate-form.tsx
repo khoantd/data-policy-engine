@@ -20,8 +20,9 @@ import {
   trimPolicyForSample,
   type TargetMatchStatus,
 } from "@/lib/evaluate-playground";
-import type { EvaluationResponse, Policy } from "@/lib/types";
+import type { EvaluationResponse, Policy, PolicyListItem } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
+import { useLazyPolicy } from "@/lib/use-lazy-policy";
 import { AiPrivacyBadge } from "@/components/ai-privacy-badge";
 import { AiPrivacyFootnote } from "@/components/ai-privacy-footnote";
 import { StatusBadge } from "@/components/status-badge";
@@ -304,7 +305,7 @@ export function EvaluatePlayground({
   tracingConfigured,
   privacyConfigured,
 }: {
-  policies: Policy[];
+  policies: PolicyListItem[];
   aiConfigured: boolean;
   tracingConfigured: boolean;
   privacyConfigured: boolean;
@@ -332,7 +333,12 @@ export function EvaluatePlayground({
   const [batchRecords, setBatchRecords] = useState(BATCH_PRESET);
   const [applied, setApplied] = useState(false);
 
-  const selectedPolicy = policies.find((p) => p.id === targetPolicyId);
+  const selectedListItem = policies.find((p) => p.id === targetPolicyId);
+  const {
+    policy: selectedFullPolicy,
+    loading: fullPolicyLoading,
+    error: fullPolicyError,
+  } = useLazyPolicy<Policy>(targetPolicyId || null);
 
   useEffect(() => {
     if (state?.result || state?.results) setApplied(true);
@@ -363,7 +369,7 @@ export function EvaluatePlayground({
   );
 
   const generateSampleData = useCallback(async () => {
-    if (!aiConfigured || generating || !selectedPolicy) return;
+    if (!aiConfigured || generating || !selectedFullPolicy) return;
 
     setAiError(null);
     setGenerating(true);
@@ -376,7 +382,7 @@ export function EvaluatePlayground({
         body: JSON.stringify({
           mode,
           scenario: mode === "single" ? scenario : "auto",
-          policy: trimPolicyForSample(selectedPolicy),
+          policy: trimPolicyForSample(selectedFullPolicy),
         }),
       });
 
@@ -405,7 +411,7 @@ export function EvaluatePlayground({
         setDataType(applied.dataType);
         setRecordId(applied.recordId);
         setSource(applied.source);
-        setJurisdiction(applied.jurisdiction || selectedPolicy.jurisdiction);
+        setJurisdiction(applied.jurisdiction || selectedFullPolicy.jurisdiction);
         setMetadata(applied.metadata);
         setContext(applied.context);
         setAiStatus("Sample record ready — review before evaluate");
@@ -418,7 +424,7 @@ export function EvaluatePlayground({
     } finally {
       setGenerating(false);
     }
-  }, [aiConfigured, generating, mode, scenario, selectedPolicy]);
+  }, [aiConfigured, generating, mode, scenario, selectedFullPolicy]);
 
   function applyPreset(preset: Preset) {
     setMode("single");
@@ -471,13 +477,13 @@ export function EvaluatePlayground({
                   </option>
                 ))}
               </Select>
-              {selectedPolicy && (
+              {selectedListItem && (
                 <p className="text-xs text-muted-fg">
                   Evaluation still considers all active policies. This selection
                   drives sample data and highlights whether your target policy
                   matched.{" "}
                   <Link
-                    href={`/policies/${encodeURIComponent(selectedPolicy.id)}`}
+                    href={`/policies/${encodeURIComponent(selectedListItem.id)}`}
                     className="text-secondary underline-offset-2 hover:underline cursor-pointer"
                   >
                     View policy
@@ -489,6 +495,11 @@ export function EvaluatePlayground({
                   >
                     All policies ({policies.length})
                   </Link>
+                </p>
+              )}
+              {fullPolicyError && (
+                <p className="text-xs text-destructive" role="alert">
+                  {fullPolicyError}
                 </p>
               )}
             </>
@@ -526,7 +537,8 @@ export function EvaluatePlayground({
                 disabled={
                   !aiConfigured ||
                   generating ||
-                  !selectedPolicy ||
+                  fullPolicyLoading ||
+                  !selectedFullPolicy ||
                   policies.length === 0
                 }
                 aria-busy={generating}
