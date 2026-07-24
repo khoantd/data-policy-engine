@@ -44,4 +44,4 @@
 - [x] Public exports: `ClassificationRequest` / `ClassificationResponse`
 - [x] Example `config/gdpr_pii_classification.yaml` set to `active` (matches evaluate sample)
 - [x] Admin BFF `classifyBatch`
-- [ ] Optional: Postman folders for systems / processes / grace-holds
+- [x] Postman: Systems / Processes / Grace Holds + policy catalog links (44/44 OpenAPI paths)

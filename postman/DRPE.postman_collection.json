@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "fca6ba9d-026c-4ff1-b2c2-d26a38a3c7aa",
     "name": "ROS Policy",
-    "description": "HTTP collection for the ROS Policy FastAPI backend (`/api/v1`).\n\n**Setup**\n1. Import this collection and the companion environment `DRPE.local.postman_environment.json`.\n2. Set `baseUrl` (default `http://localhost:8000`) and `apiKey` (your `DRPE_API_KEY`; leave empty if auth is off).\n3. Optionally set `policyId`, `jobId`, `requestId`, `webhookId` after creating resources.\n\nAuth: Bearer token (`Authorization: Bearer {{apiKey}}`).\nOpenAPI source: `openapi/openapi.json`.",
+    "description": "HTTP collection for the ROS Policy FastAPI backend (`/api/v1`).\n\n**Setup**\n1. Import this collection and the companion environment `DRPE.local.postman_environment.json`.\n2. Set `baseUrl` (default `http://localhost:8000`) and `apiKey` (your `DRPE_API_KEY`; leave empty if auth is off).\n3. Optionally set `policyId`, `jobId`, `requestId`, `webhookId` after creating resources.\n\nAuth: Bearer token (`Authorization: Bearer {{apiKey}}`).\nOpenAPI source: `openapi/openapi.json`.\n\n**Catalog & holds**\n- `Systems` / `Processes` \u2014 governance catalog + policy link replace-sets\n- Policy folder includes List/Set Policy Systems and Processes\n- `Grace Holds` \u2014 list/get/force/cancel enforcement holds\n- Set env vars `systemId`, `processId`, `holdId` after creating resources\n",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -47,6 +47,18 @@
     {
       "key": "jurisdictionCode",
       "value": "EU_GDPR"
+    },
+    {
+      "key": "systemId",
+      "value": ""
+    },
+    {
+      "key": "processId",
+      "value": ""
+    },
+    {
+      "key": "holdId",
+      "value": ""
     }
   ],
   "item": [
@@ -592,6 +604,650 @@
             "description": "Activate Policy Version"
           },
           "response": []
+        },
+        {
+          "name": "List Policy Systems",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/systems",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "systems"
+              ],
+              "query": []
+            },
+            "description": "List Policy Systems"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Policy Systems",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/systems",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "systems"
+              ],
+              "query": []
+            },
+            "description": "Set Policy Systems",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"system_ids\": [\n    \"{{systemId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Policy Processes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/processes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "processes"
+              ],
+              "query": []
+            },
+            "description": "List Policy Processes"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Policy Processes",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/processes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "policies",
+                "{{policyId}}",
+                "processes"
+              ],
+              "query": []
+            },
+            "description": "Set Policy Processes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"process_ids\": [\n    \"{{processId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Systems",
+      "description": "Governance catalog: systems (and policy links). Does not change evaluate/classify matching.",
+      "item": [
+        {
+          "name": "List Systems",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/systems",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "systems"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List Systems"
+          },
+          "response": []
+        },
+        {
+          "name": "Create System",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/systems",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "systems"
+              ],
+              "query": []
+            },
+            "description": "Create System",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"CRM\",\n  \"description\": \"Customer relationship management\",\n  \"owner\": \"ops@example.com\",\n  \"status\": \"active\",\n  \"source_key\": \"crm_system\",\n  \"tags\": [\n    \"crm\",\n    \"customer\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get System",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/systems/{{systemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "systems",
+                "{{systemId}}"
+              ],
+              "query": []
+            },
+            "description": "Get System"
+          },
+          "response": []
+        },
+        {
+          "name": "Update System",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/systems/{{systemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "systems",
+                "{{systemId}}"
+              ],
+              "query": []
+            },
+            "description": "Update System",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated CRM description\",\n  \"owner\": \"dpo@example.com\",\n  \"status\": \"active\",\n  \"source_key\": \"crm_system\",\n  \"tags\": [\n    \"crm\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete System",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/systems/{{systemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "systems",
+                "{{systemId}}"
+              ],
+              "query": []
+            },
+            "description": "Delete System"
+          },
+          "response": []
+        },
+        {
+          "name": "List System Policies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/systems/{{systemId}}/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "systems",
+                "{{systemId}}",
+                "policies"
+              ],
+              "query": []
+            },
+            "description": "List System Policies"
+          },
+          "response": []
+        },
+        {
+          "name": "Set System Policies",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/systems/{{systemId}}/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "systems",
+                "{{systemId}}",
+                "policies"
+              ],
+              "query": []
+            },
+            "description": "Set System Policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policy_ids\": [\n    \"{{policyId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Processes",
+      "description": "Governance catalog: business processes (and policy links). Does not change evaluate/classify matching.",
+      "item": [
+        {
+          "name": "List Processes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/processes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "processes"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List Processes"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Process",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/processes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "processes"
+              ],
+              "query": []
+            },
+            "description": "Create Process",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Customer onboarding\",\n  \"description\": \"Intake and KYC\",\n  \"owner\": \"ops@example.com\",\n  \"status\": \"active\",\n  \"tags\": [\n    \"onboarding\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Process",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/processes/{{processId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "processes",
+                "{{processId}}"
+              ],
+              "query": []
+            },
+            "description": "Get Process"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Process",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/processes/{{processId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "processes",
+                "{{processId}}"
+              ],
+              "query": []
+            },
+            "description": "Update Process",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated onboarding process\",\n  \"owner\": \"dpo@example.com\",\n  \"status\": \"active\",\n  \"tags\": [\n    \"onboarding\",\n    \"kyc\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Process",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/processes/{{processId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "processes",
+                "{{processId}}"
+              ],
+              "query": []
+            },
+            "description": "Delete Process"
+          },
+          "response": []
+        },
+        {
+          "name": "List Process Policies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/processes/{{processId}}/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "processes",
+                "{{processId}}",
+                "policies"
+              ],
+              "query": []
+            },
+            "description": "List Process Policies"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Process Policies",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/processes/{{processId}}/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "processes",
+                "{{processId}}",
+                "policies"
+              ],
+              "query": []
+            },
+            "description": "Set Process Policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policy_ids\": [\n    \"{{policyId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -965,6 +1621,184 @@
               "query": []
             },
             "description": "Get Job"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Grace Holds",
+      "description": "Grace-period holds created by enforcement (list/get/force/cancel).",
+      "item": [
+        {
+          "name": "List Grace Holds",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/grace-holds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "grace-holds"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "policy_id",
+                  "value": "{{policyId}}",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "record_id",
+                  "value": "cust_123",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "rule_id",
+                  "value": "rule_inactive_delete",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List Grace Holds"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Grace Hold",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/grace-holds/{{holdId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "grace-holds",
+                "{{holdId}}"
+              ],
+              "query": []
+            },
+            "description": "Get Grace Hold"
+          },
+          "response": []
+        },
+        {
+          "name": "Force Grace Hold",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/grace-holds/{{holdId}}/force",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "grace-holds",
+                "{{holdId}}",
+                "force"
+              ],
+              "query": []
+            },
+            "description": "Force Grace Hold",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requester\": \"ops@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Grace Hold",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/grace-holds/{{holdId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "grace-holds",
+                "{{holdId}}",
+                "cancel"
+              ],
+              "query": []
+            },
+            "description": "Cancel Grace Hold",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requester\": \"ops@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "response": []
         }

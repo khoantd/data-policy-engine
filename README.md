@@ -205,10 +205,10 @@ Committed collection and local environment live under [`postman/`](postman/):
 5. Edit the environment variables:
    - `baseUrl` — default `http://localhost:8000` (use your API host if different)
    - `apiKey` — your `DRPE_API_KEY` (leave empty if API auth is off)
-   - Optionally set `policyId`, `jobId`, `requestId`, `webhookId`, `jurisdictionCode` after creating resources
+   - Optionally set `policyId`, `jobId`, `requestId`, `webhookId`, `jurisdictionCode`, `systemId`, `processId`, `holdId` after creating resources
 6. Start the API (`uvicorn` or Docker), then run **Health → Health** to verify connectivity.
 
-Auth is **Bearer** (`Authorization: Bearer {{apiKey}}`) at the collection level. The collection mirrors [`openapi/openapi.json`](openapi/openapi.json).
+Auth is **Bearer** (`Authorization: Bearer {{apiKey}}`) at the collection level. The collection mirrors [`openapi/openapi.json`](openapi/openapi.json), including **Systems**, **Processes**, **Grace Holds**, and policy↔catalog link requests.
 
 #### Import via Newman / CLI (optional)
 

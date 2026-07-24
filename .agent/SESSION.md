@@ -56,6 +56,7 @@ Keep Python SDK + Admin BFF client aligned with current `/api/v1` (evaluate/clas
 - **System request context (Admin UX)** — Evaluate/Scan optional System picker seeds `source` from `source_key`; optional Process picker shows governance-linked policies; `?system=` / `?process=` deep links + catalog detail Try evaluate/scan CTAs; AI sample endpoints accept system/process snapshots and force `source` from `source_key`; no engine matching change
 - **Redis connection pool caps** — `create_redis_client` defaults `max_connections=20` + timeouts; Celery `broker_pool_limit` / `redis_max_connections` / transport `max_connections`; env `DRPE_REDIS_MAX_CONNECTIONS`, `DRPE_CELERY_BROKER_POOL_LIMIT`
 - **SDK alignment** — `DRPEClient.classify_batch`; Bearer headers on injected `http_client`; embedded `PolicyEvaluator` splits retention vs classification + `classify`/`classify_dry_run`/`classify_batch`; exports `ClassificationRequest`/`ClassificationResponse`; Admin BFF `classifyBatch`; sample `config/gdpr_pii_classification.yaml` → `active`; README/ARCHITECTURE updated; OpenAPI clients already path-complete (systems/processes included)
+- **Postman alignment** — `postman/DRPE.postman_collection.json` now covers all 44 OpenAPI paths: Systems, Processes, Grace Holds folders + policy systems/processes link requests; env vars `systemId` / `processId` / `holdId`
 
 ## In progress
 
@@ -68,17 +69,16 @@ Keep Python SDK + Admin BFF client aligned with current `/api/v1` (evaluate/clas
 2. Set `DRPE_API_URL` on Vercel project `royal-platform/ros-policy-admin` (Production/Preview), then redeploy
 3. When Redis/Celery broker is set: `docker compose --profile celery up` (or separate worker/beat containers); else `DRPE_CELERY_EAGER=true`
 4. **Redeploy API** after Redis pool caps (`DRPE_REDIS_MAX_CONNECTIONS`, `DRPE_CELERY_BROKER_POOL_LIMIT`) — then confirm Redis `connected_clients` stays under `maxclients`
-5. Optional: Postman — add Systems / Processes / grace-holds folders to match OpenAPI
-6. Optional: AI assist on policy detail editor (same BFF)
-7. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
-8. Optional: JWT OAuth2 scopes
-9. Optional: audit_logs monthly partitioning
-10. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
-11. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
-12. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
-13. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
-14. Optional: sync catalog `source_key` into evaluate `scope.sources` (explicitly out of scope for v1 governance catalog)
-15. Optional: process↔system edges; richer RoPA fields
+5. Optional: AI assist on policy detail editor (same BFF)
+6. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
+7. Optional: JWT OAuth2 scopes
+8. Optional: audit_logs monthly partitioning
+9. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
+10. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
+11. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
+12. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
+13. Optional: sync catalog `source_key` into evaluate `scope.sources` (explicitly out of scope for v1 governance catalog)
+14. Optional: process↔system edges; richer RoPA fields
 
 ## Decisions
 
