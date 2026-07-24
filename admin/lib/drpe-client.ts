@@ -169,7 +169,8 @@ export const drpe = {
   listAudit: (qs?: string) =>
     drpeFetch<AuditEntry[]>(`/audit/logs${qs ? `?${qs}` : ""}`),
 
-  listWebhooks: () => drpeFetch<WebhookResponse[]>("/webhooks"),
+  listWebhooks: (qs?: string) =>
+    drpeFetch<WebhookResponse[]>(`/webhooks${qs ? `?${qs}` : ""}`),
   getWebhook: (id: string) =>
     drpeFetch<WebhookResponse>(`/webhooks/${encodeURIComponent(id)}`),
   createWebhook: (body: {

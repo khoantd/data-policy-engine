@@ -20,6 +20,8 @@ import {
   tableRowClass,
   TableWrap,
 } from "@/components/ui/layout";
+import { PaginationControls } from "@/components/ui/pagination";
+import { paginateItems } from "@/lib/pagination";
 import { formatDate } from "@/lib/utils";
 
 const SETUP_SNIPPET = `# LiteLLM (required for AI assist)
@@ -91,6 +93,7 @@ export function ObservabilityDashboard({
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [listMessage, setListMessage] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const loadTraces = useCallback(async () => {
     if (!langsmithConfigured) return;
@@ -146,6 +149,15 @@ export function ObservabilityDashboard({
         (t.route?.toLowerCase().includes(q) ?? false),
     );
   }, [filters.search, traces]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters.search, filters.route, filters.status, filters.webSearch, filters.window]);
+
+  const pagination = useMemo(
+    () => paginateItems(filteredTraces, page),
+    [filteredTraces, page],
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -332,65 +344,80 @@ export function ObservabilityDashboard({
                 {filteredTraces.length === 0 && !loading ? (
                   <EmptyState message={listMessage ?? "No traces to show."} />
                 ) : (
-                  <TableWrap stickyHeader>
-                    <table className="w-full min-w-[900px] text-left text-sm">
-                      <thead className={tableHeaderClass}>
-                        <tr>
-                          <th className={`${tableCellClass} font-medium`}>Status</th>
-                          <th className={`${tableCellClass} font-medium`}>Name</th>
-                          <th className={`${tableCellClass} font-medium`}>Route</th>
-                          <th className={`${tableCellClass} font-medium`}>Mode</th>
-                          <th className={`${tableCellClass} font-medium`}>Web search</th>
-                          <th className={`${tableCellClass} font-medium`}>Latency</th>
-                          <th className={`${tableCellClass} font-medium`}>Start time</th>
-                          <th className={`${tableCellClass} font-medium`}>Link</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredTraces.map((trace) => (
-                          <tr key={trace.id} className={tableRowClass}>
-                            <td className={tableCellClass}>
-                              <StatusDot status={trace.status} />
-                            </td>
-                            <td className={`${tableCellClass} font-mono text-xs`}>
-                              {trace.name}
-                            </td>
-                            <td className={`${tableCellClass} font-mono text-xs`}>
-                              {trace.route ?? "—"}
-                            </td>
-                            <td className={`${tableCellClass} font-mono text-xs`}>
-                              {trace.mode ?? "—"}
-                            </td>
-                            <td className={tableCellClass}>
-                              {trace.webSearch ? (
-                                <StatusDot status={trace.webSearch} />
-                              ) : (
-                                "—"
-                              )}
-                            </td>
-                            <td className={`${tableCellClass} font-mono text-xs`}>
-                              {formatLatency(trace.latencyMs)}
-                            </td>
-                            <td className={`${tableCellClass} font-mono text-xs whitespace-nowrap`}>
-                              {formatDate(trace.startTime)}
-                            </td>
-                            <td className={tableCellClass}>
-                              <a
-                                href={trace.langsmithUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-secondary hover:underline cursor-pointer text-xs"
-                                aria-label={`Open trace ${trace.name} in LangSmith`}
-                              >
-                                LangSmith
-                                <ExternalLink className="size-3" aria-hidden />
-                              </a>
-                            </td>
+                  <>
+                    <TableWrap stickyHeader>
+                      <table className="w-full min-w-[900px] text-left text-sm">
+                        <thead className={tableHeaderClass}>
+                          <tr>
+                            <th className={`${tableCellClass} font-medium`}>Status</th>
+                            <th className={`${tableCellClass} font-medium`}>Name</th>
+                            <th className={`${tableCellClass} font-medium`}>Route</th>
+                            <th className={`${tableCellClass} font-medium`}>Mode</th>
+                            <th className={`${tableCellClass} font-medium`}>Web search</th>
+                            <th className={`${tableCellClass} font-medium`}>Latency</th>
+                            <th className={`${tableCellClass} font-medium`}>Start time</th>
+                            <th className={`${tableCellClass} font-medium`}>Link</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </TableWrap>
+                        </thead>
+                        <tbody>
+                          {pagination.items.map((trace) => (
+                            <tr key={trace.id} className={tableRowClass}>
+                              <td className={tableCellClass}>
+                                <StatusDot status={trace.status} />
+                              </td>
+                              <td className={`${tableCellClass} font-mono text-xs`}>
+                                {trace.name}
+                              </td>
+                              <td className={`${tableCellClass} font-mono text-xs`}>
+                                {trace.route ?? "—"}
+                              </td>
+                              <td className={`${tableCellClass} font-mono text-xs`}>
+                                {trace.mode ?? "—"}
+                              </td>
+                              <td className={tableCellClass}>
+                                {trace.webSearch ? (
+                                  <StatusDot status={trace.webSearch} />
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                              <td className={`${tableCellClass} font-mono text-xs`}>
+                                {formatLatency(trace.latencyMs)}
+                              </td>
+                              <td className={`${tableCellClass} font-mono text-xs whitespace-nowrap`}>
+                                {formatDate(trace.startTime)}
+                              </td>
+                              <td className={tableCellClass}>
+                                <a
+                                  href={trace.langsmithUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-secondary hover:underline cursor-pointer text-xs"
+                                  aria-label={`Open trace ${trace.name} in LangSmith`}
+                                >
+                                  LangSmith
+                                  <ExternalLink className="size-3" aria-hidden />
+                                </a>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </TableWrap>
+                    <div className="px-4 pb-4 md:px-5">
+                      <PaginationControls
+                        page={pagination.page}
+                        hasPrev={pagination.hasPrev}
+                        hasNext={pagination.hasNext}
+                        from={pagination.from}
+                        to={pagination.to}
+                        total={pagination.total}
+                        totalPages={pagination.totalPages}
+                        onPageChange={setPage}
+                        className="mt-0"
+                      />
+                    </div>
+                  </>
                 )}
               </ContentCard>
             </>

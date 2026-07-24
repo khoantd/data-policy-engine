@@ -2,8 +2,14 @@ import Link from "next/link";
 import { drpe } from "@/lib/drpe-client";
 import { formatDate } from "@/lib/utils";
 import { buildBreadcrumbs } from "@/lib/breadcrumbs";
+import {
+  parsePage,
+  resolveOffsetPage,
+  toListQuery,
+} from "@/lib/pagination";
 import { CreateDsarForm } from "@/components/dsar-audit-forms";
 import { StatusDot } from "@/components/status-dot";
+import { PaginationBar } from "@/components/ui/pagination";
 import type { PolicyListItem } from "@/lib/types";
 import {
   ContentCard,
@@ -17,20 +23,29 @@ import {
   TableWrap,
 } from "@/components/ui/layout";
 
-export default async function DsarPage() {
+export default async function DsarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const sp = await searchParams;
+  const page = parsePage(sp.page);
+  const { limit, offset } = toListQuery(page);
+
   let error: string | null = null;
-  let requests: Awaited<ReturnType<typeof drpe.listDsar>> = [];
+  let fetched: Awaited<ReturnType<typeof drpe.listDsar>> = [];
   let policies: PolicyListItem[] = [];
   try {
     const [listedRequests, listedPolicies] = await Promise.all([
-      drpe.listDsar("limit=100"),
+      drpe.listDsar(`limit=${limit}&offset=${offset}`),
       drpe.listPolicies("active", "retention"),
     ]);
-    requests = listedRequests;
+    fetched = listedRequests;
     policies = listedPolicies;
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load DSAR";
   }
+  const pagination = resolveOffsetPage(fetched, page);
 
   return (
     <>
@@ -43,56 +58,70 @@ export default async function DsarPage() {
       <Panel title="Create request" className="mb-6">
         <CreateDsarForm policies={policies} />
       </Panel>
-      <ContentCard title="Recent requests">
-        {requests.length === 0 ? (
+      <ContentCard title="Requests">
+        {pagination.items.length === 0 ? (
           <EmptyState message="No DSAR requests yet." />
         ) : (
-          <TableWrap stickyHeader>
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className={tableHeaderClass}>
-                <tr>
-                  <th className={`${tableCellClass} font-medium`}>ID</th>
-                  <th className={`${tableCellClass} font-medium`}>Type</th>
-                  <th className={`${tableCellClass} font-medium`}>Status</th>
-                  <th className={`${tableCellClass} font-medium`}>Subject</th>
-                  <th className={`${tableCellClass} font-medium`}>Policy</th>
-                  <th className={`${tableCellClass} font-medium`}>Requested</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((r) => (
-                  <tr key={r.id} className={tableRowClass}>
-                    <td className={`${tableCellClass} font-mono text-xs`}>
-                      <Link
-                        href={`/dsar/${encodeURIComponent(r.id)}`}
-                        className="text-secondary hover:underline cursor-pointer"
-                      >
-                        {r.id.slice(0, 8)}…
-                      </Link>
-                    </td>
-                    <td className={tableCellClass}>
-                      <StatusDot status={r.type} />
-                    </td>
-                    <td className={tableCellClass}>
-                      <StatusDot status={r.status} />
-                    </td>
-                    <td className={`${tableCellClass} font-mono text-xs`}>{r.subject_id}</td>
-                    <td className={`${tableCellClass} font-mono text-xs`}>
-                      <Link
-                        href={`/policies/${encodeURIComponent(r.policy_id)}`}
-                        className="text-secondary hover:underline cursor-pointer"
-                      >
-                        {r.policy_id}
-                      </Link>
-                    </td>
-                    <td className={`${tableCellClass} font-mono text-xs whitespace-nowrap`}>
-                      {formatDate(r.requested_at)}
-                    </td>
+          <>
+            <TableWrap stickyHeader>
+              <table className="w-full min-w-[720px] text-left text-sm">
+                <thead className={tableHeaderClass}>
+                  <tr>
+                    <th className={`${tableCellClass} font-medium`}>ID</th>
+                    <th className={`${tableCellClass} font-medium`}>Type</th>
+                    <th className={`${tableCellClass} font-medium`}>Status</th>
+                    <th className={`${tableCellClass} font-medium`}>Subject</th>
+                    <th className={`${tableCellClass} font-medium`}>Policy</th>
+                    <th className={`${tableCellClass} font-medium`}>Requested</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </TableWrap>
+                </thead>
+                <tbody>
+                  {pagination.items.map((r) => (
+                    <tr key={r.id} className={tableRowClass}>
+                      <td className={`${tableCellClass} font-mono text-xs`}>
+                        <Link
+                          href={`/dsar/${encodeURIComponent(r.id)}`}
+                          className="text-secondary hover:underline cursor-pointer"
+                        >
+                          {r.id.slice(0, 8)}…
+                        </Link>
+                      </td>
+                      <td className={tableCellClass}>
+                        <StatusDot status={r.type} />
+                      </td>
+                      <td className={tableCellClass}>
+                        <StatusDot status={r.status} />
+                      </td>
+                      <td className={`${tableCellClass} font-mono text-xs`}>
+                        {r.subject_id}
+                      </td>
+                      <td className={`${tableCellClass} font-mono text-xs`}>
+                        <Link
+                          href={`/policies/${encodeURIComponent(r.policy_id)}`}
+                          className="text-secondary hover:underline cursor-pointer"
+                        >
+                          {r.policy_id}
+                        </Link>
+                      </td>
+                      <td
+                        className={`${tableCellClass} font-mono text-xs whitespace-nowrap`}
+                      >
+                        {formatDate(r.requested_at)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </TableWrap>
+            <div className="px-4 pb-4 md:px-5">
+              <PaginationBar
+                pathname="/dsar"
+                searchParams={sp}
+                state={pagination}
+                className="mt-0"
+              />
+            </div>
+          </>
         )}
       </ContentCard>
     </>
