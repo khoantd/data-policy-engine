@@ -357,7 +357,7 @@ Optional. When `REDIS_URL` (or `DRPE_REDIS_URL`) is set, DRPE wraps the PolicySt
 - `/api/v1/health/ready` PINGs Redis and returns 503 if unreachable
 - Read failures fall through to the inner store
 
-Defaults: `DRPE_REDIS_TTL_SECONDS=300`, `DRPE_REDIS_KEY_PREFIX=drpe`. Requires a local Redis (`redis-server`) or a managed Redis URL.
+Defaults: `DRPE_REDIS_TTL_SECONDS=300`, `DRPE_REDIS_KEY_PREFIX=drpe`, `DRPE_REDIS_MAX_CONNECTIONS=20` (per API process). Celery uses `DRPE_CELERY_BROKER_POOL_LIMIT=10` and the same max-connections cap on the Redis transport. Keep `(API workers × redis max) + (Celery processes × pool)` under Redis `maxclients`. Requires a local Redis (`redis-server`) or a managed Redis URL.
 
 ## Enforcement scheduler (Celery)
 

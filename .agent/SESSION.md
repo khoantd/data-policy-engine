@@ -54,6 +54,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **Policy structure network graph** — Admin `/policies/graph` (fleet) + Structure panel on policy detail via `reagraph`; shared `buildPolicyStructureGraph` + adjacency a11y; Insights remains ReactFlow
 - **Systems & Processes catalog (governance)** — CRUD `/api/v1/systems` + `/processes`; many-to-many policy links (replace-set); Admin Catalog nav + list/detail; policy **Applies to** panel; structure graph `system`/`process` + `applies_to`; migration `009`; does **not** affect evaluate/classify
 - **System request context (Admin UX)** — Evaluate/Scan optional System picker seeds `source` from `source_key`; optional Process picker shows governance-linked policies; `?system=` / `?process=` deep links + catalog detail Try evaluate/scan CTAs; AI sample endpoints accept system/process snapshots and force `source` from `source_key`; no engine matching change
+- **Redis connection pool caps** — `create_redis_client` defaults `max_connections=20` + timeouts; Celery `broker_pool_limit` / `redis_max_connections` / transport `max_connections`; env `DRPE_REDIS_MAX_CONNECTIONS`, `DRPE_CELERY_BROKER_POOL_LIMIT`
 
 ## In progress
 
@@ -65,19 +66,21 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 1. Apply `alembic upgrade head` anywhere the DB schema is not yet at 009+
 2. Set `DRPE_API_URL` on Vercel project `royal-platform/ros-policy-admin` (Production/Preview), then redeploy
 3. When Redis/Celery broker is set: `docker compose --profile celery up` (or separate worker/beat containers); else `DRPE_CELERY_EAGER=true`
-4. Optional: AI assist on policy detail editor (same BFF)
-5. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
-6. Optional: JWT OAuth2 scopes
-7. Optional: audit_logs monthly partitioning
-8. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
-9. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
-10. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
-11. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
-12. Optional: sync catalog `source_key` into evaluate `scope.sources` (explicitly out of scope for v1 governance catalog)
-13. Optional: process↔system edges; richer RoPA fields
+4. **Redeploy API** after Redis pool caps (`DRPE_REDIS_MAX_CONNECTIONS`, `DRPE_CELERY_BROKER_POOL_LIMIT`) — then confirm Redis `connected_clients` stays under `maxclients`
+5. Optional: AI assist on policy detail editor (same BFF)
+6. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
+7. Optional: JWT OAuth2 scopes
+8. Optional: audit_logs monthly partitioning
+9. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
+10. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
+11. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
+12. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
+13. Optional: sync catalog `source_key` into evaluate `scope.sources` (explicitly out of scope for v1 governance catalog)
+14. Optional: process↔system edges; richer RoPA fields
 
 ## Decisions
 
+- Redis client pools are capped per process (`DRPE_REDIS_MAX_CONNECTIONS=20`, Celery `DRPE_CELERY_BROKER_POOL_LIMIT=10`) to avoid prod `max number of clients reached`
 - Python FastAPI (not TypeScript) per user choice and original specs
 - Persistence: Supabase lead-flow (`yshqwmldepsfckiacjwu`), private schema `drpe`
 - `DATABASE_URL` unset → `InMemoryPolicyStore`; set → `SqlAlchemyPolicyStore`

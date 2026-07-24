@@ -338,7 +338,7 @@ def test_ready_with_redis_ok(monkeypatch: pytest.MonkeyPatch) -> None:
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(
-        "drpe.api.app.create_redis_client", lambda _url: fake
+        "drpe.api.app.create_redis_client", lambda _url, **_kwargs: fake
     )
     settings = Settings(
         drpe_policies_dir=str(CONFIG),
@@ -359,7 +359,7 @@ def test_ready_redis_unavailable_returns_503(monkeypatch: pytest.MonkeyPatch) ->
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(
-        "drpe.api.app.create_redis_client", lambda _url: fake
+        "drpe.api.app.create_redis_client", lambda _url, **_kwargs: fake
     )
     settings = Settings(
         drpe_policies_dir=str(CONFIG),

@@ -28,11 +28,29 @@ class RedisClient(Protocol):
     def ping(self) -> Any: ...
 
 
-def create_redis_client(url: str) -> Any:
-    """Create a sync Redis client from a URL."""
+def create_redis_client(
+    url: str,
+    *,
+    max_connections: int = 20,
+    socket_connect_timeout: float = 5,
+    socket_timeout: float = 5,
+    health_check_interval: int = 30,
+) -> Any:
+    """Create a sync Redis client from a URL with a capped connection pool.
+
+    ``max_connections`` limits sockets per process so API workers + Celery
+    cannot exhaust Redis ``maxclients`` under load.
+    """
     import redis
 
-    return redis.Redis.from_url(url, decode_responses=True)
+    return redis.Redis.from_url(
+        url,
+        decode_responses=True,
+        max_connections=max_connections,
+        socket_connect_timeout=socket_connect_timeout,
+        socket_timeout=socket_timeout,
+        health_check_interval=health_check_interval,
+    )
 
 
 class RedisPolicyCache:

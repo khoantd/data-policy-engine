@@ -105,7 +105,10 @@ def _build_store(
     if not settings.redis_url:
         return inner, db_engine, None, None, session_factory
 
-    redis_client = create_redis_client(settings.redis_url)
+    redis_client = create_redis_client(
+        settings.redis_url,
+        max_connections=settings.drpe_redis_max_connections,
+    )
     cache = RedisPolicyCache(
         redis_client,
         ttl_seconds=settings.drpe_redis_ttl_seconds,

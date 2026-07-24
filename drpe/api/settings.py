@@ -30,10 +30,14 @@ class Settings(BaseSettings):
     )
     drpe_redis_ttl_seconds: int = 300
     drpe_redis_key_prefix: str = "drpe"
+    # Cap Redis sockets per API process (CachingPolicyStore client pool).
+    drpe_redis_max_connections: int = 20
     celery_broker_url: str | None = Field(
         default=None,
         validation_alias=AliasChoices("CELERY_BROKER_URL", "DRPE_CELERY_BROKER_URL"),
     )
+    # Cap Celery broker connection pool per worker/beat/API process.
+    drpe_celery_broker_pool_limit: int = 10
     drpe_enforce_interval_seconds: int = 3600
     drpe_webhook_url: str | None = Field(
         default=None,

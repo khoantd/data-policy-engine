@@ -26,25 +26,32 @@ def configure_celery(settings: Settings | None = None) -> Celery:
     else:
         backend = settings.redis_url or broker
 
-    celery_app.conf.update(
-        broker_url=broker,
-        result_backend=backend,
-        task_serializer="json",
-        accept_content=["json"],
-        result_serializer="json",
-        timezone="UTC",
-        enable_utc=True,
-        task_always_eager=eager,
-        task_eager_propagates=True,
-        task_ignore_result=eager,
-        beat_schedule={
+    conf: dict = {
+        "broker_url": broker,
+        "result_backend": backend,
+        "task_serializer": "json",
+        "accept_content": ["json"],
+        "result_serializer": "json",
+        "timezone": "UTC",
+        "enable_utc": True,
+        "task_always_eager": eager,
+        "task_eager_propagates": True,
+        "task_ignore_result": eager,
+        "broker_pool_limit": settings.drpe_celery_broker_pool_limit,
+        "redis_max_connections": settings.drpe_redis_max_connections,
+        "beat_schedule": {
             "scan-due-policies": {
                 "task": "drpe.scheduler.tasks.scan_due_policies",
                 "schedule": schedule(run_every=settings.drpe_enforce_interval_seconds),
             },
         },
-        imports=("drpe.scheduler.tasks",),
-    )
+        "imports": ("drpe.scheduler.tasks",),
+    }
+    if not broker.startswith("memory://"):
+        conf["broker_transport_options"] = {
+            "max_connections": settings.drpe_redis_max_connections,
+        }
+    celery_app.conf.update(**conf)
     return celery_app
 
 
