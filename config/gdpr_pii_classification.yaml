@@ -1,7 +1,7 @@
 classification_policy:
   id: pol_gdpr_pii_detect
   name: "GDPR Personal Data Detection"
-  status: draft
+  status: active
   jurisdiction: EU_GDPR
   version: 1
   tags: [gdpr, pii, detection]

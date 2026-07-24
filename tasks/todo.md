@@ -37,3 +37,11 @@
 - [x] Export committed OpenAPI schema (`openapi/openapi.json`)
 - [x] Generate TypeScript / Go / Java clients under `clients/` (`npm run openapi`)
 - [x] Admin OpenAPI types generator (`admin` `npm run openapi` → `lib/generated/schema.d.ts`)
+
+## SDK alignment (2026-07-24)
+- [x] `DRPEClient.classify_batch` + Bearer headers on injected `http_client`
+- [x] Embedded `PolicyEvaluator` loads retention + classification; `classify` / `classify_dry_run` / `classify_batch`
+- [x] Public exports: `ClassificationRequest` / `ClassificationResponse`
+- [x] Example `config/gdpr_pii_classification.yaml` set to `active` (matches evaluate sample)
+- [x] Admin BFF `classifyBatch`
+- [ ] Optional: Postman folders for systems / processes / grace-holds

@@ -1,45 +1,105 @@
 # ROS Policy — Architecture
 
+> Product display name: **ROS Policy**. Technical package/env remain `drpe` / `DRPE_*`.
+> Updated: 2026-07-24
+
 ## 1. System Overview
 
-ROS Policy is a **standalone policy engine** that other applications integrate with to:
+ROS Policy is a **standalone retention & classification policy engine** that applications integrate with to:
 
-1. **Define** data retention policies via a YAML-based DSL
-2. **Evaluate** whether a data record should be retained, archived, anonymized, or deleted
-3. **Enforce** policies via scheduled scans + webhook callbacks
-4. **Audit** every policy evaluation and action with an immutable trail
-5. **Version** policies with full history, diff, and rollback
-6. **Comply** with GDPR, PDPA, and custom jurisdictional rules
+1. **Define** retention and classification policies via a YAML DSL
+2. **Evaluate** whether a record should be retained, archived, anonymized, deleted, etc.
+3. **Classify** records for PII/SPII (and related) detections against classification policies
+4. **Enforce** policies via scheduled Celery scans + webhook / action dispatch
+5. **Audit** enforcement and DSAR outcomes with an append-only trail
+6. **Version** policies with full history, structural diff, and rollback-as-new-version
+7. **Govern** systems & processes (RoPA-style catalog) linked to policies (metadata only)
+8. **Operate** via Admin UI (Next.js BFF) over the same `/api/v1` surface
 
 ### Architecture Style: Hexagonal (Ports & Adapters)
 
-**Why**: The engine must be usable as both a REST API (remote) and a Python SDK (in-process). Hexagonal architecture keeps the core policy evaluation logic independent of transport and storage, enabling both integration modes from the same codebase.
+The engine is usable as a **REST API** (remote) and a **Python SDK** (in-process). Core evaluation/classification stays independent of transport and storage.
 
 ```
-┌─────────────────────────────────────────────────┐
-│                  ROS Policy Core                │
-│  ┌───────────┐  ┌──────────┐  ┌──────────────┐ │
-│  │ Policy DSL│  │ Evaluator│  │ Version Mgr  │ │
-│  │  Parser   │  │  Engine  │  │              │ │
-│  └───────────┘  └──────────┘  └──────────────┘ │
-│  ┌───────────┐  ┌──────────┐  ┌──────────────┐ │
-│  │ Audit     │  │ Scheduler│  │ Jurisdiction │ │
-│  │ Logger    │  │          │  │ Registry     │ │
-│  └───────────┘  └──────────┘  └──────────────┘ │
-├─────────────────────────────────────────────────┤
-│                    Ports                        │
-│  [PolicyStore] [AuditStore] [ActionDispatcher]  │
-│  [WebhookSender] [NotificationPort]             │
-├─────────────────────────────────────────────────┤
-│                   Adapters                      │
-│  [PostgresPolicy] [PostgresAudit] [HTTPWebhook] │
-│  [FastAPI REST] [Python SDK] [CLI]              │
-└─────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                         ROS Policy Core                          │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌───────────────┐ │
+│  │ DSL Parser │ │ Evaluator  │ │ Classifier │ │ Policy Diff   │ │
+│  └────────────┘ └────────────┘ └────────────┘ └───────────────┘ │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌───────────────┐ │
+│  │ Enforcement│ │ DSAR Svc   │ │ Jurisdiction│ │ Conflict Res. │ │
+│  └────────────┘ └────────────┘ └────────────┘ └───────────────┘ │
+├──────────────────────────────────────────────────────────────────┤
+│                             Ports                                │
+│  PolicyStore · AuditStore · JobStore · DsarStore · WebhookStore  │
+│  GraceHoldStore · CatalogStore · RecordSource · ActionDispatcher │
+│  WebhookSender                                                   │
+├──────────────────────────────────────────────────────────────────┤
+│                            Adapters                              │
+│  InMemory* · SqlAlchemy* · CachingPolicyStore (Redis)            │
+│  HttpWebhook · ActionDispatchers · FastAPI · Python SDK · Celery │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. C4 Diagrams
+## 2. Runtime Topology
+
+```mermaid
+flowchart TB
+  subgraph clients [Clients]
+    Admin["Admin UI<br/>Next.js BFF :3000"]
+    SDK["Python SDK<br/>DRPEClient / PolicyEvaluator"]
+    HTTP["HTTP clients<br/>OpenAPI TS/Go/Java"]
+  end
+
+  subgraph api [API process]
+    FastAPI["FastAPI<br/>/api/v1"]
+    Engine["PolicyEvaluatorEngine"]
+    Classifier["ClassificationEngine"]
+  end
+
+  subgraph workers [Optional workers]
+    CeleryW["Celery worker"]
+    CeleryB["Celery beat"]
+  end
+
+  subgraph data [Data plane]
+    PG[(PostgreSQL<br/>schema drpe)]
+    Redis[(Redis<br/>cache + broker)]
+  end
+
+  subgraph external [External]
+    LiteLLM["LiteLLM<br/>Admin AI assist only"]
+    WebhookTgt["Webhook targets<br/>DRPE_WEBHOOK_URL"]
+  end
+
+  Admin -->|server actions / BFF| FastAPI
+  Admin -.->|AI suggest / samples| LiteLLM
+  SDK --> FastAPI
+  SDK -.->|embedded| Engine
+  HTTP --> FastAPI
+  FastAPI --> Engine
+  FastAPI --> Classifier
+  FastAPI --> PG
+  FastAPI --> Redis
+  CeleryW --> Engine
+  CeleryW --> PG
+  CeleryW --> Redis
+  CeleryB --> Redis
+  CeleryW --> WebhookTgt
+```
+
+| Process | Role |
+|---------|------|
+| **API** (`uvicorn drpe.api.app:app`) | Policy CRUD, evaluate, classify, DSAR, webhooks, audit reads, catalog |
+| **Celery worker** | Runs queued `POST /enforce` jobs via `EnforcementRunner` |
+| **Celery beat** | Periodic `scan_due_policies` when broker is configured |
+| **Admin** (`admin/`) | Ops console; holds API key in httpOnly cookie; AI via Admin BFF only |
+
+---
+
+## 3. C4 Views
 
 ### Level 1 — System Context
 
@@ -47,451 +107,328 @@ ROS Policy is a **standalone policy engine** that other applications integrate w
 C4Context
     title ROS Policy — System Context
 
-    Person(admin, "Policy Admin", "Defines and manages retention policies")
-    Person(devops, "DevOps / DPO", "Monitors compliance, reviews audit logs")
+    Person(admin, "Policy Admin", "Authors policies, runs evaluate/classify playgrounds")
+    Person(dpo, "DPO / Compliance", "Reviews audit, DSAR, grace holds")
 
-    System(drpe, "ROS Policy", "Retention & classification policy engine")
+    System(drpe, "ROS Policy", "Retention & classification policy engine + Admin")
 
-    System_Ext(crm, "CRM System", "Checks policies before data ops")
-    System_Ext(erp, "ERP System", "Enforces retention on financial data")
-    System_Ext(datalake, "Data Lake", "Archives/purges per policy")
-    System_Ext(idp, "Identity Provider", "OAuth2/OIDC for API auth")
+    System_Ext(apps, "Integrating apps", "CRM / ERP / data platform")
+    System_Ext(llm, "LiteLLM", "Optional AI assist for Admin import/samples")
+    System_Ext(hooks, "Downstream webhooks", "Receive enforcement actions")
 
-    Rel(admin, drpe, "Manages policies via API/UI")
-    Rel(devops, drpe, "Reviews audit logs")
-    Rel(crm, drpe, "SDK/API: evaluate & enforce")
-    Rel(erp, drpe, "SDK/API: evaluate & enforce")
-    Rel(datalake, drpe, "API: batch evaluate")
-    Rel(drpe, idp, "Validates JWT tokens")
+    Rel(admin, drpe, "Admin UI + API key")
+    Rel(dpo, drpe, "Audit / DSAR / grace holds")
+    Rel(apps, drpe, "SDK or REST /api/v1")
+    Rel(drpe, llm, "Admin BFF only (masked prompts)")
+    Rel(drpe, hooks, "Action dispatch")
 ```
 
-### Level 2 — Container
+### Level 2 — Containers
 
 ```mermaid
 C4Container
-    title ROS Policy — Container Diagram
+    title ROS Policy — Containers
 
-    Container(api, "REST API", "FastAPI", "Policy CRUD, evaluation, audit endpoints")
-    Container(sdk, "Python SDK", "PyPI package", "In-process policy evaluation")
-    Container(engine, "Policy Engine Core", "Python", "DSL parser, evaluator, version manager")
-    Container(scheduler, "Retention Scheduler", "Celery/APScheduler", "Periodic enforcement scans")
-    ContainerDb(db, "PostgreSQL", "Policy store, audit log, versioning")
-    Container(cache, "Redis", "Policy cache, rate limiting")
+    Container(admin, "Admin Console", "Next.js App Router", "BFF, playgrounds, policy import AI")
+    Container(api, "REST API", "FastAPI", "/api/v1 policy, evaluate, classify, enforce, DSAR…")
+    Container(sdk, "Python SDK", "drpe package", "Remote client + embedded evaluator")
+    Container(core, "Engine Core", "Python", "DSL, evaluate, classify, enforce, DSAR")
+    Container(sched, "Scheduler", "Celery", "Periodic + queued enforcement")
+    ContainerDb(db, "PostgreSQL", "Supabase / local", "drpe schema")
+    Container(cache, "Redis", "Cache + broker", "Policy cache, gen stamp, Celery")
 
-    Rel(api, engine, "Uses")
-    Rel(sdk, engine, "Embeds")
-    Rel(api, db, "Reads/writes")
-    Rel(sdk, api, "Fallback remote calls")
-    Rel(engine, cache, "Caches compiled policies")
-    Rel(scheduler, engine, "Triggers enforcement")
-    Rel(scheduler, db, "Reads policies & schedules")
+    Rel(admin, api, "DRPE_API_URL + Bearer key")
+    Rel(sdk, api, "HTTP")
+    Rel(sdk, core, "Embedded mode")
+    Rel(api, core, "In-process")
+    Rel(api, db, "SQLAlchemy")
+    Rel(api, cache, "Optional CachingPolicyStore")
+    Rel(sched, core, "EnforcementRunner")
+    Rel(sched, db, "Jobs + audit")
+    Rel(sched, cache, "Broker / backend")
 ```
 
-### Level 3 — Component (Engine Core)
+### Level 3 — Engine Components
 
-```mermaid
-C4Component
-    title Policy Engine Core — Components
-
-    Component(parser, "DSL Parser", "Parses YAML policy into PolicyAST")
-    Component(compiler, "Policy Compiler", "Compiles PolicyAST into executable rules")
-    Component(evaluator, "Evaluator", "Runs compiled rules against data metadata")
-    Component(versioner, "Version Manager", "Handles policy versioning, diff, rollback")
-    Component(jurisdiction, "Jurisdiction Registry", "Maps data to applicable legal frameworks")
-    Component(resolver, "Conflict Resolver", "Resolves overlapping/conflicting policies")
-    Component(audit, "Audit Logger", "Writes immutable evaluation & action logs")
-
-    Rel(parser, compiler, "PolicyAST")
-    Rel(compiler, evaluator, "CompiledPolicy")
-    Rel(evaluator, resolver, "Checks conflicts")
-    Rel(evaluator, jurisdiction, "Checks jurisdiction rules")
-    Rel(evaluator, audit, "Logs every evaluation")
-    Rel(versioner, parser, "Loads specific version")
-```
+| Component | Package path | Responsibility |
+|-----------|--------------|----------------|
+| DSL Parser | `drpe/dsl/parser.py` | YAML → Pydantic `Policy` / classification policy |
+| Evaluator | `drpe/core/evaluator.py` | Match scope + rules; lowest `priority` wins |
+| Classifier | `drpe/core/classifier.py` | Entity detection vs classification policies |
+| Conflict resolver | `drpe/core/conflict.py` | Surface overlapping matches |
+| Jurisdictions | `drpe/core/jurisdictions.py` | Built-in jurisdiction metadata |
+| Policy diff | `drpe/core/policy_diff.py` | Structural version diff |
+| Enforcement | `drpe/core/enforcement.py` | Scan records, grace, dispatch, audit |
+| DSAR service | `drpe/core/dsar.py` | Sync access/erasure workflows |
+| Privacy | `drpe/privacy/` | Optional PII mask for AI / privacy APIs |
 
 ---
 
-## 3. Policy DSL Specification
+## 4. Repository Layout
 
-### 3.1 Policy Definition (YAML)
+| Path | Purpose |
+|------|---------|
+| `drpe/models/` | Domain models (Policy, DSAR, audit, systems/processes, …) |
+| `drpe/dsl/` | YAML policy parser |
+| `drpe/core/` | Evaluator, classifier, enforcement, DSAR, operators |
+| `drpe/api/` | FastAPI `create_app()`, routes, settings, deps |
+| `drpe/sdk/` | `DRPEClient`, embedded `PolicyEvaluator`, `@enforce` |
+| `drpe/ports/` | Protocols (stores, RecordSource, dispatchers) |
+| `drpe/adapters/` | In-memory, SQLAlchemy, Redis cache, HTTP webhook |
+| `drpe/db/` | ORM rows, session helpers |
+| `drpe/migrations/` | Alembic versions `001`–`009` |
+| `drpe/scheduler/` | Celery app, tasks, enforcement runtime |
+| `drpe/privacy/` | Masking / privacy helpers |
+| `admin/` | Next.js ops console (BFF over `/api/v1`) |
+| `config/` | Example YAML policies |
+| `openapi/` | Committed OpenAPI schema |
+| `clients/` | Generated TypeScript / Go / Java clients |
+| `docs/ARCHITECTURE.md` | This document |
 
-```yaml
-# Example: GDPR-compliant customer data retention
-policy:
-  id: pol_gdpr_customer_data
-  name: "GDPR Customer Data Retention"
-  version: 3
-  status: active              # draft | active | deprecated | archived
-  jurisdiction: EU_GDPR       # EU_GDPR | VN_PDPD | GLOBAL | custom
-  data_classification: PII    # PII | SPII | financial | operational | public
-  owner: "dpo@company.com"
-  effective_from: "2025-01-01"
-  expires_at: null             # null = no expiry
-  tags: ["gdpr", "customer", "pii"]
+### Entry points
 
-  # Subject scope: which data this policy applies to
-  scope:
-    data_types:
-      - customer_profile
-      - customer_contact
-    sources:
-      - crm_system
-      - marketing_platform
-    exclude:
-      data_types:
-        - anonymized_analytics
+| Entry | How |
+|-------|-----|
+| API ASGI | `uvicorn drpe.api.app:app` → `create_app()` |
+| Celery | `celery -A drpe.scheduler.celery_app.celery_app worker\|beat` |
+| Admin | `cd admin && npm run dev` (port 3000) |
+| SDK remote | `from drpe import DRPEClient` |
+| SDK embedded | `from drpe import PolicyEvaluator` |
 
-  # Retention rules (evaluated top-to-bottom, first match wins)
-  rules:
-    - id: rule_inactive_delete
-      description: "Delete inactive customer profiles after 2 years"
-      priority: 100
-      condition:
-        all:
-          - field: "status"
-            operator: "eq"
-            value: "inactive"
-          - field: "last_activity_at"
-            operator: "older_than"
-            value: "730d"
-      action: delete
-      grace_period: "30d"
-      notify_before: "7d"
-      requires_approval: false
+### Store wiring (`create_app`)
 
-    - id: rule_active_archive
-      description: "Archive active records older than 5 years"
-      priority: 200
-      condition:
-        all:
-          - field: "status"
-            operator: "eq"
-            value: "active"
-          - field: "created_at"
-            operator: "older_than"
-            value: "1825d"
-      action: archive
-      archive_target: "cold_storage"
-
-    - id: rule_legal_hold
-      description: "Legal hold overrides all other rules"
-      priority: 1              # highest priority
-      condition:
-        any:
-          - field: "legal_hold"
-            operator: "eq"
-            value: true
-          - field: "tags"
-            operator: "contains"
-            value: "litigation"
-      action: retain
-      retain_until: "legal_hold_released"
-
-  # What happens on subject access / erasure request
-  dsar:
-    right_to_access: true
-    right_to_erasure: true
-    erasure_exceptions:
-      - "legal_obligation"
-      - "public_interest"
-    response_deadline: "30d"
-
-  # Audit requirements
-  audit:
-    log_evaluations: true
-    log_actions: true
-    retention_of_audit_logs: "3650d"   # 10 years
-```
-
-### 3.2 DSL Operators
-
-| Operator       | Description                    | Value Type        |
-|----------------|--------------------------------|-------------------|
-| `eq`           | Equals                         | any               |
-| `neq`          | Not equals                     | any               |
-| `gt`, `gte`    | Greater than (or equal)        | number / date     |
-| `lt`, `lte`    | Less than (or equal)           | number / date     |
-| `in`           | Value in list                  | list              |
-| `not_in`       | Value not in list              | list              |
-| `contains`     | List/string contains value     | any               |
-| `older_than`   | Datetime field older than duration | duration string |
-| `newer_than`   | Datetime field newer than duration | duration string |
-| `is_null`      | Field is null                  | boolean           |
-| `regex`        | Matches regex pattern          | string            |
-
-### 3.3 Actions
-
-| Action        | Description                                           |
-|---------------|-------------------------------------------------------|
-| `retain`      | Keep data, no action — overrides other rules          |
-| `archive`     | Move to cold/archive storage                          |
-| `anonymize`   | Replace PII fields with anonymized values             |
-| `pseudonymize`| Replace identifiers with pseudonyms (reversible)      |
-| `delete`      | Permanently delete after grace period                 |
-| `notify`      | Notify data owner/subject, take no data action        |
-| `flag`        | Flag for manual review                                |
+1. `DATABASE_URL` set → SQLAlchemy stores; else in-memory stores
+2. `REDIS_URL` / `DRPE_REDIS_URL` set → wrap policy store with `CachingPolicyStore` + engine generation sync
+3. Seed YAML from `DRPE_POLICIES_DIR` (default `config/`) when store empty, or when `DRPE_SEED_YAML=true` / in-memory mode
+4. Celery broker: `CELERY_BROKER_URL` or `REDIS_URL`; eager/`memory://` when unset (`DRPE_CELERY_EAGER`)
 
 ---
 
-## 4. API Design (REST)
-
-### 4.1 Authentication
-
-All API calls require a Bearer JWT token (OAuth2). Scopes:
-- `policy:read` — read policies
-- `policy:write` — create/update policies
-- `policy:admin` — delete, force actions
-- `evaluate` — evaluate data against policies
-- `audit:read` — read audit logs
-
-### 4.2 Endpoints
+## 5. Admin UI Architecture
 
 ```
-# ── Policy Management ──
-POST   /api/v1/policies                    # Create policy (from YAML or JSON)
-GET    /api/v1/policies                    # List policies (filter, paginate)
-GET    /api/v1/policies/{policy_id}        # Get policy (latest version)
-GET    /api/v1/policies/{policy_id}/versions          # List all versions
-GET    /api/v1/policies/{policy_id}/versions/{ver}    # Get specific version
-POST   /api/v1/policies/{policy_id}/versions/{ver}/activate  # Rollback: restore snapshot as new head version
-PUT    /api/v1/policies/{policy_id}        # Update (creates new version)
-DELETE /api/v1/policies/{policy_id}        # Deprecate (soft delete)
-POST   /api/v1/policies/{policy_id}/diff   # Diff two versions (`from_version` / `to_version`)
-POST   /api/v1/policies/validate           # Validate DSL without saving
-POST   /api/v1/policies/import             # Bulk import from YAML file
-
-# ── Policy Evaluation ──
-POST   /api/v1/evaluate                    # Evaluate single record
-POST   /api/v1/evaluate/batch              # Evaluate batch (up to 1000)
-POST   /api/v1/evaluate/dry-run            # Evaluate without side effects
-
-# ── Enforcement ──
-POST   /api/v1/enforce                     # Trigger enforcement for a policy
-GET    /api/v1/enforce/jobs                 # List enforcement jobs
-GET    /api/v1/enforce/jobs/{job_id}        # Job status & progress
-
-# ── DSAR (Data Subject Access Requests) ──
-POST   /api/v1/dsar/access                 # Subject access request
-POST   /api/v1/dsar/erasure                # Erasure request (right to be forgotten)
-GET    /api/v1/dsar/requests               # List DSAR requests
-GET    /api/v1/dsar/requests/{request_id}  # DSAR status
-
-# ── Audit ──
-GET    /api/v1/audit/logs                  # Query audit logs (filter, paginate)
-GET    /api/v1/audit/logs/{log_id}         # Single audit entry
-GET    /api/v1/audit/reports               # Compliance reports
-POST   /api/v1/audit/export                # Export audit logs (CSV/JSON)
-
-# ── Jurisdictions ──
-GET    /api/v1/jurisdictions               # List supported jurisdictions
-GET    /api/v1/jurisdictions/{code}         # Jurisdiction details & constraints
-
-# ── Webhooks ──
-POST   /api/v1/webhooks                    # Register webhook (returns secret once)
-GET    /api/v1/webhooks                    # List webhooks (?active=)
-GET    /api/v1/webhooks/{webhook_id}       # Get webhook (secret omitted)
-PATCH  /api/v1/webhooks/{webhook_id}       # Update webhook
-DELETE /api/v1/webhooks/{webhook_id}       # Remove webhook
-
-# ── Health ──
-GET    /api/v1/health                      # Health check
-GET    /api/v1/health/ready                # Readiness (DB + cache connected)
+Browser → Next.js middleware (session cookie)
+       → Server Components / Server Actions
+       → admin/lib/drpe-client.ts → FastAPI /api/v1
+       → admin/app/api/ai/* → LiteLLM (optional; never auto-imports)
 ```
 
-### 4.3 Evaluate Request/Response
+| Concern | Implementation |
+|---------|----------------|
+| Auth | Login sets httpOnly cookie with API key; middleware guards console |
+| Data access | Server-side `DRPE_API_URL` + Bearer key; no key in browser JS |
+| AI assist | BFF routes: `policy-suggest`, `classify-sample`, `evaluate-sample` |
+| Design | `admin/design-system/` (Fira Sans/Code, blue/amber) |
+| OpenAPI types | `admin/lib/generated/schema.d.ts` via `npm run openapi` |
+
+### Console surfaces
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Overview metrics / attention |
+| `/policies`, `/policies/[id]`, `/policies/import`, `/policies/graph` | CRUD, versions, AI import, structure graph |
+| `/systems`, `/processes` | Governance catalog + policy links |
+| `/evaluate`, `/classify` | Playgrounds (dry-run default for evaluate) |
+| `/enforce`, `/grace-holds` | Jobs + grace hold actions |
+| `/dsar`, `/audit`, `/webhooks` | Requests, audit trail, webhook CRUD |
+| `/insights`, `/observability` | Relation graph / LangSmith traces (when configured) |
+
+---
+
+## 6. API Surface (`/api/v1`)
+
+### Authentication
+
+Optional Bearer **`DRPE_API_KEY`**. If unset, API is open (dev/test). Full OAuth2/JWT scopes are deferred.
+
+### Route modules
+
+| Prefix | Module | Notes |
+|--------|--------|-------|
+| `/policies` | `routes_policies.py` | CRUD, validate, import, versions, activate, diff |
+| `/systems` | `routes_systems.py` | Governance catalog |
+| `/processes` | `routes_processes.py` | Governance catalog |
+| `/classify` | `routes_classify.py` | Single/batch classify + diagnostics |
+| `/evaluate` | `routes_evaluate.py` | Single/batch/dry-run |
+| `/enforce` | `routes_enforce.py` | Trigger job + list/get jobs |
+| `/grace-holds` | `routes_grace_holds.py` | List + approve/cancel style actions |
+| `/dsar` | `routes_dsar.py` | Access/erasure + list/get (sync) |
+| `/webhooks` | `routes_webhooks.py` | Registration CRUD |
+| `/audit` | `routes_audit.py` | Query append-only logs |
+| `/health` | `routes_misc.py` | Liveness / readiness (DB + Redis PING) |
+| `/jurisdictions` | `routes_misc.py` | Built-in jurisdiction list |
+| `/privacy` | `routes_privacy.py` | Mask / privacy helpers |
+
+Interactive docs: `http://localhost:8000/docs`. Contract: `openapi/openapi.json`.
+
+### Evaluate (shape)
 
 ```json
-// POST /api/v1/evaluate
-// Request
+POST /api/v1/evaluate
 {
   "data_type": "customer_profile",
   "source": "crm_system",
   "record_id": "cust_12345",
   "metadata": {
     "status": "inactive",
-    "created_at": "2021-03-15T10:00:00Z",
     "last_activity_at": "2023-06-01T00:00:00Z",
-    "legal_hold": false,
-    "tags": ["newsletter"]
+    "legal_hold": false
   },
-  "jurisdiction": "EU_GDPR",
-  "context": {
-    "requester": "crm_cleanup_job",
-    "reason": "scheduled_review"
-  }
-}
-
-// Response
-{
-  "record_id": "cust_12345",
-  "evaluation_id": "eval_abc123",
-  "result": {
-    "action": "delete",
-    "matched_policy": "pol_gdpr_customer_data",
-    "matched_rule": "rule_inactive_delete",
-    "policy_version": 3,
-    "grace_period_ends": "2026-08-21T00:00:00Z",
-    "notify_at": "2026-08-14T00:00:00Z",
-    "requires_approval": false,
-    "confidence": "definitive"
-  },
-  "conflicting_policies": [],
-  "jurisdiction_applied": "EU_GDPR",
-  "evaluated_at": "2026-07-22T10:30:00Z",
-  "audit_ref": "aud_xyz789"
+  "jurisdiction": "EU_GDPR"
 }
 ```
 
----
+Response includes matched policy/rule, action, grace/notify timestamps, conflicts, and jurisdiction applied.
 
-## 5. Database Schema (PostgreSQL / Supabase)
-
-**Implemented:** private schema `drpe` on Supabase project lead-flow (`yshqwmldepsfckiacjwu`).
-
-```
-drpe.policies           — Current policy head (JSONB rules/scope/tags/dsar/audit)
-drpe.policy_versions    — Immutable full JSON snapshots per version
-drpe.audit_logs         — Append-only evaluation & enforcement events
-drpe.enforcement_jobs   — Scheduled/triggered enforcement runs
-drpe.dsar_requests      — DSAR access/erasure requests + outcomes
-drpe.webhooks           — Registered webhook endpoints (url, events, secret)
-```
-
-Migrations: Alembic under `drpe/migrations/` (`alembic upgrade head`). Set `DATABASE_URL`.
-
-RLS is enabled on these tables with no policies for `anon`/`authenticated` (Data API deny-by-default). The FastAPI process connects with the Postgres role (bypasses RLS).
-
-### Redis policy cache (implemented)
-
-When `REDIS_URL` / `DRPE_REDIS_URL` is set, `CachingPolicyStore` wraps the inner PolicyStore (`InMemory` or `SqlAlchemy`):
-
-| Key | Purpose |
-|-----|---------|
-| `{prefix}:policy:{id}` | Cached Policy JSON (TTL, default 300s) |
-| `{prefix}:policies:ids` | Id list for unfiltered `list_policies` |
-| `{prefix}:policies:gen` | Generation counter; evaluators reload when it changes |
-
-Writes invalidate policy + ids keys and `INCR` generation. Redis read errors fall through to the inner store; `/api/v1/health/ready` requires a successful `PING` when Redis is configured.
-
-### Enforcement + audit (implemented)
-
-| Table | Purpose |
-|-------|---------|
-| `drpe.audit_logs` | Append-only evaluation/action/notify/pending_grace/dsar events |
-| `drpe.enforcement_jobs` | Scheduled/API-triggered scan jobs + progress |
-
-Celery beat (`scan_due_policies`) and `POST /api/v1/enforce` create jobs; workers run `EnforcementRunner` with grace-aware dispatch. Broker: `CELERY_BROKER_URL` or `REDIS_URL` (eager/`memory://` when unset). Optional `DRPE_WEBHOOK_URL` for HTTP action dispatch.
-
-### DSAR (implemented)
-
-| Table | Purpose |
-|-------|---------|
-| `drpe.dsar_requests` | Access/erasure requests + collected records / erase outcomes |
-
-Synchronous `DsarService`: collects records from inline payload and `RecordSource` (match `record_id` or `metadata.subject_id`), respects policy `dsar` rights/exceptions/deadline, dispatches erasure via `ActionDispatcher`, audits `dsar_access` / `dsar_erasure`.
-
-API: `POST /api/v1/dsar/access`, `POST /api/v1/dsar/erasure`, `GET /api/v1/dsar/requests`, `GET /api/v1/dsar/requests/{id}`.
-
-### Webhooks (implemented)
-
-| Table | Purpose |
-|-------|---------|
-| `drpe.webhooks` | Registered callback URLs + event subscriptions + HMAC secret |
-
-CRUD via `/api/v1/webhooks` (create returns secret once; list/get expose `secret_set` only). Env `DRPE_WEBHOOK_URL` remains the single-URL dispatcher fallback; fan-out to registered rows is deferred.
-
-### Policy versioning (implemented)
-
-| Endpoint | Behavior |
-|----------|----------|
-| `GET .../versions` | List version metadata from immutable snapshots |
-| `GET .../versions/{ver}` | Full policy at that version |
-| `POST .../versions/{ver}/activate` | Rollback: copy snapshot to a **new** head version (history preserved) |
-| `POST .../diff` | Structural JSON diff between two versions |
-
-### Planned tables (not yet implemented)
-
-```
-jurisdictions         — Legal framework definitions
-api_keys              — API key management (hashed)
-```
-
-Monthly partitioning for `audit_logs` is deferred (app-layer append-only today).
-
-### Key Design Decisions
-
-- **audit_logs** is append-only (no UPDATE/DELETE APIs) — monthly partitioning planned later
-- **policy_versions** stores full JSON snapshot per version (not diffs) for self-contained rollback
-- **Activate = rollback-as-new-version** — never rewrites history; head becomes `current.version + 1` with the chosen snapshot
-- **Soft deletes** — `deprecated_at` timestamp / status `deprecated`, never hard delete policies
-- **Optimistic locking** via `version` column on policies to prevent concurrent edits
-- **Schema isolation** — `drpe` schema avoids colliding with other apps in a shared Supabase project
+**Priority:** lowest numeric `priority` wins among matching rules; conflicts are listed, not silently dropped.
 
 ---
 
-## 6. SDK Design (Python)
+## 7. Policy DSL (summary)
+
+Example retention policy (see `config/gdpr_customer.yaml`):
+
+```yaml
+policy:
+  id: pol_gdpr_customer_data
+  name: "GDPR Customer Data Retention"
+  status: active
+  jurisdiction: EU_GDPR
+  data_classification: PII
+  scope:
+    data_types: [customer_profile]
+    sources: [crm_system]
+  rules:
+    - id: rule_inactive_delete
+      priority: 100
+      condition:
+        all:
+          - field: status
+            operator: eq
+            value: inactive
+          - field: last_activity_at
+            operator: older_than
+            value: 730d
+      action: delete
+      grace_period: 30d
+      notify_before: 7d
+  dsar:
+    right_to_access: true
+    right_to_erasure: true
+    erasure_exceptions: [legal_obligation, public_interest]
+    response_deadline: 30d
+```
+
+### Operators
+
+`eq`, `neq`, `gt`/`gte`, `lt`/`lte`, `in`, `not_in`, `contains`, `older_than`, `newer_than`, `is_null`, `regex`
+
+### Actions
+
+`retain`, `archive`, `anonymize`, `pseudonymize`, `delete`, `notify`, `flag`
+
+Policies also support **`policy_kind`**: retention vs classification (migration `005`). Classification policies use entities / text fields rather than retention actions.
+
+Optional **`reference_sources`** (AI provenance URLs) are metadata on the policy — not part of the YAML DSL scope and not used for matching (migration `008`).
+
+---
+
+## 8. Persistence
+
+**Schema:** `drpe` (Postgres / Supabase). Migrations: `alembic upgrade head` through `009_systems_processes`.
+
+| Table | Purpose |
+|-------|---------|
+| `policies` | Current policy head (JSONB rules/scope/tags/dsar/audit/reference_sources) |
+| `policy_versions` | Immutable full JSON snapshots per version |
+| `audit_logs` | Append-only enforcement / DSAR events (**not** an HTTP access log) |
+| `enforcement_jobs` | Scheduled/API-triggered scan jobs + progress |
+| `dsar_requests` | Access/erasure requests + outcomes |
+| `webhooks` | Registered endpoints + events + secret |
+| `grace_holds` | Pending grace-period holds |
+| `systems` / `processes` (+ link tables) | Governance catalog; many-to-many policy links |
+
+### Redis (optional)
+
+| Key pattern | Purpose |
+|-------------|---------|
+| `{prefix}:policy:{id}` | Cached policy JSON (TTL) |
+| `{prefix}:policies:ids` | Id list for unfiltered list |
+| `{prefix}:policies:gen` | Generation counter for multi-worker engine reload |
+
+Pool caps: `DRPE_REDIS_MAX_CONNECTIONS` (default 20), Celery `DRPE_CELERY_BROKER_POOL_LIMIT`.
+
+### Design decisions
+
+- **Audit** written only by `EnforcementRunner` and `DsarService` — evaluate/classify/policy GETs do not append
+- **Activate = rollback-as-new-version** — never rewrite `policy_versions` history
+- **Soft deprecate** policies; catalog links cleared on deprecate/delete
+- **Systems/Processes** are governance metadata only — they do **not** change evaluate/classify matching (Admin can seed `source` from `source_key` for UX)
+- **Webhook fan-out** to registered rows is deferred; live dispatch still uses `DRPE_WEBHOOK_URL`
+
+---
+
+## 9. Enforcement & DSAR flows
+
+### Enforcement
+
+```
+POST /enforce  →  create job (queued)
+               →  Celery worker (or eager)
+               →  EnforcementRunner
+                    · load policy + records (inline and/or RecordSource)
+                    · evaluate → grace hold / dispatch action
+                    · AuditStore.append
+```
+
+Without a worker (and without eager mode), jobs remain `queued`.
+
+### DSAR
+
+Synchronous `DsarService`: collect records (inline + `RecordSource` matching `record_id` / `metadata.subject_id`), apply policy DSAR rights/exceptions, dispatch erasure via `ActionDispatcher`, audit immediately.
+
+---
+
+## 10. SDK
 
 ```python
 from drpe import DRPEClient, PolicyEvaluator
 
-# ── Remote mode (REST API) ──
-client = DRPEClient(
-    base_url="https://drpe.internal.company.com",
-    api_key="drpe_sk_...",
-    timeout=5.0,
-    retry_config={"max_retries": 3, "backoff_factor": 0.5}
-)
+# Remote (evaluate + classify; dry-run / batch variants)
+client = DRPEClient(base_url="http://localhost:8000", api_key="...")
+result = client.evaluate(data_type="customer_profile", record_id="c1", metadata={...})
+result = client.evaluate_dry_run(...)  # no side effects
+result = client.classify(data_type="customer_profile", record_id="c1", metadata={...})
+results = client.classify_batch([...])
 
-# Evaluate a record
-result = client.evaluate(
-    data_type="customer_profile",
-    record_id="cust_12345",
-    metadata={
-        "status": "inactive",
-        "last_activity_at": "2023-06-01T00:00:00Z",
-        "legal_hold": False
-    },
-    jurisdiction="EU_GDPR"
-)
-
-if result.action == "delete":
-    print(f"Delete after {result.grace_period_ends}")
-
-# Batch evaluate
-results = client.evaluate_batch(records=[...])
-
-# ── Embedded mode (no network, policies loaded locally) ──
+# Embedded (no network) — loads retention + classification YAML from a directory
 evaluator = PolicyEvaluator.from_directory("./policies/")
-# or
-evaluator = PolicyEvaluator.from_yaml(policy_yaml_string)
-
 result = evaluator.evaluate(data_type="customer_profile", metadata={...})
-
-# ── Decorator for automatic enforcement ──
-@client.enforce(data_type="customer_profile", on_delete=my_delete_handler)
-def get_customer(customer_id: str):
-    return db.query(Customer).get(customer_id)
+result = evaluator.classify(data_type="customer_profile", metadata={...})
 ```
 
----
-
-## 7. Quality Attribute Trade-offs
-
-| Attribute       | Priority | How Addressed                                    |
-|-----------------|----------|--------------------------------------------------|
-| **Compliance**  | Critical | Immutable audit, jurisdiction registry, DSAR API |
-| **Reliability** | High     | Graceful degradation, SDK fallback, retry logic  |
-| **Performance** | High     | Redis cache for compiled policies, batch eval    |
-| **Extensibility**| High    | DSL-based rules, plugin actions, webhook system  |
-| **Security**    | High     | JWT scopes, API key hashing, TLS, no PII in logs |
-| **Operability** | Medium   | Health endpoints, structured logging, metrics     |
-| **Simplicity**  | Medium   | SDK hides complexity, sensible defaults           |
+`DRPEClient` sends `Authorization: Bearer <api_key>` on every request (including when an injected `http_client` is used). Full admin/governance surface (policies, systems, processes, DSAR, …) is covered by generated OpenAPI clients: `clients/typescript`, `clients/go`, `clients/java` (`npm run openapi`).
 
 ---
 
-## 8. Non-Goals (v1)
+## 11. Quality attributes
 
-- No built-in UI (API-first; admin UI is a separate concern)
-- No cross-datacenter replication (single-region for v1)
-- No real-time streaming evaluation (batch + request/response only)
-- No automatic data deletion execution (ROS Policy tells you WHAT to do; YOUR system does it)
+| Attribute | How addressed |
+|-----------|---------------|
+| Compliance | Immutable audit, jurisdictions, DSAR, grace holds |
+| Reliability | Store fallbacks, Redis read fall-through, Celery retries |
+| Performance | Redis policy cache, batch evaluate/classify, Admin lazy loads |
+| Extensibility | YAML DSL, pluggable RecordSource / ActionDispatcher |
+| Security | Optional API key, CORS (`DRPE_CORS_ORIGINS`), no secrets in SESSION/docs; AI prompts masked when privacy stack installed |
+| Operability | `/health`, `/health/ready`, structured Admin observability |
+
+---
+
+## 12. Non-goals / deferred
+
+- JWT OAuth2 scopes (API key only today)
+- Fan-out delivery to all registered webhooks (env URL only for dispatch)
+- Monthly partitioning of `audit_logs`
+- Catalog `source_key` automatically matching evaluate `scope.sources`
+- Cross-region replication / streaming evaluation
+- Engine does **not** delete customer data itself — it decides **what** to do; integrators execute via webhooks/handlers

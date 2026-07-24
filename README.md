@@ -283,6 +283,13 @@ result = client.classify(
 for entity in result.detected_entities:
     print(entity.label, entity.classification, entity.sensitivity)
 print(result.result.action, result.result.handling)
+print(result.diagnostics.out_of_scope_reason)
+
+# Batch classify (same shape as evaluate_batch)
+batch = client.classify_batch([
+    {"data_type": "customer_profile", "record_id": "a", "metadata": {"email": "a@example.com"}},
+    {"data_type": "customer_profile", "record_id": "b", "metadata": {"email": "b@example.com"}},
+])
 ```
 
 ### Integrate via SDK (Embedded — no server needed)
@@ -297,6 +304,14 @@ result = evaluator.evaluate(EvaluationRequest(
     record_id="cust_123",
     metadata={"status": "inactive", "last_activity_at": "2023-01-01T00:00:00Z"}
 ))
+
+# Classification policies in the same directory are loaded separately
+cls = evaluator.classify(
+    data_type="customer_profile",
+    record_id="cust_123",
+    metadata={"email": "user@example.com"},
+    jurisdiction="EU_GDPR",
+)
 ```
 
 ### Decorator-Based Enforcement

@@ -378,4 +378,9 @@ export const drpe = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+  classifyBatch: (records: ClassificationRequest[]) =>
+    drpeFetch<ClassificationResponse[]>("/classify/batch", {
+      method: "POST",
+      body: JSON.stringify({ records }),
+    }),
 };

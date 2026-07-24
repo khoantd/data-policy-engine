@@ -41,6 +41,7 @@ class DRPEClient:
         headers: dict[str, str] = {"Accept": "application/json"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
+        self._default_headers = headers
         self._owns_client = http_client is None
         if http_client is not None:
             self._client = http_client
@@ -66,6 +67,8 @@ class DRPEClient:
         max_retries = int(self.retry_config.get("max_retries", 0))
         backoff = float(self.retry_config.get("backoff_factor", 0.5))
         last_exc: Exception | None = None
+        call_headers = kwargs.pop("headers", None) or {}
+        kwargs["headers"] = {**self._default_headers, **call_headers}
         for attempt in range(max_retries + 1):
             try:
                 response = self._client.request(method, path, **kwargs)
@@ -193,6 +196,18 @@ class DRPEClient:
             "POST", "/api/v1/classify/dry-run", json=payload.model_dump()
         )
         return ClassificationResponse.model_validate(data)
+
+    def classify_batch(
+        self, records: list[ClassificationRequest | dict[str, Any]]
+    ) -> list[ClassificationResponse]:
+        body = []
+        for rec in records:
+            if isinstance(rec, ClassificationRequest):
+                body.append(rec.model_dump())
+            else:
+                body.append(rec)
+        data = self._request("POST", "/api/v1/classify/batch", json={"records": body})
+        return [ClassificationResponse.model_validate(item) for item in data]
 
     def enforce(
         self,

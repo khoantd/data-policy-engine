@@ -9,11 +9,11 @@
 | **Updated** | 2026-07-24 |
 | **Phase** | build |
 | **Tool** | cursor |
-| **Persona** | frontend |
+| **Persona** | backend |
 
 ## Goal
 
-Ship Admin UI (Next.js ops console) over existing `/api/v1`.
+Keep Python SDK + Admin BFF client aligned with current `/api/v1` (evaluate/classify); OpenAPI clients cover full admin/governance surface.
 
 ## Done
 
@@ -21,7 +21,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - YAML DSL parser + Pydantic validation
 - Evaluator with operators, priority conflict resolution, jurisdiction filter, grace/notify timestamps
 - FastAPI `/api/v1` policies, evaluate, jurisdictions, health
-- SDK: `DRPEClient`, `PolicyEvaluator`, `@enforce`
+- SDK: `DRPEClient` (evaluate/classify + batch/dry-run + `@enforce`), embedded `PolicyEvaluator` (retention + classification)
 - Example policy `config/gdpr_customer.yaml`
 - Docs: `README.md`, `docs/ARCHITECTURE.md`
 - **SqlAlchemyPolicyStore** + Alembic migrations (`drpe` schema)
@@ -55,6 +55,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **Systems & Processes catalog (governance)** — CRUD `/api/v1/systems` + `/processes`; many-to-many policy links (replace-set); Admin Catalog nav + list/detail; policy **Applies to** panel; structure graph `system`/`process` + `applies_to`; migration `009`; does **not** affect evaluate/classify
 - **System request context (Admin UX)** — Evaluate/Scan optional System picker seeds `source` from `source_key`; optional Process picker shows governance-linked policies; `?system=` / `?process=` deep links + catalog detail Try evaluate/scan CTAs; AI sample endpoints accept system/process snapshots and force `source` from `source_key`; no engine matching change
 - **Redis connection pool caps** — `create_redis_client` defaults `max_connections=20` + timeouts; Celery `broker_pool_limit` / `redis_max_connections` / transport `max_connections`; env `DRPE_REDIS_MAX_CONNECTIONS`, `DRPE_CELERY_BROKER_POOL_LIMIT`
+- **SDK alignment** — `DRPEClient.classify_batch`; Bearer headers on injected `http_client`; embedded `PolicyEvaluator` splits retention vs classification + `classify`/`classify_dry_run`/`classify_batch`; exports `ClassificationRequest`/`ClassificationResponse`; Admin BFF `classifyBatch`; sample `config/gdpr_pii_classification.yaml` → `active`; README/ARCHITECTURE updated; OpenAPI clients already path-complete (systems/processes included)
 
 ## In progress
 
@@ -67,16 +68,17 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 2. Set `DRPE_API_URL` on Vercel project `royal-platform/ros-policy-admin` (Production/Preview), then redeploy
 3. When Redis/Celery broker is set: `docker compose --profile celery up` (or separate worker/beat containers); else `DRPE_CELERY_EAGER=true`
 4. **Redeploy API** after Redis pool caps (`DRPE_REDIS_MAX_CONNECTIONS`, `DRPE_CELERY_BROKER_POOL_LIMIT`) — then confirm Redis `connected_clients` stays under `maxclients`
-5. Optional: AI assist on policy detail editor (same BFF)
-6. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
-7. Optional: JWT OAuth2 scopes
-8. Optional: audit_logs monthly partitioning
-9. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
-10. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
-11. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
-12. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
-13. Optional: sync catalog `source_key` into evaluate `scope.sources` (explicitly out of scope for v1 governance catalog)
-14. Optional: process↔system edges; richer RoPA fields
+5. Optional: Postman — add Systems / Processes / grace-holds folders to match OpenAPI
+6. Optional: AI assist on policy detail editor (same BFF)
+7. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
+8. Optional: JWT OAuth2 scopes
+9. Optional: audit_logs monthly partitioning
+10. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
+11. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
+12. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
+13. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
+14. Optional: sync catalog `source_key` into evaluate `scope.sources` (explicitly out of scope for v1 governance catalog)
+15. Optional: process↔system edges; richer RoPA fields
 
 ## Decisions
 
@@ -101,6 +103,8 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - Admin load UX: prefer `loading.tsx` + Suspense over `revalidate` for ops freshness; playgrounds use list metadata + lazy full policy
 - List pagination: URL `?page=` (1-based), default 25 rows; API lists over-fetch `pageSize+1` for `hasNext` (no total in API); Policies/Observability slice client-side after filter
 - Systems/Processes: governance catalog only (1A); full Admin slice (2A); links do not change evaluate matching
+- Python SDK stays focused on evaluate/classify/`@enforce`; full CRUD/governance via OpenAPI clients
+- Example classification YAML is `active` so local seed + README classify examples match retention fixture behavior
 
 ## Gotchas
 
@@ -119,6 +123,8 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - OpenAPI clients: `npm run openapi` from repo root (venv active); regenerates `openapi/openapi.json` + `clients/*` + `admin/lib/generated/schema.d.ts`
 - AI references: require migration `008_policy_reference_sources`; Import body optional `reference_sources`; detail Provenance panel only when non-empty
 - Catalog: require migration `009_systems_processes`; policy deprecate clears links; system/process delete clears their links
+- SDK tests: isolate Settings with `_env_file=None` + `drpe_api_key=None` (local `.env` API key otherwise forces Bearer); `python -m pytest tests/test_sdk.py -v`
+- OpenAPI clients path-complete vs current schema; regenerate with `npm run openapi` only after API route/schema changes
 
 ## Pointers
 
@@ -133,4 +139,5 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 | AI references | `drpe/models/policy.py` (`ReferenceSource`), `008_policy_reference_sources`, `admin/components/ai-source-references.tsx`, `admin/lib/reference-sources.ts` |
 | Policy structure graph | `admin/lib/policy-structure-graph.ts`, `admin/components/policy-structure-graph.tsx`, `/policies/graph`, design `admin/design-system/pages/policy-graph.md` |
 | Systems / Processes | `drpe/models/system.py`, `drpe/models/process.py`, `drpe/api/routes_systems.py`, `drpe/api/routes_processes.py`, `009_systems_processes`, Admin `/systems` `/processes`, `admin/components/policy-applies-to.tsx` |
+| Python SDK | `drpe/sdk/client.py`, `drpe/sdk/embedded.py`, `drpe/__init__.py`, `tests/test_sdk.py` |
 | Tests | `python -m pytest tests/ -v` |
