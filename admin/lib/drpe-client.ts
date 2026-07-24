@@ -24,6 +24,9 @@ import {
   ValidateResponse,
   WebhookCreateResponse,
   WebhookResponse,
+  SystemResponse,
+  ProcessResponse,
+  CatalogStatus,
 } from "@/lib/types";
 
 function apiBase(): string {
@@ -211,6 +214,115 @@ export const drpe = {
     drpeFetch<void>(`/webhooks/${encodeURIComponent(id)}`, {
       method: "DELETE",
     }),
+
+  listSystems: (qs?: string) =>
+    drpeFetch<SystemResponse[]>(`/systems${qs ? `?${qs}` : ""}`),
+  getSystem: (id: string) =>
+    drpeFetch<SystemResponse>(`/systems/${encodeURIComponent(id)}`),
+  createSystem: (body: {
+    name: string;
+    description?: string;
+    owner?: string;
+    status?: CatalogStatus;
+    source_key?: string;
+    tags?: string[];
+  }) =>
+    drpeFetch<SystemResponse>("/systems", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  updateSystem: (
+    id: string,
+    body: Partial<{
+      name: string;
+      description: string;
+      owner: string;
+      status: CatalogStatus;
+      source_key: string;
+      tags: string[];
+    }>,
+  ) =>
+    drpeFetch<SystemResponse>(`/systems/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  deleteSystem: (id: string) =>
+    drpeFetch<void>(`/systems/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    }),
+  listSystemPolicies: (id: string) =>
+    drpeFetch<string[]>(`/systems/${encodeURIComponent(id)}/policies`),
+  setSystemPolicies: (id: string, policy_ids: string[]) =>
+    drpeFetch<string[]>(`/systems/${encodeURIComponent(id)}/policies`, {
+      method: "PUT",
+      body: JSON.stringify({ policy_ids }),
+    }),
+
+  listProcesses: (qs?: string) =>
+    drpeFetch<ProcessResponse[]>(`/processes${qs ? `?${qs}` : ""}`),
+  getProcess: (id: string) =>
+    drpeFetch<ProcessResponse>(`/processes/${encodeURIComponent(id)}`),
+  createProcess: (body: {
+    name: string;
+    description?: string;
+    owner?: string;
+    status?: CatalogStatus;
+    tags?: string[];
+  }) =>
+    drpeFetch<ProcessResponse>("/processes", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  updateProcess: (
+    id: string,
+    body: Partial<{
+      name: string;
+      description: string;
+      owner: string;
+      status: CatalogStatus;
+      tags: string[];
+    }>,
+  ) =>
+    drpeFetch<ProcessResponse>(`/processes/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  deleteProcess: (id: string) =>
+    drpeFetch<void>(`/processes/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    }),
+  listProcessPolicies: (id: string) =>
+    drpeFetch<string[]>(`/processes/${encodeURIComponent(id)}/policies`),
+  setProcessPolicies: (id: string, policy_ids: string[]) =>
+    drpeFetch<string[]>(`/processes/${encodeURIComponent(id)}/policies`, {
+      method: "PUT",
+      body: JSON.stringify({ policy_ids }),
+    }),
+
+  listPolicySystems: (policyId: string) =>
+    drpeFetch<SystemResponse[]>(
+      `/policies/${encodeURIComponent(policyId)}/systems`,
+    ),
+  setPolicySystems: (policyId: string, system_ids: string[]) =>
+    drpeFetch<SystemResponse[]>(
+      `/policies/${encodeURIComponent(policyId)}/systems`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ system_ids }),
+      },
+    ),
+  listPolicyProcesses: (policyId: string) =>
+    drpeFetch<ProcessResponse[]>(
+      `/policies/${encodeURIComponent(policyId)}/processes`,
+    ),
+  setPolicyProcesses: (policyId: string, process_ids: string[]) =>
+    drpeFetch<ProcessResponse[]>(
+      `/policies/${encodeURIComponent(policyId)}/processes`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ process_ids }),
+      },
+    ),
 
   listJobs: (qs?: string) =>
     drpeFetch<EnforcementJob[]>(`/enforce/jobs${qs ? `?${qs}` : ""}`),

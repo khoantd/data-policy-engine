@@ -17,6 +17,8 @@ export type StructureNodeKind =
   | "tag"
   | "reference"
   | "jurisdiction"
+  | "system"
+  | "process"
   | "other";
 
 export type StructureRelation =
@@ -25,7 +27,8 @@ export type StructureRelation =
   | "excludes"
   | "in"
   | "provenanced_by"
-  | "tagged";
+  | "tagged"
+  | "applies_to";
 
 export type StructureNode = {
   id: string;
@@ -199,6 +202,7 @@ function finalize(
 function buildFleetGraph(
   policies: PolicyListItem[],
   maxNodes: number,
+  catalogLinks?: CatalogLinksByPolicy,
 ): StructureGraph {
   const nodeMap = new Map<string, NodeAcc>();
   const edgeMap = new Map<string, EdgeAcc>();
@@ -268,6 +272,31 @@ function buildFleetGraph(
       bump(policyNode);
       addEdge(edgeMap, policyId, id, "excludes");
     }
+
+    const links = catalogLinks?.[p.id];
+    for (const sys of links?.systems ?? []) {
+      const id = `system:${sys.id}`;
+      const node = ensureNode(nodeMap, {
+        id,
+        kind: "system",
+        label: sys.name,
+        meta: sys.source_key || undefined,
+      });
+      bump(node);
+      bump(policyNode);
+      addEdge(edgeMap, policyId, id, "applies_to");
+    }
+    for (const proc of links?.processes ?? []) {
+      const id = `process:${proc.id}`;
+      const node = ensureNode(nodeMap, {
+        id,
+        kind: "process",
+        label: proc.name,
+      });
+      bump(node);
+      bump(policyNode);
+      addEdge(edgeMap, policyId, id, "applies_to");
+    }
   }
 
   return finalize("fleet", nodeMap, edgeMap, maxNodes);
@@ -282,6 +311,7 @@ function isClassification(
 function buildDetailGraph(
   policy: Policy | ClassificationPolicy,
   maxNodes: number,
+  catalogLinks?: PolicyCatalogLinks,
 ): StructureGraph {
   const nodeMap = new Map<string, NodeAcc>();
   const edgeMap = new Map<string, EdgeAcc>();
@@ -381,19 +411,56 @@ function buildDetailGraph(
     addEdge(edgeMap, policyId, id, "provenanced_by");
   }
 
+  for (const sys of catalogLinks?.systems ?? []) {
+    const id = `system:${sys.id}`;
+    ensureNode(nodeMap, {
+      id,
+      kind: "system",
+      label: sys.name,
+      meta: sys.source_key || undefined,
+    });
+    bump(policyNode);
+    addEdge(edgeMap, policyId, id, "applies_to");
+  }
+  for (const proc of catalogLinks?.processes ?? []) {
+    const id = `process:${proc.id}`;
+    ensureNode(nodeMap, {
+      id,
+      kind: "process",
+      label: proc.name,
+    });
+    bump(policyNode);
+    addEdge(edgeMap, policyId, id, "applies_to");
+  }
+
   return finalize("detail", nodeMap, edgeMap, maxNodes);
 }
+
+export type CatalogLinkRef = {
+  id: string;
+  name: string;
+  source_key?: string | null;
+};
+
+export type PolicyCatalogLinks = {
+  systems?: CatalogLinkRef[];
+  processes?: CatalogLinkRef[];
+};
+
+export type CatalogLinksByPolicy = Record<string, PolicyCatalogLinks>;
 
 export type BuildFleetInput = {
   mode: "fleet";
   policies: PolicyListItem[];
   maxNodes?: number;
+  catalogLinks?: CatalogLinksByPolicy;
 };
 
 export type BuildDetailInput = {
   mode: "detail";
   policy: Policy | ClassificationPolicy;
   maxNodes?: number;
+  catalogLinks?: PolicyCatalogLinks;
 };
 
 export function buildPolicyStructureGraph(
@@ -401,7 +468,25 @@ export function buildPolicyStructureGraph(
 ): StructureGraph {
   const maxNodes = input.maxNodes ?? DEFAULT_MAX_NODES;
   if (input.mode === "fleet") {
-    return buildFleetGraph(input.policies, maxNodes);
+    return buildFleetGraph(input.policies, maxNodes, input.catalogLinks);
   }
-  return buildDetailGraph(input.policy, maxNodes);
+  return buildDetailGraph(input.policy, maxNodes, input.catalogLinks);
+}
+
+/** Keep nodes whose kind is in `visibleKinds`; edges need both endpoints. */
+export function filterStructureGraphByKinds(
+  graph: StructureGraph,
+  visibleKinds: Set<StructureNodeKind>,
+): StructureGraph {
+  const nodes = graph.nodes.filter((n) => visibleKinds.has(n.kind));
+  const keep = new Set(nodes.map((n) => n.id));
+  const edges = graph.edges.filter(
+    (e) => keep.has(e.source) && keep.has(e.target),
+  );
+  return {
+    mode: graph.mode,
+    nodes,
+    edges,
+    truncated: graph.truncated,
+  };
 }

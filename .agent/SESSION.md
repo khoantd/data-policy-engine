@@ -52,15 +52,17 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - **Admin list pagination** — shared `admin/lib/pagination.ts` + `PaginationBar` / `PaginationControls`; `?page=` on Policies (client slice), Audit/DSAR/Enforce/Grace holds/Webhooks (API `limit`/`offset` over-fetch), Observability traces (client slice); page size 25
 - **AI reference sources persistence** — Import posts Tavily `reference_sources` with YAML; stored on Policy/ClassificationPolicy + DB column `008`; detail page shows saved `AiSourceReferences` (collapsed); YAML editor strips provenance
 - **Policy structure network graph** — Admin `/policies/graph` (fleet) + Structure panel on policy detail via `reagraph`; shared `buildPolicyStructureGraph` + adjacency a11y; Insights remains ReactFlow
+- **Systems & Processes catalog (governance)** — CRUD `/api/v1/systems` + `/processes`; many-to-many policy links (replace-set); Admin Catalog nav + list/detail; policy **Applies to** panel; structure graph `system`/`process` + `applies_to`; migration `009`; does **not** affect evaluate/classify
+- **System request context (Admin UX)** — Evaluate/Scan optional System picker seeds `source` from `source_key`; optional Process picker shows governance-linked policies; `?system=` / `?process=` deep links + catalog detail Try evaluate/scan CTAs; AI sample endpoints accept system/process snapshots and force `source` from `source_key`; no engine matching change
 
 ## In progress
 
 - _(none)_
-- **Blockers:** Supabase/local DB may need `alembic upgrade head` (through `008_policy_reference_sources`) where schema is behind
+- **Blockers:** Supabase/local DB may need `alembic upgrade head` (through `009_systems_processes`) where schema is behind
 
 ## Next
 
-1. Apply `alembic upgrade head` anywhere the DB schema is not yet at 008+
+1. Apply `alembic upgrade head` anywhere the DB schema is not yet at 009+
 2. Set `DRPE_API_URL` on Vercel project `royal-platform/ros-policy-admin` (Production/Preview), then redeploy
 3. When Redis/Celery broker is set: `docker compose --profile celery up` (or separate worker/beat containers); else `DRPE_CELERY_EAGER=true`
 4. Optional: AI assist on policy detail editor (same BFF)
@@ -71,6 +73,8 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 9. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
 10. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
 11. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
+12. Optional: sync catalog `source_key` into evaluate `scope.sources` (explicitly out of scope for v1 governance catalog)
+13. Optional: process↔system edges; richer RoPA fields
 
 ## Decisions
 
@@ -93,6 +97,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - Product name: **ROS Policy** (display); technical package/env remain `drpe` / `DRPE_*` unless a breaking rebrand is desired
 - Admin load UX: prefer `loading.tsx` + Suspense over `revalidate` for ops freshness; playgrounds use list metadata + lazy full policy
 - List pagination: URL `?page=` (1-based), default 25 rows; API lists over-fetch `pageSize+1` for `hasNext` (no total in API); Policies/Observability slice client-side after filter
+- Systems/Processes: governance catalog only (1A); full Admin slice (2A); links do not change evaluate matching
 
 ## Gotchas
 
@@ -110,6 +115,7 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 - Admin unit tests: `cd admin && npm test` (vitest)
 - OpenAPI clients: `npm run openapi` from repo root (venv active); regenerates `openapi/openapi.json` + `clients/*` + `admin/lib/generated/schema.d.ts`
 - AI references: require migration `008_policy_reference_sources`; Import body optional `reference_sources`; detail Provenance panel only when non-empty
+- Catalog: require migration `009_systems_processes`; policy deprecate clears links; system/process delete clears their links
 
 ## Pointers
 
@@ -123,4 +129,5 @@ Ship Admin UI (Next.js ops console) over existing `/api/v1`.
 | Pagination | `admin/lib/pagination.ts`, `admin/components/ui/pagination.tsx` |
 | AI references | `drpe/models/policy.py` (`ReferenceSource`), `008_policy_reference_sources`, `admin/components/ai-source-references.tsx`, `admin/lib/reference-sources.ts` |
 | Policy structure graph | `admin/lib/policy-structure-graph.ts`, `admin/components/policy-structure-graph.tsx`, `/policies/graph`, design `admin/design-system/pages/policy-graph.md` |
+| Systems / Processes | `drpe/models/system.py`, `drpe/models/process.py`, `drpe/api/routes_systems.py`, `drpe/api/routes_processes.py`, `009_systems_processes`, Admin `/systems` `/processes`, `admin/components/policy-applies-to.tsx` |
 | Tests | `python -m pytest tests/ -v` |

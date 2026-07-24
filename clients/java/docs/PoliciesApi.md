@@ -13,7 +13,11 @@ All URIs are relative to *http://localhost:8000*
 | [**getPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet**](PoliciesApi.md#getPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet) | **GET** /api/v1/policies/{policy_id}/versions/{ver} | Get Policy Version |
 | [**importPoliciesApiV1PoliciesImportPost**](PoliciesApi.md#importPoliciesApiV1PoliciesImportPost) | **POST** /api/v1/policies/import | Import Policies |
 | [**listPoliciesApiV1PoliciesGet**](PoliciesApi.md#listPoliciesApiV1PoliciesGet) | **GET** /api/v1/policies | List Policies |
+| [**listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet**](PoliciesApi.md#listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet) | **GET** /api/v1/policies/{policy_id}/processes | List Policy Processes |
+| [**listPolicySystemsApiV1PoliciesPolicyIdSystemsGet**](PoliciesApi.md#listPolicySystemsApiV1PoliciesPolicyIdSystemsGet) | **GET** /api/v1/policies/{policy_id}/systems | List Policy Systems |
 | [**listPolicyVersionsApiV1PoliciesPolicyIdVersionsGet**](PoliciesApi.md#listPolicyVersionsApiV1PoliciesPolicyIdVersionsGet) | **GET** /api/v1/policies/{policy_id}/versions | List Policy Versions |
+| [**setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut**](PoliciesApi.md#setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut) | **PUT** /api/v1/policies/{policy_id}/processes | Set Policy Processes |
+| [**setPolicySystemsApiV1PoliciesPolicyIdSystemsPut**](PoliciesApi.md#setPolicySystemsApiV1PoliciesPolicyIdSystemsPut) | **PUT** /api/v1/policies/{policy_id}/systems | Set Policy Systems |
 | [**updatePolicyApiV1PoliciesPolicyIdPut**](PoliciesApi.md#updatePolicyApiV1PoliciesPolicyIdPut) | **PUT** /api/v1/policies/{policy_id} | Update Policy |
 | [**validatePolicyApiV1PoliciesValidatePost**](PoliciesApi.md#validatePolicyApiV1PoliciesValidatePost) | **POST** /api/v1/policies/validate | Validate Policy |
 
@@ -622,6 +626,138 @@ public class Example {
 | **200** | Successful Response |  -  |
 | **422** | Validation Error |  -  |
 
+<a id="listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet"></a>
+# **listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet**
+> List&lt;ProcessResponse&gt; listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet(policyId)
+
+List Policy Processes
+
+### Example
+```java
+// Import classes:
+import com.drpe.client.ApiClient;
+import com.drpe.client.ApiException;
+import com.drpe.client.Configuration;
+import com.drpe.client.auth.*;
+import com.drpe.client.models.*;
+import com.drpe.client.api.PoliciesApi;
+
+public class Example {
+  public static void main(String[] args) {
+    ApiClient defaultClient = Configuration.getDefaultApiClient();
+    defaultClient.setBasePath("http://localhost:8000");
+    
+    // Configure HTTP bearer authorization: BearerAuth
+    HttpBearerAuth BearerAuth = (HttpBearerAuth) defaultClient.getAuthentication("BearerAuth");
+    BearerAuth.setBearerToken("BEARER TOKEN");
+
+    PoliciesApi apiInstance = new PoliciesApi(defaultClient);
+    String policyId = "policyId_example"; // String | 
+    try {
+      List<ProcessResponse> result = apiInstance.listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet(policyId);
+      System.out.println(result);
+    } catch (ApiException e) {
+      System.err.println("Exception when calling PoliciesApi#listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet");
+      System.err.println("Status code: " + e.getCode());
+      System.err.println("Reason: " + e.getResponseBody());
+      System.err.println("Response headers: " + e.getResponseHeaders());
+      e.printStackTrace();
+    }
+  }
+}
+```
+
+### Parameters
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **policyId** | **String**|  | |
+
+### Return type
+
+[**List&lt;ProcessResponse&gt;**](ProcessResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Successful Response |  -  |
+| **422** | Validation Error |  -  |
+
+<a id="listPolicySystemsApiV1PoliciesPolicyIdSystemsGet"></a>
+# **listPolicySystemsApiV1PoliciesPolicyIdSystemsGet**
+> List&lt;SystemResponse&gt; listPolicySystemsApiV1PoliciesPolicyIdSystemsGet(policyId)
+
+List Policy Systems
+
+### Example
+```java
+// Import classes:
+import com.drpe.client.ApiClient;
+import com.drpe.client.ApiException;
+import com.drpe.client.Configuration;
+import com.drpe.client.auth.*;
+import com.drpe.client.models.*;
+import com.drpe.client.api.PoliciesApi;
+
+public class Example {
+  public static void main(String[] args) {
+    ApiClient defaultClient = Configuration.getDefaultApiClient();
+    defaultClient.setBasePath("http://localhost:8000");
+    
+    // Configure HTTP bearer authorization: BearerAuth
+    HttpBearerAuth BearerAuth = (HttpBearerAuth) defaultClient.getAuthentication("BearerAuth");
+    BearerAuth.setBearerToken("BEARER TOKEN");
+
+    PoliciesApi apiInstance = new PoliciesApi(defaultClient);
+    String policyId = "policyId_example"; // String | 
+    try {
+      List<SystemResponse> result = apiInstance.listPolicySystemsApiV1PoliciesPolicyIdSystemsGet(policyId);
+      System.out.println(result);
+    } catch (ApiException e) {
+      System.err.println("Exception when calling PoliciesApi#listPolicySystemsApiV1PoliciesPolicyIdSystemsGet");
+      System.err.println("Status code: " + e.getCode());
+      System.err.println("Reason: " + e.getResponseBody());
+      System.err.println("Response headers: " + e.getResponseHeaders());
+      e.printStackTrace();
+    }
+  }
+}
+```
+
+### Parameters
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **policyId** | **String**|  | |
+
+### Return type
+
+[**List&lt;SystemResponse&gt;**](SystemResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Successful Response |  -  |
+| **422** | Validation Error |  -  |
+
 <a id="listPolicyVersionsApiV1PoliciesPolicyIdVersionsGet"></a>
 # **listPolicyVersionsApiV1PoliciesPolicyIdVersionsGet**
 > List&lt;PolicyVersionInfo&gt; listPolicyVersionsApiV1PoliciesPolicyIdVersionsGet(policyId)
@@ -680,6 +816,142 @@ public class Example {
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Successful Response |  -  |
+| **422** | Validation Error |  -  |
+
+<a id="setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut"></a>
+# **setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut**
+> List&lt;ProcessResponse&gt; setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(policyId, processIdsRequest)
+
+Set Policy Processes
+
+### Example
+```java
+// Import classes:
+import com.drpe.client.ApiClient;
+import com.drpe.client.ApiException;
+import com.drpe.client.Configuration;
+import com.drpe.client.auth.*;
+import com.drpe.client.models.*;
+import com.drpe.client.api.PoliciesApi;
+
+public class Example {
+  public static void main(String[] args) {
+    ApiClient defaultClient = Configuration.getDefaultApiClient();
+    defaultClient.setBasePath("http://localhost:8000");
+    
+    // Configure HTTP bearer authorization: BearerAuth
+    HttpBearerAuth BearerAuth = (HttpBearerAuth) defaultClient.getAuthentication("BearerAuth");
+    BearerAuth.setBearerToken("BEARER TOKEN");
+
+    PoliciesApi apiInstance = new PoliciesApi(defaultClient);
+    String policyId = "policyId_example"; // String | 
+    ProcessIdsRequest processIdsRequest = new ProcessIdsRequest(); // ProcessIdsRequest | 
+    try {
+      List<ProcessResponse> result = apiInstance.setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(policyId, processIdsRequest);
+      System.out.println(result);
+    } catch (ApiException e) {
+      System.err.println("Exception when calling PoliciesApi#setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut");
+      System.err.println("Status code: " + e.getCode());
+      System.err.println("Reason: " + e.getResponseBody());
+      System.err.println("Response headers: " + e.getResponseHeaders());
+      e.printStackTrace();
+    }
+  }
+}
+```
+
+### Parameters
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **policyId** | **String**|  | |
+| **processIdsRequest** | [**ProcessIdsRequest**](ProcessIdsRequest.md)|  | |
+
+### Return type
+
+[**List&lt;ProcessResponse&gt;**](ProcessResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Successful Response |  -  |
+| **422** | Validation Error |  -  |
+
+<a id="setPolicySystemsApiV1PoliciesPolicyIdSystemsPut"></a>
+# **setPolicySystemsApiV1PoliciesPolicyIdSystemsPut**
+> List&lt;SystemResponse&gt; setPolicySystemsApiV1PoliciesPolicyIdSystemsPut(policyId, systemIdsRequest)
+
+Set Policy Systems
+
+### Example
+```java
+// Import classes:
+import com.drpe.client.ApiClient;
+import com.drpe.client.ApiException;
+import com.drpe.client.Configuration;
+import com.drpe.client.auth.*;
+import com.drpe.client.models.*;
+import com.drpe.client.api.PoliciesApi;
+
+public class Example {
+  public static void main(String[] args) {
+    ApiClient defaultClient = Configuration.getDefaultApiClient();
+    defaultClient.setBasePath("http://localhost:8000");
+    
+    // Configure HTTP bearer authorization: BearerAuth
+    HttpBearerAuth BearerAuth = (HttpBearerAuth) defaultClient.getAuthentication("BearerAuth");
+    BearerAuth.setBearerToken("BEARER TOKEN");
+
+    PoliciesApi apiInstance = new PoliciesApi(defaultClient);
+    String policyId = "policyId_example"; // String | 
+    SystemIdsRequest systemIdsRequest = new SystemIdsRequest(); // SystemIdsRequest | 
+    try {
+      List<SystemResponse> result = apiInstance.setPolicySystemsApiV1PoliciesPolicyIdSystemsPut(policyId, systemIdsRequest);
+      System.out.println(result);
+    } catch (ApiException e) {
+      System.err.println("Exception when calling PoliciesApi#setPolicySystemsApiV1PoliciesPolicyIdSystemsPut");
+      System.err.println("Status code: " + e.getCode());
+      System.err.println("Reason: " + e.getResponseBody());
+      System.err.println("Response headers: " + e.getResponseHeaders());
+      e.printStackTrace();
+    }
+  }
+}
+```
+
+### Parameters
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **policyId** | **String**|  | |
+| **systemIdsRequest** | [**SystemIdsRequest**](SystemIdsRequest.md)|  | |
+
+### Return type
+
+[**List&lt;SystemResponse&gt;**](SystemResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 ### HTTP response details

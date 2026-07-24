@@ -47,6 +47,10 @@ export type ConflictingPolicy = Schemas["ConflictingPolicy"];
 export type WebhookResponse = Schemas["WebhookResponse"];
 export type WebhookCreateResponse = Schemas["WebhookCreateResponse"];
 
+export type CatalogStatus = Schemas["CatalogStatus"];
+export type SystemResponse = Schemas["SystemResponse"];
+export type ProcessResponse = Schemas["ProcessResponse"];
+
 export class DrpeApiError extends Error {
   status: number;
   detail: unknown;

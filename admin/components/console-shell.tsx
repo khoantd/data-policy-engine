@@ -15,8 +15,10 @@ import {
   Menu,
   Network,
   ScanSearch,
+  Server,
   Shield,
   Webhook,
+  Workflow,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -45,7 +47,14 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/policies", label: "All policies", icon: Shield },
       { href: "/policies/graph", label: "Structure graph", icon: Network },
-      { href: "/policies/import", label: "Import", icon: FileUp },
+      { href: "/policies/import", label: "Create Policy", icon: FileUp },
+    ],
+  },
+  {
+    label: "Catalog",
+    items: [
+      { href: "/systems", label: "Systems", icon: Server },
+      { href: "/processes", label: "Processes", icon: Workflow },
     ],
   },
   {

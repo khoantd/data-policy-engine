@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  catalogProcessSnapshotSchema,
+  catalogSystemSnapshotSchema,
+} from "@/lib/ai/catalog-sample-context";
 import { entriesToRecordObject } from "@/lib/ai/evaluate-sample-schema";
 
 export const CLASSIFY_SAMPLE_SCENARIOS = [
@@ -91,6 +95,8 @@ export type ClassifySamplePolicySnapshot = z.infer<
 export const classifySampleBodySchema = z.object({
   scenario: z.enum(CLASSIFY_SAMPLE_SCENARIOS).default("auto"),
   policy: classifySamplePolicySnapshotSchema,
+  system: catalogSystemSnapshotSchema.optional().nullable(),
+  process: catalogProcessSnapshotSchema.optional().nullable(),
 });
 
 export type ClassifySampleBody = z.infer<typeof classifySampleBodySchema>;

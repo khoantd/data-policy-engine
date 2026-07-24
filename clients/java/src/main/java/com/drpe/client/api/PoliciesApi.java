@@ -37,6 +37,10 @@ import com.drpe.client.model.PolicyKind;
 import com.drpe.client.model.PolicyListItem;
 import com.drpe.client.model.PolicyStatusChangeRequest;
 import com.drpe.client.model.PolicyVersionInfo;
+import com.drpe.client.model.ProcessIdsRequest;
+import com.drpe.client.model.ProcessResponse;
+import com.drpe.client.model.SystemIdsRequest;
+import com.drpe.client.model.SystemResponse;
 import com.drpe.client.model.ValidateRequest;
 import com.drpe.client.model.ValidateResponse;
 
@@ -1309,6 +1313,268 @@ public class PoliciesApi {
         return localVarCall;
     }
     /**
+     * Build call for listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet
+     * @param policyId  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetCall(@javax.annotation.Nonnull String policyId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/api/v1/policies/{policy_id}/processes"
+            .replace("{" + "policy_id" + "}", localVarApiClient.escapeString(policyId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "BearerAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetValidateBeforeCall(@javax.annotation.Nonnull String policyId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'policyId' is set
+        if (policyId == null) {
+            throw new ApiException("Missing the required parameter 'policyId' when calling listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet(Async)");
+        }
+
+        return listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetCall(policyId, _callback);
+
+    }
+
+    /**
+     * List Policy Processes
+     * 
+     * @param policyId  (required)
+     * @return List&lt;ProcessResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public List<ProcessResponse> listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet(@javax.annotation.Nonnull String policyId) throws ApiException {
+        ApiResponse<List<ProcessResponse>> localVarResp = listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetWithHttpInfo(policyId);
+        return localVarResp.getData();
+    }
+
+    /**
+     * List Policy Processes
+     * 
+     * @param policyId  (required)
+     * @return ApiResponse&lt;List&lt;ProcessResponse&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<List<ProcessResponse>> listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetWithHttpInfo(@javax.annotation.Nonnull String policyId) throws ApiException {
+        okhttp3.Call localVarCall = listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetValidateBeforeCall(policyId, null);
+        Type localVarReturnType = new TypeToken<List<ProcessResponse>>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * List Policy Processes (asynchronously)
+     * 
+     * @param policyId  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetAsync(@javax.annotation.Nonnull String policyId, final ApiCallback<List<ProcessResponse>> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetValidateBeforeCall(policyId, _callback);
+        Type localVarReturnType = new TypeToken<List<ProcessResponse>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for listPolicySystemsApiV1PoliciesPolicyIdSystemsGet
+     * @param policyId  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listPolicySystemsApiV1PoliciesPolicyIdSystemsGetCall(@javax.annotation.Nonnull String policyId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/api/v1/policies/{policy_id}/systems"
+            .replace("{" + "policy_id" + "}", localVarApiClient.escapeString(policyId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "BearerAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listPolicySystemsApiV1PoliciesPolicyIdSystemsGetValidateBeforeCall(@javax.annotation.Nonnull String policyId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'policyId' is set
+        if (policyId == null) {
+            throw new ApiException("Missing the required parameter 'policyId' when calling listPolicySystemsApiV1PoliciesPolicyIdSystemsGet(Async)");
+        }
+
+        return listPolicySystemsApiV1PoliciesPolicyIdSystemsGetCall(policyId, _callback);
+
+    }
+
+    /**
+     * List Policy Systems
+     * 
+     * @param policyId  (required)
+     * @return List&lt;SystemResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public List<SystemResponse> listPolicySystemsApiV1PoliciesPolicyIdSystemsGet(@javax.annotation.Nonnull String policyId) throws ApiException {
+        ApiResponse<List<SystemResponse>> localVarResp = listPolicySystemsApiV1PoliciesPolicyIdSystemsGetWithHttpInfo(policyId);
+        return localVarResp.getData();
+    }
+
+    /**
+     * List Policy Systems
+     * 
+     * @param policyId  (required)
+     * @return ApiResponse&lt;List&lt;SystemResponse&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<List<SystemResponse>> listPolicySystemsApiV1PoliciesPolicyIdSystemsGetWithHttpInfo(@javax.annotation.Nonnull String policyId) throws ApiException {
+        okhttp3.Call localVarCall = listPolicySystemsApiV1PoliciesPolicyIdSystemsGetValidateBeforeCall(policyId, null);
+        Type localVarReturnType = new TypeToken<List<SystemResponse>>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * List Policy Systems (asynchronously)
+     * 
+     * @param policyId  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listPolicySystemsApiV1PoliciesPolicyIdSystemsGetAsync(@javax.annotation.Nonnull String policyId, final ApiCallback<List<SystemResponse>> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listPolicySystemsApiV1PoliciesPolicyIdSystemsGetValidateBeforeCall(policyId, _callback);
+        Type localVarReturnType = new TypeToken<List<SystemResponse>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for listPolicyVersionsApiV1PoliciesPolicyIdVersionsGet
      * @param policyId  (required)
      * @param _callback Callback for upload/download progress
@@ -1436,6 +1702,288 @@ public class PoliciesApi {
 
         okhttp3.Call localVarCall = listPolicyVersionsApiV1PoliciesPolicyIdVersionsGetValidateBeforeCall(policyId, _callback);
         Type localVarReturnType = new TypeToken<List<PolicyVersionInfo>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut
+     * @param policyId  (required)
+     * @param processIdsRequest  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutCall(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull ProcessIdsRequest processIdsRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = processIdsRequest;
+
+        // create path and map variables
+        String localVarPath = "/api/v1/policies/{policy_id}/processes"
+            .replace("{" + "policy_id" + "}", localVarApiClient.escapeString(policyId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "BearerAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutValidateBeforeCall(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull ProcessIdsRequest processIdsRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'policyId' is set
+        if (policyId == null) {
+            throw new ApiException("Missing the required parameter 'policyId' when calling setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(Async)");
+        }
+
+        // verify the required parameter 'processIdsRequest' is set
+        if (processIdsRequest == null) {
+            throw new ApiException("Missing the required parameter 'processIdsRequest' when calling setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(Async)");
+        }
+
+        return setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutCall(policyId, processIdsRequest, _callback);
+
+    }
+
+    /**
+     * Set Policy Processes
+     * 
+     * @param policyId  (required)
+     * @param processIdsRequest  (required)
+     * @return List&lt;ProcessResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public List<ProcessResponse> setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull ProcessIdsRequest processIdsRequest) throws ApiException {
+        ApiResponse<List<ProcessResponse>> localVarResp = setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutWithHttpInfo(policyId, processIdsRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Set Policy Processes
+     * 
+     * @param policyId  (required)
+     * @param processIdsRequest  (required)
+     * @return ApiResponse&lt;List&lt;ProcessResponse&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<List<ProcessResponse>> setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutWithHttpInfo(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull ProcessIdsRequest processIdsRequest) throws ApiException {
+        okhttp3.Call localVarCall = setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutValidateBeforeCall(policyId, processIdsRequest, null);
+        Type localVarReturnType = new TypeToken<List<ProcessResponse>>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Set Policy Processes (asynchronously)
+     * 
+     * @param policyId  (required)
+     * @param processIdsRequest  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutAsync(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull ProcessIdsRequest processIdsRequest, final ApiCallback<List<ProcessResponse>> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutValidateBeforeCall(policyId, processIdsRequest, _callback);
+        Type localVarReturnType = new TypeToken<List<ProcessResponse>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for setPolicySystemsApiV1PoliciesPolicyIdSystemsPut
+     * @param policyId  (required)
+     * @param systemIdsRequest  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setPolicySystemsApiV1PoliciesPolicyIdSystemsPutCall(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull SystemIdsRequest systemIdsRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = systemIdsRequest;
+
+        // create path and map variables
+        String localVarPath = "/api/v1/policies/{policy_id}/systems"
+            .replace("{" + "policy_id" + "}", localVarApiClient.escapeString(policyId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "BearerAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call setPolicySystemsApiV1PoliciesPolicyIdSystemsPutValidateBeforeCall(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull SystemIdsRequest systemIdsRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'policyId' is set
+        if (policyId == null) {
+            throw new ApiException("Missing the required parameter 'policyId' when calling setPolicySystemsApiV1PoliciesPolicyIdSystemsPut(Async)");
+        }
+
+        // verify the required parameter 'systemIdsRequest' is set
+        if (systemIdsRequest == null) {
+            throw new ApiException("Missing the required parameter 'systemIdsRequest' when calling setPolicySystemsApiV1PoliciesPolicyIdSystemsPut(Async)");
+        }
+
+        return setPolicySystemsApiV1PoliciesPolicyIdSystemsPutCall(policyId, systemIdsRequest, _callback);
+
+    }
+
+    /**
+     * Set Policy Systems
+     * 
+     * @param policyId  (required)
+     * @param systemIdsRequest  (required)
+     * @return List&lt;SystemResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public List<SystemResponse> setPolicySystemsApiV1PoliciesPolicyIdSystemsPut(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull SystemIdsRequest systemIdsRequest) throws ApiException {
+        ApiResponse<List<SystemResponse>> localVarResp = setPolicySystemsApiV1PoliciesPolicyIdSystemsPutWithHttpInfo(policyId, systemIdsRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Set Policy Systems
+     * 
+     * @param policyId  (required)
+     * @param systemIdsRequest  (required)
+     * @return ApiResponse&lt;List&lt;SystemResponse&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<List<SystemResponse>> setPolicySystemsApiV1PoliciesPolicyIdSystemsPutWithHttpInfo(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull SystemIdsRequest systemIdsRequest) throws ApiException {
+        okhttp3.Call localVarCall = setPolicySystemsApiV1PoliciesPolicyIdSystemsPutValidateBeforeCall(policyId, systemIdsRequest, null);
+        Type localVarReturnType = new TypeToken<List<SystemResponse>>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Set Policy Systems (asynchronously)
+     * 
+     * @param policyId  (required)
+     * @param systemIdsRequest  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setPolicySystemsApiV1PoliciesPolicyIdSystemsPutAsync(@javax.annotation.Nonnull String policyId, @javax.annotation.Nonnull SystemIdsRequest systemIdsRequest, final ApiCallback<List<SystemResponse>> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = setPolicySystemsApiV1PoliciesPolicyIdSystemsPutValidateBeforeCall(policyId, systemIdsRequest, _callback);
+        Type localVarReturnType = new TypeToken<List<SystemResponse>>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

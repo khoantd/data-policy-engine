@@ -2,13 +2,18 @@ import type {
   ClassifySamplePolicySnapshot,
   ClassifySampleScenario,
 } from "@/lib/ai/classify-sample-schema";
+import {
+  formatCatalogContextForPrompt,
+  type CatalogProcessSnapshot,
+  type CatalogSystemSnapshot,
+} from "@/lib/ai/catalog-sample-context";
 
 const RECORD_CONTRACT = `You generate synthetic classification scan records for the ROS Policy Scan playground.
 Each record must use these exact field names (snake_case):
 - data_type (string, required) — match a policy scope data_type when the policy restricts them
 - record_id (string, required, synthetic IDs like cust_scan_ai_001 — never real identifiers)
 - metadata (array, required, min 1 entry) — key/value pairs that should exercise the policy's entity detectors
-- source (string or null, required key) — match policy scope sources when applicable, otherwise null
+- source (string or null, required key) — match policy scope sources when applicable, otherwise null. When a catalog system source_key is provided below, use that exact value.
 - jurisdiction (string or null, required key) — match the policy jurisdiction when applicable, otherwise null
 
 Detection guidance:
@@ -36,13 +41,16 @@ export function buildClassifySampleSystemPrompt(): string {
 export function buildClassifySampleUserPrompt(input: {
   scenario: ClassifySampleScenario;
   policy: ClassifySamplePolicySnapshot;
+  system?: CatalogSystemSnapshot | null;
+  process?: CatalogProcessSnapshot | null;
 }): string {
-  const { policy, scenario } = input;
+  const { policy, scenario, system, process } = input;
   const dataTypes = policy.scope?.data_types?.join(", ") || "any in scope";
   const sources = policy.scope?.sources?.join(", ") || "any in scope";
   const textFields = policy.text_fields?.join(", ") || "none";
+  const catalogLines = formatCatalogContextForPrompt({ system, process });
 
-  return [
+  const parts = [
     `Target classification policy id: ${policy.id}`,
     `Jurisdiction: ${policy.jurisdiction}`,
     `Scope data_types: ${dataTypes}`,
@@ -53,9 +61,18 @@ export function buildClassifySampleUserPrompt(input: {
     JSON.stringify(policy.entities, null, 2),
     "",
     `Scenario: ${scenario} — ${SCENARIO_HINTS[scenario]}`,
+  ];
+
+  if (catalogLines.length > 0) {
+    parts.push("", ...catalogLines);
+  }
+
+  parts.push(
     "",
     'Generate one record under key "record".',
     "",
     `Reference date (today): ${new Date().toISOString().slice(0, 10)}`,
-  ].join("\n");
+  );
+
+  return parts.join("\n");
 }

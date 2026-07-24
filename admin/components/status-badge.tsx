@@ -24,7 +24,7 @@ export function StatusBadge({
           s === "delete" ||
           s === "anonymize"
         ? "bg-destructive/10 text-destructive border-destructive/30"
-        : s === "archived"
+        : s === "archived" || s === "retired"
           ? "bg-muted text-muted-fg border-border"
           : s === "running" ||
             s === "in_progress" ||

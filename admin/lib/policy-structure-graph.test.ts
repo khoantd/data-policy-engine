@@ -3,6 +3,8 @@ import type { ClassificationPolicy, Policy, PolicyListItem } from "@/lib/types";
 import {
   OTHER_LABEL,
   buildPolicyStructureGraph,
+  filterStructureGraphByKinds,
+  type StructureNodeKind,
 } from "./policy-structure-graph";
 
 const fleetItems: PolicyListItem[] = [
@@ -199,5 +201,93 @@ describe("buildPolicyStructureGraph detail mode", () => {
           e.relation === "contains",
       ),
     ).toBe(true);
+  });
+
+  it("includes system and process applies_to edges when catalog links provided", () => {
+    const graph = buildPolicyStructureGraph({
+      mode: "detail",
+      policy: retentionPolicy,
+      catalogLinks: {
+        systems: [{ id: "sys_crm", name: "CRM", source_key: "crm_system" }],
+        processes: [{ id: "proc_onboard", name: "Onboarding" }],
+      },
+    });
+    expect(graph.nodes.find((n) => n.id === "system:sys_crm")?.kind).toBe(
+      "system",
+    );
+    expect(graph.nodes.find((n) => n.id === "process:proc_onboard")?.kind).toBe(
+      "process",
+    );
+    expect(
+      graph.edges.some(
+        (e) =>
+          e.relation === "applies_to" && e.target === "system:sys_crm",
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("buildPolicyStructureGraph fleet catalog links", () => {
+  it("attaches systems to policies in fleet mode", () => {
+    const graph = buildPolicyStructureGraph({
+      mode: "fleet",
+      policies: fleetItems,
+      catalogLinks: {
+        gdpr_customer: {
+          systems: [{ id: "sys_crm", name: "CRM" }],
+        },
+      },
+    });
+    expect(graph.nodes.some((n) => n.id === "system:sys_crm")).toBe(true);
+    expect(
+      graph.edges.some(
+        (e) =>
+          e.source === "policy:gdpr_customer" &&
+          e.target === "system:sys_crm" &&
+          e.relation === "applies_to",
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("filterStructureGraphByKinds", () => {
+  const fullGraph = buildPolicyStructureGraph({
+    mode: "detail",
+    policy: retentionPolicy,
+    catalogLinks: {
+      systems: [{ id: "sys_crm", name: "CRM", source_key: "crm_system" }],
+      processes: [{ id: "proc_onboard", name: "Onboarding" }],
+    },
+  });
+
+  it("hides system nodes and applies_to edges when system is excluded", () => {
+    const kinds = new Set<StructureNodeKind>(
+      fullGraph.nodes.map((n) => n.kind).filter((k) => k !== "system"),
+    );
+    const filtered = filterStructureGraphByKinds(fullGraph, kinds);
+    expect(filtered.nodes.some((n) => n.kind === "system")).toBe(false);
+    expect(
+      filtered.edges.some(
+        (e) => e.relation === "applies_to" && e.target === "system:sys_crm",
+      ),
+    ).toBe(false);
+    expect(filtered.nodes.some((n) => n.kind === "process")).toBe(true);
+    expect(filtered.mode).toBe(fullGraph.mode);
+    expect(filtered.truncated).toBe(fullGraph.truncated);
+  });
+
+  it("returns empty nodes and edges when visibleKinds is empty", () => {
+    const filtered = filterStructureGraphByKinds(fullGraph, new Set());
+    expect(filtered.nodes).toEqual([]);
+    expect(filtered.edges).toEqual([]);
+  });
+
+  it("is identity when all node kinds are visible", () => {
+    const kinds = new Set<StructureNodeKind>(
+      fullGraph.nodes.map((n) => n.kind),
+    );
+    const filtered = filterStructureGraphByKinds(fullGraph, kinds);
+    expect(filtered.nodes).toEqual(fullGraph.nodes);
+    expect(filtered.edges).toEqual(fullGraph.edges);
   });
 });

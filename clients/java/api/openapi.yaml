@@ -423,6 +423,666 @@ paths:
       x-content-type: application/json
       x-accepts:
       - application/json
+  /api/v1/policies/{policy_id}/systems:
+    get:
+      operationId: list_policy_systems_api_v1_policies__policy_id__systems_get
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SystemResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Policy Systems
+      tags:
+      - policies
+      x-accepts:
+      - application/json
+    put:
+      operationId: set_policy_systems_api_v1_policies__policy_id__systems_put
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SystemIdsRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SystemResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Set Policy Systems
+      tags:
+      - policies
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/policies/{policy_id}/processes:
+    get:
+      operationId: list_policy_processes_api_v1_policies__policy_id__processes_get
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ProcessResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Policy Processes
+      tags:
+      - policies
+      x-accepts:
+      - application/json
+    put:
+      operationId: set_policy_processes_api_v1_policies__policy_id__processes_put
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessIdsRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ProcessResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Set Policy Processes
+      tags:
+      - policies
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/systems:
+    get:
+      operationId: list_systems_api_v1_systems_get
+      parameters:
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/CatalogStatus"
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SystemResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Systems
+      tags:
+      - systems
+      x-accepts:
+      - application/json
+    post:
+      operationId: create_system_api_v1_systems_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SystemCreateRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Create System
+      tags:
+      - systems
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/systems/{system_id}:
+    delete:
+      operationId: delete_system_api_v1_systems__system_id__delete
+      parameters:
+      - explode: false
+        in: path
+        name: system_id
+        required: true
+        schema:
+          title: System Id
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Delete System
+      tags:
+      - systems
+      x-accepts:
+      - application/json
+    get:
+      operationId: get_system_api_v1_systems__system_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: system_id
+        required: true
+        schema:
+          title: System Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get System
+      tags:
+      - systems
+      x-accepts:
+      - application/json
+    patch:
+      operationId: update_system_api_v1_systems__system_id__patch
+      parameters:
+      - explode: false
+        in: path
+        name: system_id
+        required: true
+        schema:
+          title: System Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SystemUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Update System
+      tags:
+      - systems
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/systems/{system_id}/policies:
+    get:
+      operationId: list_system_policies_api_v1_systems__system_id__policies_get
+      parameters:
+      - explode: false
+        in: path
+        name: system_id
+        required: true
+        schema:
+          title: System Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  nullable: true
+                  type: string
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List System Policies
+      tags:
+      - systems
+      x-accepts:
+      - application/json
+    put:
+      operationId: set_system_policies_api_v1_systems__system_id__policies_put
+      parameters:
+      - explode: false
+        in: path
+        name: system_id
+        required: true
+        schema:
+          title: System Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyIdsRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  nullable: true
+                  type: string
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Set System Policies
+      tags:
+      - systems
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/processes:
+    get:
+      operationId: list_processes_api_v1_processes_get
+      parameters:
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/CatalogStatus"
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ProcessResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Processes
+      tags:
+      - processes
+      x-accepts:
+      - application/json
+    post:
+      operationId: create_process_api_v1_processes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessCreateRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Create Process
+      tags:
+      - processes
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/processes/{process_id}:
+    delete:
+      operationId: delete_process_api_v1_processes__process_id__delete
+      parameters:
+      - explode: false
+        in: path
+        name: process_id
+        required: true
+        schema:
+          title: Process Id
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Delete Process
+      tags:
+      - processes
+      x-accepts:
+      - application/json
+    get:
+      operationId: get_process_api_v1_processes__process_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: process_id
+        required: true
+        schema:
+          title: Process Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get Process
+      tags:
+      - processes
+      x-accepts:
+      - application/json
+    patch:
+      operationId: update_process_api_v1_processes__process_id__patch
+      parameters:
+      - explode: false
+        in: path
+        name: process_id
+        required: true
+        schema:
+          title: Process Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Update Process
+      tags:
+      - processes
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/processes/{process_id}/policies:
+    get:
+      operationId: list_process_policies_api_v1_processes__process_id__policies_get
+      parameters:
+      - explode: false
+        in: path
+        name: process_id
+        required: true
+        schema:
+          title: Process Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  nullable: true
+                  type: string
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Process Policies
+      tags:
+      - processes
+      x-accepts:
+      - application/json
+    put:
+      operationId: set_process_policies_api_v1_processes__process_id__policies_put
+      parameters:
+      - explode: false
+        in: path
+        name: process_id
+        required: true
+        schema:
+          title: Process Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyIdsRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  nullable: true
+                  type: string
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Set Process Policies
+      tags:
+      - processes
+      x-content-type: application/json
+      x-accepts:
+      - application/json
   /api/v1/classify:
     post:
       operationId: classify_one_api_v1_classify_post
@@ -1687,6 +2347,12 @@ components:
       required:
       - records
       title: BatchEvaluateRequest
+    CatalogStatus:
+      enum:
+      - active
+      - retired
+      title: CatalogStatus
+      type: string
     ClassificationAction:
       enum:
       - flag
@@ -3384,6 +4050,18 @@ components:
       - policy_id
       - to_version
       title: PolicyDiffResponse
+    PolicyIdsRequest:
+      description: Replace-set body for linking policies to a catalog entity.
+      example:
+        policy_ids:
+        - policy_ids
+        - policy_ids
+      properties:
+        policy_ids:
+          items:
+            type: string
+          type: array
+      title: PolicyIdsRequest
     PolicyKind:
       enum:
       - retention
@@ -3627,6 +4305,129 @@ components:
       - available
       - enabled
       title: PrivacyStatusResponse
+    ProcessCreateRequest:
+      description: POST /api/v1/processes body.
+      example:
+        owner: owner
+        name: name
+        description: description
+        status: active
+        tags:
+        - tags
+        - tags
+      properties:
+        name:
+          maxLength: 512
+          minLength: 1
+          title: Name
+          type: string
+        description:
+          maxLength: 4000
+          nullable: true
+          type: string
+        owner:
+          maxLength: 255
+          nullable: true
+          type: string
+        status:
+          $ref: "#/components/schemas/CatalogStatus"
+        tags:
+          items:
+            type: string
+          type: array
+      required:
+      - name
+      title: ProcessCreateRequest
+    ProcessIdsRequest:
+      description: Replace-set body for linking processes to a policy.
+      example:
+        process_ids:
+        - process_ids
+        - process_ids
+      properties:
+        process_ids:
+          items:
+            type: string
+          type: array
+      title: ProcessIdsRequest
+    ProcessResponse:
+      description: Public process view.
+      example:
+        owner: owner
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        name: name
+        description: description
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        status: active
+        tags:
+        - tags
+        - tags
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        description:
+          nullable: true
+          type: string
+        owner:
+          nullable: true
+          type: string
+        status:
+          $ref: "#/components/schemas/CatalogStatus"
+        tags:
+          items:
+            type: string
+          type: array
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+      title: ProcessResponse
+    ProcessUpdateRequest:
+      description: "PATCH /api/v1/processes/{id} body."
+      example:
+        owner: owner
+        name: name
+        description: description
+        status: active
+        tags:
+        - tags
+        - tags
+      properties:
+        name:
+          maxLength: 512
+          minLength: 1
+          nullable: true
+          type: string
+        description:
+          maxLength: 4000
+          nullable: true
+          type: string
+        owner:
+          maxLength: 255
+          nullable: true
+          type: string
+        status:
+          $ref: "#/components/schemas/CatalogStatus"
+        tags:
+          items:
+            type: string
+          nullable: true
+          type: array
+      title: ProcessUpdateRequest
     ReadyResponse:
       example:
         policies_loaded: 0
@@ -3736,6 +4537,143 @@ components:
       - critical
       title: Sensitivity
       type: string
+    SystemCreateRequest:
+      description: POST /api/v1/systems body.
+      example:
+        owner: owner
+        name: name
+        description: description
+        source_key: source_key
+        status: active
+        tags:
+        - tags
+        - tags
+      properties:
+        name:
+          maxLength: 512
+          minLength: 1
+          title: Name
+          type: string
+        description:
+          maxLength: 4000
+          nullable: true
+          type: string
+        owner:
+          maxLength: 255
+          nullable: true
+          type: string
+        status:
+          $ref: "#/components/schemas/CatalogStatus"
+        source_key:
+          maxLength: 255
+          nullable: true
+          type: string
+        tags:
+          items:
+            type: string
+          type: array
+      required:
+      - name
+      title: SystemCreateRequest
+    SystemIdsRequest:
+      description: Replace-set body for linking systems to a policy.
+      example:
+        system_ids:
+        - system_ids
+        - system_ids
+      properties:
+        system_ids:
+          items:
+            type: string
+          type: array
+      title: SystemIdsRequest
+    SystemResponse:
+      description: Public system view.
+      example:
+        owner: owner
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        name: name
+        description: description
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        source_key: source_key
+        status: active
+        tags:
+        - tags
+        - tags
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        description:
+          nullable: true
+          type: string
+        owner:
+          nullable: true
+          type: string
+        status:
+          $ref: "#/components/schemas/CatalogStatus"
+        source_key:
+          nullable: true
+          type: string
+        tags:
+          items:
+            type: string
+          type: array
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+      title: SystemResponse
+    SystemUpdateRequest:
+      description: "PATCH /api/v1/systems/{id} body."
+      example:
+        owner: owner
+        name: name
+        description: description
+        source_key: source_key
+        status: active
+        tags:
+        - tags
+        - tags
+      properties:
+        name:
+          maxLength: 512
+          minLength: 1
+          nullable: true
+          type: string
+        description:
+          maxLength: 4000
+          nullable: true
+          type: string
+        owner:
+          maxLength: 255
+          nullable: true
+          type: string
+        status:
+          $ref: "#/components/schemas/CatalogStatus"
+        source_key:
+          maxLength: 255
+          nullable: true
+          type: string
+        tags:
+          items:
+            type: string
+          nullable: true
+          type: array
+      title: SystemUpdateRequest
     UnmaskRequest:
       example:
         consume_token: true

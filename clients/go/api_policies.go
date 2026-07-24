@@ -1080,6 +1080,228 @@ func (a *PoliciesAPIService) ListPoliciesApiV1PoliciesGetExecute(r ApiListPolici
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest struct {
+	ctx context.Context
+	ApiService *PoliciesAPIService
+	policyId string
+}
+
+func (r ApiListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest) Execute() ([]ProcessResponse, *http.Response, error) {
+	return r.ApiService.ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetExecute(r)
+}
+
+/*
+ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet List Policy Processes
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param policyId
+ @return ApiListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest
+*/
+func (a *PoliciesAPIService) ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet(ctx context.Context, policyId string) ApiListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest {
+	return ApiListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest{
+		ApiService: a,
+		ctx: ctx,
+		policyId: policyId,
+	}
+}
+
+// Execute executes the request
+//  @return []ProcessResponse
+func (a *PoliciesAPIService) ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetExecute(r ApiListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest) ([]ProcessResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ProcessResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PoliciesAPIService.ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/policies/{policy_id}/processes"
+	localVarPath = strings.Replace(localVarPath, "{"+"policy_id"+"}", url.PathEscape(parameterValueToString(r.policyId, "policyId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v HTTPValidationError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest struct {
+	ctx context.Context
+	ApiService *PoliciesAPIService
+	policyId string
+}
+
+func (r ApiListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest) Execute() ([]SystemResponse, *http.Response, error) {
+	return r.ApiService.ListPolicySystemsApiV1PoliciesPolicyIdSystemsGetExecute(r)
+}
+
+/*
+ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet List Policy Systems
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param policyId
+ @return ApiListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest
+*/
+func (a *PoliciesAPIService) ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet(ctx context.Context, policyId string) ApiListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest {
+	return ApiListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest{
+		ApiService: a,
+		ctx: ctx,
+		policyId: policyId,
+	}
+}
+
+// Execute executes the request
+//  @return []SystemResponse
+func (a *PoliciesAPIService) ListPolicySystemsApiV1PoliciesPolicyIdSystemsGetExecute(r ApiListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest) ([]SystemResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []SystemResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PoliciesAPIService.ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/policies/{policy_id}/systems"
+	localVarPath = strings.Replace(localVarPath, "{"+"policy_id"+"}", url.PathEscape(parameterValueToString(r.policyId, "policyId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v HTTPValidationError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiListPolicyVersionsApiV1PoliciesPolicyIdVersionsGetRequest struct {
 	ctx context.Context
 	ApiService *PoliciesAPIService
@@ -1144,6 +1366,250 @@ func (a *PoliciesAPIService) ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGetE
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v HTTPValidationError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest struct {
+	ctx context.Context
+	ApiService *PoliciesAPIService
+	policyId string
+	processIdsRequest *ProcessIdsRequest
+}
+
+func (r ApiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest) ProcessIdsRequest(processIdsRequest ProcessIdsRequest) ApiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest {
+	r.processIdsRequest = &processIdsRequest
+	return r
+}
+
+func (r ApiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest) Execute() ([]ProcessResponse, *http.Response, error) {
+	return r.ApiService.SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutExecute(r)
+}
+
+/*
+SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut Set Policy Processes
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param policyId
+ @return ApiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest
+*/
+func (a *PoliciesAPIService) SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(ctx context.Context, policyId string) ApiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest {
+	return ApiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest{
+		ApiService: a,
+		ctx: ctx,
+		policyId: policyId,
+	}
+}
+
+// Execute executes the request
+//  @return []ProcessResponse
+func (a *PoliciesAPIService) SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutExecute(r ApiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest) ([]ProcessResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ProcessResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PoliciesAPIService.SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/policies/{policy_id}/processes"
+	localVarPath = strings.Replace(localVarPath, "{"+"policy_id"+"}", url.PathEscape(parameterValueToString(r.policyId, "policyId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.processIdsRequest == nil {
+		return localVarReturnValue, nil, reportError("processIdsRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.processIdsRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v HTTPValidationError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest struct {
+	ctx context.Context
+	ApiService *PoliciesAPIService
+	policyId string
+	systemIdsRequest *SystemIdsRequest
+}
+
+func (r ApiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest) SystemIdsRequest(systemIdsRequest SystemIdsRequest) ApiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest {
+	r.systemIdsRequest = &systemIdsRequest
+	return r
+}
+
+func (r ApiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest) Execute() ([]SystemResponse, *http.Response, error) {
+	return r.ApiService.SetPolicySystemsApiV1PoliciesPolicyIdSystemsPutExecute(r)
+}
+
+/*
+SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut Set Policy Systems
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param policyId
+ @return ApiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest
+*/
+func (a *PoliciesAPIService) SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut(ctx context.Context, policyId string) ApiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest {
+	return ApiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest{
+		ApiService: a,
+		ctx: ctx,
+		policyId: policyId,
+	}
+}
+
+// Execute executes the request
+//  @return []SystemResponse
+func (a *PoliciesAPIService) SetPolicySystemsApiV1PoliciesPolicyIdSystemsPutExecute(r ApiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest) ([]SystemResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []SystemResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PoliciesAPIService.SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/policies/{policy_id}/systems"
+	localVarPath = strings.Replace(localVarPath, "{"+"policy_id"+"}", url.PathEscape(parameterValueToString(r.policyId, "policyId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.systemIdsRequest == nil {
+		return localVarReturnValue, nil, reportError("systemIdsRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.systemIdsRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

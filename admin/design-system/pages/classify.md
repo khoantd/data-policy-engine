@@ -34,9 +34,11 @@
 
 ### Component Overrides
 
-- **Request:** Classification policy `<Select>`; AI sample row (`Generate sample data` + scenario chips: Auto/PII/SPII/Mixed/Clean); **Privacy masking** badge + footnote when LiteLLM configured — see `design-system/pages/privacy-masking.md`; offline quick-sample chips; scope chips for data types/sources; labeled inputs + mono metadata textarea
+- **Request:** Classification policy `<Select>`; optional **System** `<Select>` (catalog `source_key` → request `source`); optional **Process** `<Select>` (governance-linked policies only); AI sample row (`Generate sample data` + scenario chips: Auto/PII/SPII/Mixed/Clean); **Privacy masking** badge + footnote when LiteLLM configured — see `design-system/pages/privacy-masking.md`; offline quick-sample chips; scope chips for data types/sources; labeled inputs + mono metadata textarea
+- **System context:** Amber callout when selected system has no `source_key`; governance-linked policy chips (highlight when chip matches selected classification policy); Lucide `Server`; deep link `?system=<id>`
+- **Process context:** Governance-linked policy chips only (no `source_key`); Lucide `Workflow`; deep link `?process=<id>`
 - **Result:** Outcome summary card; action/status chips; detections table; empty/out-of-scope copy when no entities
-- **Feedback:** Pending/generating disables submit and AI; `aria-live` for AI status; `ErrorAlert` for parse/API failures
+- **Feedback:** Pending/generating disables submit and AI; `aria-live` for AI status and system source sync; `ErrorAlert` for parse/API failures
 - **Motion:** Prefer `motion-safe:` / short 150–200ms transitions; respect `prefers-reduced-motion`
 
 ### Interaction / a11y
@@ -51,13 +53,18 @@
 ## Page-Specific Components
 
 - `ClassifyPlayground` — client form + result inspector (`admin/components/classify-form.tsx`)
-- Server page loads active classification policies + AI config flags (`admin/app/(console)/classify/page.tsx`)
+- `SystemRequestContext` — optional catalog system picker (`admin/components/system-request-context.tsx`)
+- `ProcessRequestContext` — optional catalog process picker (`admin/components/process-request-context.tsx`)
+- Server page loads active classification policies + active systems/processes + AI config flags (`admin/app/(console)/classify/page.tsx`)
 - AI sample endpoint: `POST /api/ai/classify-sample` (`admin/app/api/ai/classify-sample/route.ts`)
+- Catalog linked policies BFF: `GET /api/systems/[id]/policies`, `GET /api/processes/[id]/policies`
 
 ---
 
 ## Recommendations
 
 - Keep quick samples aligned with seeded classification policies so first-run works offline
+- Catalog system selection seeds `source` from `source_key` only; process selection shows linked policies as governance context; neither filters the engine
 - AI sample generation requires LiteLLM env vars; offline users can still use quick samples and manual JSON
+- AI sample requests include optional system/process snapshots; prompts prefer system `source_key` for `source`, and may add process_id context; response overrides `source` when `source_key` is set
 - Never auto-run scan after AI generation — operators must review metadata first

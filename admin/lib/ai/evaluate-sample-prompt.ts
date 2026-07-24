@@ -2,15 +2,20 @@ import type {
   EvaluateSamplePolicySnapshot,
   EvaluateSampleScenario,
 } from "@/lib/ai/evaluate-sample-schema";
+import {
+  formatCatalogContextForPrompt,
+  type CatalogProcessSnapshot,
+  type CatalogSystemSnapshot,
+} from "@/lib/ai/catalog-sample-context";
 
 const RECORD_CONTRACT = `You generate synthetic evaluation records for the ROS Policy playground.
 Each record must use these exact field names (snake_case):
 - data_type (string, required)
 - record_id (string, required, synthetic IDs like cust_sample_001 — no real PII)
 - metadata (array, required, min 1 entry) — key/value pairs for policy rule condition fields, e.g. [{ "key": "status", "value": "inactive" }]
-- source (string or null, required key) — match policy scope when applicable, otherwise null
+- source (string or null, required key) — match policy scope when applicable, otherwise null. When a catalog system source_key is provided below, use that exact value.
 - jurisdiction (string or null, required key) — match the policy jurisdiction when applicable, otherwise null
-- context (array of key/value pairs or null, required key) — e.g. [{ "key": "requester", "value": "audit" }], or null when unused
+- context (array of key/value pairs or null, required key) — e.g. [{ "key": "requester", "value": "audit" }], or null when unused. When a catalog process is selected, you may include process_id / process_name entries.
 
 Rules for metadata timestamps:
 - Use ISO-8601 UTC strings (e.g. 2023-06-01T00:00:00Z)
@@ -41,10 +46,13 @@ export function buildEvaluateSampleUserPrompt(input: {
   mode: "single" | "batch";
   scenario: EvaluateSampleScenario;
   policy: EvaluateSamplePolicySnapshot;
+  system?: CatalogSystemSnapshot | null;
+  process?: CatalogProcessSnapshot | null;
 }): string {
-  const { policy, mode, scenario } = input;
+  const { policy, mode, scenario, system, process } = input;
   const dataTypes = policy.scope?.data_types?.join(", ") || "any in scope";
   const sources = policy.scope?.sources?.join(", ") || "any in scope";
+  const catalogLines = formatCatalogContextForPrompt({ system, process });
 
   const parts = [
     `Target policy id: ${policy.id}`,
@@ -58,6 +66,10 @@ export function buildEvaluateSampleUserPrompt(input: {
     `Scenario: ${scenario} — ${SCENARIO_HINTS[scenario]}`,
   ];
 
+  if (catalogLines.length > 0) {
+    parts.push("", ...catalogLines);
+  }
+
   if (mode === "batch") {
     parts.push(
       "",
@@ -65,6 +77,9 @@ export function buildEvaluateSampleUserPrompt(input: {
       "Each record should exercise a different rule or outcome when possible (e.g. inactive→delete, active→archive, legal_hold→retain).",
       "Use unique record_id values per record.",
     );
+    if (system?.source_key) {
+      parts.push(`Use source "${system.source_key}" on every record.`);
+    }
   } else {
     parts.push("", "Generate one record under key \"record\".");
   }

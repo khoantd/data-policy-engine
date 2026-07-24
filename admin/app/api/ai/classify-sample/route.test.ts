@@ -112,6 +112,42 @@ describe("POST /api/ai/classify-sample", () => {
     expect(call.prompt).toContain("Target classification policy id");
   });
 
+  it("forces source from catalog system source_key", async () => {
+    generateObjectMock.mockResolvedValue({
+      object: {
+        record: {
+          data_type: "customer_profile",
+          record_id: "cust_scan_ai_001",
+          metadata: [{ key: "email", value: "ada.lovelace@example.com" }],
+          source: null,
+          jurisdiction: "EU_GDPR",
+        },
+      },
+    });
+    const { POST } = await import("@/app/api/ai/classify-sample/route");
+    const res = await POST(
+      new Request("http://localhost/api/ai/classify-sample", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          policy: samplePolicy,
+          system: {
+            id: "sys_crm",
+            name: "CRM",
+            source_key: "crm_system",
+          },
+          process: { id: "proc_a", name: "Onboarding" },
+        }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { record: { source: string | null } };
+    expect(body.record.source).toBe("crm_system");
+    const call = generateObjectMock.mock.calls[0]?.[0] as { prompt?: string };
+    expect(call.prompt).toContain("crm_system");
+    expect(call.prompt).toContain("Onboarding");
+  });
+
   it("returns 400 for invalid body", async () => {
     const { POST } = await import("@/app/api/ai/classify-sample/route");
     const res = await POST(

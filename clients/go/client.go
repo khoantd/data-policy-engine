@@ -69,6 +69,10 @@ type APIClient struct {
 
 	PrivacyAPI *PrivacyAPIService
 
+	ProcessesAPI *ProcessesAPIService
+
+	SystemsAPI *SystemsAPIService
+
 	WebhooksAPI *WebhooksAPIService
 }
 
@@ -98,6 +102,8 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.JurisdictionsAPI = (*JurisdictionsAPIService)(&c.common)
 	c.PoliciesAPI = (*PoliciesAPIService)(&c.common)
 	c.PrivacyAPI = (*PrivacyAPIService)(&c.common)
+	c.ProcessesAPI = (*ProcessesAPIService)(&c.common)
+	c.SystemsAPI = (*SystemsAPIService)(&c.common)
 	c.WebhooksAPI = (*WebhooksAPIService)(&c.common)
 
 	return c

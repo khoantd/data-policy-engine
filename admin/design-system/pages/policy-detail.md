@@ -14,12 +14,13 @@
 ### Layout Overrides
 
 - **Grid:** `xl` uses `1.6fr / 1fr` — Definition (YAML) left; Provenance + Version history stacked right
-- **Structure:** Full-width **Structure** panel above the Definition grid — reagraph network of rules/scope/entities/tags/references; YAML stays the primary edit job
-- **One job:** Review and edit the stored policy definition; provenance and structure are secondary
+- **Structure:** Full-width **Structure** panel above the Definition grid — reagraph network of rules/scope/entities/tags/references/systems/processes; YAML stays the primary edit job
+- **One job:** Review and edit the stored policy definition; provenance, applies-to, and structure are secondary
 
 ### Component Overrides
 
 - **Structure panel:** `PolicyStructureGraph` in `mode="detail"`; link to `/policies/graph` for fleet view
+- **Applies to panel:** `PolicyAppliesToPanel` — governance links to systems/processes (not YAML / not `scope.sources`)
 - **Provenance panel:** Only when `reference_sources` is non-empty; reuse `AiSourceReferences` in `mode="saved"` with title **AI research references (N)**; **default collapsed** so Definition stays primary
 - **YAML dump:** Strip `reference_sources` from Monaco initial YAML — provenance is metadata, not DSL
 - **Links:** External reference URLs use `rel="noopener noreferrer"` + sr-only “(opens in new tab)”
@@ -36,5 +37,6 @@
 ## Page-Specific Components
 
 - `PolicyStructureGraph` (`mode="detail"`) — `admin/components/policy-structure-graph.tsx`
+- `PolicyAppliesToPanel` — `admin/components/policy-applies-to.tsx`
 - `AiSourceReferences` (`mode="saved"`) — `admin/components/ai-source-references.tsx`
 - Server page: `admin/app/(console)/policies/[id]/page.tsx`

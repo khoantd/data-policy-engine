@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 
 from drpe.api.deps import AuthDep, ClassifierDep, EngineDep, StoreDep
 from drpe.api.schemas import (
@@ -24,9 +24,16 @@ from drpe.dsl.parser import PolicyParseError, parse_yaml
 from drpe.models.classification_policy import ClassificationDocument, ClassificationPolicy
 from drpe.models.enums import PolicyKind
 from drpe.models.policy import Policy, PolicyDocument, ReferenceSource
+from drpe.models.process import ProcessIdsRequest, ProcessResponse
 from drpe.models.stored_policy import StoredPolicy, as_retention, is_classification_policy, policy_kind_of
+from drpe.models.system import SystemIdsRequest, SystemResponse
+from drpe.ports.catalog_store import CatalogStore
 
 router = APIRouter(prefix="/policies", tags=["policies"])
+
+
+def _catalog(request: Request) -> CatalogStore:
+    return request.app.state.catalog_store
 
 
 def _preserve_reference_sources(
@@ -226,6 +233,7 @@ def update_policy(
 def delete_policy(
     _: AuthDep,
     policy_id: str,
+    request: Request,
     store: StoreDep,
     engine: EngineDep,
     classifier: ClassifierDep,
@@ -233,6 +241,7 @@ def delete_policy(
     deprecated = store.deprecate(policy_id)
     if deprecated is None:
         raise HTTPException(status_code=404, detail="policy not found")
+    _catalog(request).clear_links_for_policy(policy_id)
     _register_policy(deprecated, engine, classifier)
     return deprecated
 
@@ -318,3 +327,105 @@ def diff_policy_versions(
         to_version=body.to_version,
         changes=diff_policies(left, right),
     )
+
+
+@router.get("/{policy_id}/systems", response_model=list[SystemResponse])
+def list_policy_systems(
+    _: AuthDep, policy_id: str, request: Request, store: StoreDep
+) -> list[SystemResponse]:
+    if store.get(policy_id) is None:
+        raise HTTPException(status_code=404, detail="policy not found")
+    return [
+        SystemResponse(
+            id=s.id,
+            name=s.name,
+            description=s.description,
+            owner=s.owner,
+            status=s.status,
+            source_key=s.source_key,
+            tags=list(s.tags),
+            created_at=s.created_at,
+            updated_at=s.updated_at,
+        )
+        for s in _catalog(request).list_systems_for_policy(policy_id)
+    ]
+
+
+@router.put("/{policy_id}/systems", response_model=list[SystemResponse])
+def set_policy_systems(
+    _: AuthDep,
+    policy_id: str,
+    body: SystemIdsRequest,
+    request: Request,
+    store: StoreDep,
+) -> list[SystemResponse]:
+    if store.get(policy_id) is None:
+        raise HTTPException(status_code=404, detail="policy not found")
+    try:
+        records = _catalog(request).set_policy_systems(policy_id, body.system_ids)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return [
+        SystemResponse(
+            id=s.id,
+            name=s.name,
+            description=s.description,
+            owner=s.owner,
+            status=s.status,
+            source_key=s.source_key,
+            tags=list(s.tags),
+            created_at=s.created_at,
+            updated_at=s.updated_at,
+        )
+        for s in records
+    ]
+
+
+@router.get("/{policy_id}/processes", response_model=list[ProcessResponse])
+def list_policy_processes(
+    _: AuthDep, policy_id: str, request: Request, store: StoreDep
+) -> list[ProcessResponse]:
+    if store.get(policy_id) is None:
+        raise HTTPException(status_code=404, detail="policy not found")
+    return [
+        ProcessResponse(
+            id=p.id,
+            name=p.name,
+            description=p.description,
+            owner=p.owner,
+            status=p.status,
+            tags=list(p.tags),
+            created_at=p.created_at,
+            updated_at=p.updated_at,
+        )
+        for p in _catalog(request).list_processes_for_policy(policy_id)
+    ]
+
+
+@router.put("/{policy_id}/processes", response_model=list[ProcessResponse])
+def set_policy_processes(
+    _: AuthDep,
+    policy_id: str,
+    body: ProcessIdsRequest,
+    request: Request,
+    store: StoreDep,
+) -> list[ProcessResponse]:
+    if store.get(policy_id) is None:
+        raise HTTPException(status_code=404, detail="policy not found")
+    try:
+        records = _catalog(request).set_policy_processes(policy_id, body.process_ids)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return [
+        ProcessResponse(
+            id=p.id,
+            name=p.name,
+            description=p.description,
+            owner=p.owner,
+            status=p.status,
+            tags=list(p.tags),
+            created_at=p.created_at,
+            updated_at=p.updated_at,
+        )
+        for p in records
+    ]

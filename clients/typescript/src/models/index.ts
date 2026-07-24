@@ -164,6 +164,17 @@ export interface BatchEvaluateRequest {
  * 
  * @export
  */
+export const CatalogStatus = {
+    Active: 'active',
+    Retired: 'retired'
+} as const;
+export type CatalogStatus = typeof CatalogStatus[keyof typeof CatalogStatus];
+
+
+/**
+ * 
+ * @export
+ */
 export const ClassificationAction = {
     Flag: 'flag',
     Mask: 'mask',
@@ -1863,6 +1874,19 @@ export interface PolicyDiffResponse {
      */
     changes?: Array<PolicyDiffChange>;
 }
+/**
+ * Replace-set body for linking policies to a catalog entity.
+ * @export
+ * @interface PolicyIdsRequest
+ */
+export interface PolicyIdsRequest {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof PolicyIdsRequest
+     */
+    policyIds?: Array<string>;
+}
 
 /**
  * 
@@ -2152,6 +2176,154 @@ export interface PrivacyStatusResponse {
     languages?: Array<string>;
 }
 /**
+ * POST /api/v1/processes body.
+ * @export
+ * @interface ProcessCreateRequest
+ */
+export interface ProcessCreateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessCreateRequest
+     */
+    name: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessCreateRequest
+     */
+    description?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessCreateRequest
+     */
+    owner?: string | null;
+    /**
+     * 
+     * @type {CatalogStatus}
+     * @memberof ProcessCreateRequest
+     */
+    status?: CatalogStatus;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ProcessCreateRequest
+     */
+    tags?: Array<string>;
+}
+
+
+/**
+ * Replace-set body for linking processes to a policy.
+ * @export
+ * @interface ProcessIdsRequest
+ */
+export interface ProcessIdsRequest {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ProcessIdsRequest
+     */
+    processIds?: Array<string>;
+}
+/**
+ * Public process view.
+ * @export
+ * @interface ProcessResponse
+ */
+export interface ProcessResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessResponse
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessResponse
+     */
+    name: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessResponse
+     */
+    description?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessResponse
+     */
+    owner?: string | null;
+    /**
+     * 
+     * @type {CatalogStatus}
+     * @memberof ProcessResponse
+     */
+    status?: CatalogStatus;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ProcessResponse
+     */
+    tags?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessResponse
+     */
+    createdAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessResponse
+     */
+    updatedAt: string;
+}
+
+
+/**
+ * PATCH /api/v1/processes/{id} body.
+ * @export
+ * @interface ProcessUpdateRequest
+ */
+export interface ProcessUpdateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessUpdateRequest
+     */
+    name?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessUpdateRequest
+     */
+    description?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessUpdateRequest
+     */
+    owner?: string | null;
+    /**
+     * 
+     * @type {CatalogStatus}
+     * @memberof ProcessUpdateRequest
+     */
+    status?: CatalogStatus | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ProcessUpdateRequest
+     */
+    tags?: Array<string> | null;
+}
+
+
+/**
  * 
  * @export
  * @interface ReadyResponse
@@ -2275,6 +2447,172 @@ export const Sensitivity = {
     Critical: 'critical'
 } as const;
 export type Sensitivity = typeof Sensitivity[keyof typeof Sensitivity];
+
+/**
+ * POST /api/v1/systems body.
+ * @export
+ * @interface SystemCreateRequest
+ */
+export interface SystemCreateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemCreateRequest
+     */
+    name: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemCreateRequest
+     */
+    description?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemCreateRequest
+     */
+    owner?: string | null;
+    /**
+     * 
+     * @type {CatalogStatus}
+     * @memberof SystemCreateRequest
+     */
+    status?: CatalogStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemCreateRequest
+     */
+    sourceKey?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SystemCreateRequest
+     */
+    tags?: Array<string>;
+}
+
+
+/**
+ * Replace-set body for linking systems to a policy.
+ * @export
+ * @interface SystemIdsRequest
+ */
+export interface SystemIdsRequest {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SystemIdsRequest
+     */
+    systemIds?: Array<string>;
+}
+/**
+ * Public system view.
+ * @export
+ * @interface SystemResponse
+ */
+export interface SystemResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemResponse
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemResponse
+     */
+    name: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemResponse
+     */
+    description?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemResponse
+     */
+    owner?: string | null;
+    /**
+     * 
+     * @type {CatalogStatus}
+     * @memberof SystemResponse
+     */
+    status?: CatalogStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemResponse
+     */
+    sourceKey?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SystemResponse
+     */
+    tags?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemResponse
+     */
+    createdAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemResponse
+     */
+    updatedAt: string;
+}
+
+
+/**
+ * PATCH /api/v1/systems/{id} body.
+ * @export
+ * @interface SystemUpdateRequest
+ */
+export interface SystemUpdateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemUpdateRequest
+     */
+    name?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemUpdateRequest
+     */
+    description?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemUpdateRequest
+     */
+    owner?: string | null;
+    /**
+     * 
+     * @type {CatalogStatus}
+     * @memberof SystemUpdateRequest
+     */
+    status?: CatalogStatus | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof SystemUpdateRequest
+     */
+    sourceKey?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SystemUpdateRequest
+     */
+    tags?: Array<string> | null;
+}
+
 
 /**
  * 

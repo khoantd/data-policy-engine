@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { lightTheme, type GraphEdge, type GraphNode, type Theme } from "reagraph";
+import { Button } from "@/components/ui/button";
 import {
   EmptyState,
   tableCellClass,
@@ -14,6 +15,9 @@ import {
 import { cn } from "@/lib/utils";
 import {
   buildPolicyStructureGraph,
+  filterStructureGraphByKinds,
+  type CatalogLinksByPolicy,
+  type PolicyCatalogLinks,
   type StructureEdge,
   type StructureGraph,
   type StructureNode,
@@ -43,6 +47,8 @@ const KIND_COLORS: Record<StructureNodeKind, string> = {
   tag: "#0F766E",
   reference: "#475569",
   jurisdiction: "#0369A1",
+  system: "#B45309",
+  process: "#0F766E",
   other: "#9CA3AF",
 };
 
@@ -52,6 +58,8 @@ const LEGEND: { kind: StructureNodeKind; label: string }[] = [
   { kind: "entity", label: "Entity" },
   { kind: "data_type", label: "Data type" },
   { kind: "source", label: "Source" },
+  { kind: "system", label: "System" },
+  { kind: "process", label: "Process" },
   { kind: "tag", label: "Tag" },
   { kind: "reference", label: "Reference" },
   { kind: "jurisdiction", label: "Jurisdiction" },
@@ -172,30 +180,66 @@ export function PolicyStructureGraph({
   mode,
   policies,
   policy,
+  catalogLinks,
+  fleetCatalogLinks,
   initialFocus,
   fleetHref = "/policies/graph",
 }: {
   mode: "fleet" | "detail";
   policies?: PolicyListItem[];
   policy?: Policy | ClassificationPolicy;
+  catalogLinks?: PolicyCatalogLinks;
+  fleetCatalogLinks?: CatalogLinksByPolicy;
   initialFocus?: string | null;
   fleetHref?: string;
 }) {
   const reducedMotion = usePrefersReducedMotion();
   const { selectedId, select } = useInitialFocus(initialFocus);
+  const [visibleKinds, setVisibleKinds] = useState<Set<StructureNodeKind>>(
+    () => new Set(LEGEND.map((item) => item.kind)),
+  );
 
-  const graph = useMemo(() => {
+  const fullGraph = useMemo(() => {
     if (mode === "fleet") {
       return buildPolicyStructureGraph({
         mode: "fleet",
         policies: policies ?? [],
+        catalogLinks: fleetCatalogLinks,
       });
     }
     if (!policy) {
       return buildPolicyStructureGraph({ mode: "fleet", policies: [] });
     }
-    return buildPolicyStructureGraph({ mode: "detail", policy });
-  }, [mode, policies, policy]);
+    return buildPolicyStructureGraph({
+      mode: "detail",
+      policy,
+      catalogLinks,
+    });
+  }, [mode, policies, policy, catalogLinks, fleetCatalogLinks]);
+
+  const presentKinds = useMemo(() => {
+    const present = new Set<StructureNodeKind>();
+    for (const n of fullGraph.nodes) present.add(n.kind);
+    return present;
+  }, [fullGraph]);
+
+  const kindOptions = useMemo(
+    () => LEGEND.filter((item) => presentKinds.has(item.kind)),
+    [presentKinds],
+  );
+
+  const graph = useMemo(
+    () => filterStructureGraphByKinds(fullGraph, visibleKinds),
+    [fullGraph, visibleKinds],
+  );
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const node = fullGraph.nodes.find((n) => n.id === selectedId);
+    if (node && !visibleKinds.has(node.kind)) {
+      select(null);
+    }
+  }, [selectedId, visibleKinds, fullGraph.nodes, select]);
 
   const nodes = useMemo(() => toReagraphNodes(graph), [graph]);
   const edges = useMemo(() => toReagraphEdges(graph), [graph]);
@@ -207,7 +251,16 @@ export function PolicyStructureGraph({
   const layoutType =
     mode === "detail" ? "hierarchicalTd" : "forceDirected2d";
 
-  if (graph.nodes.length === 0) {
+  function toggleKind(kind: StructureNodeKind) {
+    setVisibleKinds((prev) => {
+      const next = new Set(prev);
+      if (next.has(kind)) next.delete(kind);
+      else next.add(kind);
+      return next;
+    });
+  }
+
+  if (fullGraph.nodes.length === 0) {
     return (
       <EmptyState message="No policy structure to visualize for this selection." />
     );
@@ -215,194 +268,231 @@ export function PolicyStructureGraph({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div
-          className="flex flex-wrap gap-3 text-xs text-muted-fg"
-          aria-label="Node legend"
-        >
-          {LEGEND.map((item) => (
-            <LegendSwatch
-              key={item.kind}
-              color={KIND_COLORS[item.kind]}
-              label={item.label}
-            />
-          ))}
-          <span>Selection uses amber accent</span>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <span
+            id="structure-kind-filter-label"
+            className="text-xs font-medium text-foreground"
+          >
+            Kind
+          </span>
+          <div
+            role="group"
+            aria-labelledby="structure-kind-filter-label"
+            aria-label="Kind filter"
+            className="flex flex-wrap gap-1.5"
+          >
+            {kindOptions.map((item) => {
+              const pressed = visibleKinds.has(item.kind);
+              return (
+                <Button
+                  key={item.kind}
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  aria-pressed={pressed}
+                  title={
+                    pressed
+                      ? `Hide ${item.label} nodes`
+                      : `Show ${item.label} nodes`
+                  }
+                  onClick={() => toggleKind(item.kind)}
+                  className={cn(
+                    "gap-1.5 text-xs",
+                    pressed
+                      ? "ring-2 ring-ring ring-offset-1"
+                      : "opacity-55",
+                  )}
+                >
+                  <span
+                    className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm"
+                    style={{ backgroundColor: KIND_COLORS[item.kind] }}
+                    aria-hidden
+                  />
+                  {item.label}
+                </Button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-fg">
+            Selection uses amber accent
+          </p>
         </div>
         <p className="text-xs text-muted-fg" aria-live="polite">
           {graph.nodes.length} nodes · {graph.edges.length} edges
-          {graph.truncated ? " · truncated" : ""}
+          {fullGraph.truncated ? " · truncated" : ""}
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="flex min-w-0 flex-col gap-4">
-          <div
-            className="relative hidden h-[420px] overflow-hidden rounded-md border border-border bg-surface lg:block"
-            role="img"
-            aria-label="Policy structure network graph. Use the adjacency table below for an accessible alternative."
-          >
-            <PolicyStructureCanvas
-              nodes={nodes}
-              edges={edges}
-              theme={structureTheme}
-              layoutType={layoutType}
-              animated={!reducedMotion}
-              selections={selectedId ? [selectedId] : []}
-              actives={selectedId ? [selectedId] : []}
-              onNodeClick={(nodeId) => select(nodeId)}
-              onCanvasClick={() => select(null)}
-            />
-          </div>
-
-          <div className="lg:hidden">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">Nodes</h2>
-            <ul
-              className="flex flex-col gap-1"
-              role="listbox"
-              aria-label="Structure nodes"
+      {graph.nodes.length === 0 ? (
+        <EmptyState message="No nodes match the selected kinds. Turn a Kind back on to restore the graph." />
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="flex min-w-0 flex-col gap-4">
+            <div
+              className="relative hidden h-[420px] overflow-hidden rounded-md border border-border bg-surface lg:block"
+              role="img"
+              aria-label="Policy structure network graph. Use the adjacency table below for an accessible alternative."
             >
-              {graph.nodes.map((n) => (
-                <li key={n.id}>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={selectedId === n.id}
-                    className={cn(
-                      "flex w-full cursor-pointer items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition-colors duration-150",
-                      selectedId === n.id
-                        ? "border-accent bg-amber-50"
-                        : "border-border bg-surface hover:bg-muted",
-                    )}
-                    onClick={() => select(n.id)}
-                  >
-                    <span>
-                      <span className="text-[10px] uppercase text-muted-fg">
-                        {n.kind}{" "}
-                      </span>
-                      <span className="font-mono text-xs">{n.label}</span>
-                    </span>
-                    <span className="text-xs text-muted-fg">{n.weight}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <section aria-labelledby="structure-adjacency-heading">
-            <h2
-              id="structure-adjacency-heading"
-              className="mb-2 text-sm font-semibold text-foreground"
-            >
-              Adjacency list
-            </h2>
-            <TableWrap stickyHeader>
-              <table className="w-full min-w-[480px] text-left text-sm">
-                <thead className={tableHeaderClass}>
-                  <tr>
-                    <th className={`${tableCellClass} font-medium`}>Source</th>
-                    <th className={`${tableCellClass} font-medium`}>Relation</th>
-                    <th className={`${tableCellClass} font-medium`}>Target</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {graph.edges.map((edge) => (
-                    <AdjacencyRow
-                      key={edge.id}
-                      edge={edge}
-                      nodes={graph.nodes}
-                      selected={
-                        edge.source === selectedId ||
-                        edge.target === selectedId
-                      }
-                      onSelect={() => select(edge.source)}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </TableWrap>
-          </section>
-        </div>
-
-        <aside
-          className="rounded-md border border-border bg-surface p-4"
-          aria-live="polite"
-        >
-          <h2 className="text-sm font-semibold text-foreground">Detail</h2>
-          {!selectedNode ? (
-            <p className="mt-2 text-sm text-muted-fg">
-              Select a node in the graph or table to inspect connections.
-            </p>
-          ) : (
-            <div className="mt-3 flex flex-col gap-3 text-sm">
-              <div>
-                <div className="text-[10px] uppercase text-muted-fg">
-                  {selectedNode.kind}
-                </div>
-                <div className="break-all font-mono text-xs">
-                  {selectedNode.label}
-                </div>
-              </div>
-              {selectedNode.meta && (
-                <div>
-                  <span className="text-muted-fg">Meta: </span>
-                  <span className="font-mono text-xs">{selectedNode.meta}</span>
-                </div>
-              )}
-              {selectedEdges.length > 0 && (
-                <div>
-                  <div className="mb-1 text-muted-fg">Connected</div>
-                  <ul className="list-disc space-y-1 pl-4 text-xs">
-                    {selectedEdges.slice(0, 12).map((e) => (
-                      <li key={e.id}>
-                        <span className="font-mono">
-                          {labelFor(graph.nodes, e.source)} →{" "}
-                          {labelFor(graph.nodes, e.target)}
-                        </span>{" "}
-                        <span className="text-muted-fg">
-                          ({relationLabel(e.relation)})
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div className="flex flex-col gap-2">
-                {selectedNode.policyId && (
-                  <Link
-                    href={`/policies/${encodeURIComponent(selectedNode.policyId)}`}
-                    className="cursor-pointer text-sm text-primary underline hover:text-secondary"
-                  >
-                    Open policy
-                  </Link>
-                )}
-                {mode === "detail" && (
-                  <Link
-                    href={fleetHref}
-                    className="cursor-pointer text-sm text-primary underline hover:text-secondary"
-                  >
-                    View fleet structure
-                  </Link>
-                )}
-              </div>
+              <PolicyStructureCanvas
+                nodes={nodes}
+                edges={edges}
+                theme={structureTheme}
+                layoutType={layoutType}
+                animated={!reducedMotion}
+                selections={selectedId ? [selectedId] : []}
+                actives={selectedId ? [selectedId] : []}
+                onNodeClick={(nodeId) => select(nodeId)}
+                onCanvasClick={() => select(null)}
+              />
             </div>
-          )}
-        </aside>
-      </div>
-    </div>
-  );
-}
 
-function LegendSwatch({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span
-        className="inline-block h-2.5 w-2.5 rounded-sm"
-        style={{ backgroundColor: color }}
-        aria-hidden
-      />
-      {label}
-    </span>
+            <div className="lg:hidden">
+              <h2 className="mb-2 text-sm font-semibold text-foreground">
+                Nodes
+              </h2>
+              <ul
+                className="flex flex-col gap-1"
+                role="listbox"
+                aria-label="Structure nodes"
+              >
+                {graph.nodes.map((n) => (
+                  <li key={n.id}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={selectedId === n.id}
+                      className={cn(
+                        "flex w-full cursor-pointer items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition-colors duration-150",
+                        selectedId === n.id
+                          ? "border-accent bg-amber-50"
+                          : "border-border bg-surface hover:bg-muted",
+                      )}
+                      onClick={() => select(n.id)}
+                    >
+                      <span>
+                        <span className="text-[10px] uppercase text-muted-fg">
+                          {n.kind}{" "}
+                        </span>
+                        <span className="font-mono text-xs">{n.label}</span>
+                      </span>
+                      <span className="text-xs text-muted-fg">{n.weight}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <section aria-labelledby="structure-adjacency-heading">
+              <h2
+                id="structure-adjacency-heading"
+                className="mb-2 text-sm font-semibold text-foreground"
+              >
+                Adjacency list
+              </h2>
+              <TableWrap stickyHeader>
+                <table className="w-full min-w-[480px] text-left text-sm">
+                  <thead className={tableHeaderClass}>
+                    <tr>
+                      <th className={`${tableCellClass} font-medium`}>
+                        Source
+                      </th>
+                      <th className={`${tableCellClass} font-medium`}>
+                        Relation
+                      </th>
+                      <th className={`${tableCellClass} font-medium`}>
+                        Target
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {graph.edges.map((edge) => (
+                      <AdjacencyRow
+                        key={edge.id}
+                        edge={edge}
+                        nodes={graph.nodes}
+                        selected={
+                          edge.source === selectedId ||
+                          edge.target === selectedId
+                        }
+                        onSelect={() => select(edge.source)}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </TableWrap>
+            </section>
+          </div>
+
+          <aside
+            className="rounded-md border border-border bg-surface p-4"
+            aria-live="polite"
+          >
+            <h2 className="text-sm font-semibold text-foreground">Detail</h2>
+            {!selectedNode ? (
+              <p className="mt-2 text-sm text-muted-fg">
+                Select a node in the graph or table to inspect connections.
+              </p>
+            ) : (
+              <div className="mt-3 flex flex-col gap-3 text-sm">
+                <div>
+                  <div className="text-[10px] uppercase text-muted-fg">
+                    {selectedNode.kind}
+                  </div>
+                  <div className="break-all font-mono text-xs">
+                    {selectedNode.label}
+                  </div>
+                </div>
+                {selectedNode.meta && (
+                  <div>
+                    <span className="text-muted-fg">Meta: </span>
+                    <span className="font-mono text-xs">
+                      {selectedNode.meta}
+                    </span>
+                  </div>
+                )}
+                {selectedEdges.length > 0 && (
+                  <div>
+                    <div className="mb-1 text-muted-fg">Connected</div>
+                    <ul className="list-disc space-y-1 pl-4 text-xs">
+                      {selectedEdges.slice(0, 12).map((e) => (
+                        <li key={e.id}>
+                          <span className="font-mono">
+                            {labelFor(graph.nodes, e.source)} →{" "}
+                            {labelFor(graph.nodes, e.target)}
+                          </span>{" "}
+                          <span className="text-muted-fg">
+                            ({relationLabel(e.relation)})
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div className="flex flex-col gap-2">
+                  {selectedNode.policyId && (
+                    <Link
+                      href={`/policies/${encodeURIComponent(selectedNode.policyId)}`}
+                      className="cursor-pointer text-sm text-primary underline hover:text-secondary"
+                    >
+                      Open policy
+                    </Link>
+                  )}
+                  {mode === "detail" && (
+                    <Link
+                      href={fleetHref}
+                      className="cursor-pointer text-sm text-primary underline hover:text-secondary"
+                    >
+                      View fleet structure
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
+    </div>
   );
 }
 

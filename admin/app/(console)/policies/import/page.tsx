@@ -15,7 +15,7 @@ export default async function ImportPolicyPage() {
   return (
     <>
       <PageHeader
-        title="Import policy"
+        title="Create Policy"
         description="Describe retention or classification intent for AI-assisted drafts, or paste YAML. Validate before import — AI never auto-imports."
         breadcrumbs={buildBreadcrumbs("/policies/import")}
       />

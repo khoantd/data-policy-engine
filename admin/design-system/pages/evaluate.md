@@ -34,9 +34,11 @@
 
 ### Component Overrides
 
-- **Request:** Target policy `<Select>` at top; mode toggle; AI sample row (`Generate sample data` + scenario chips for single mode); **Privacy masking** badge + footnote when LiteLLM configured — see `design-system/pages/privacy-masking.md`; quick-sample ghost buttons; labeled inputs + mono textareas; dry-run checkbox default **on** for single mode
+- **Request:** Target policy `<Select>` at top; optional **System** `<Select>` (catalog `source_key` → request `source`); optional **Process** `<Select>` (governance-linked policies only); mode toggle; AI sample row (`Generate sample data` + scenario chips for single mode); **Privacy masking** badge + footnote when LiteLLM configured — see `design-system/pages/privacy-masking.md`; quick-sample ghost buttons; labeled inputs + mono textareas; dry-run checkbox default **on** for single mode
+- **System context:** Amber callout when selected system has no `source_key`; governance-linked policy chips (highlight when chip matches target policy); Lucide `Server`; deep link `?system=<id>`
+- **Process context:** Governance-linked policy chips only (no `source_key`); Lucide `Workflow`; deep link `?process=<id>`
 - **Result:** Target match badge when a policy is selected; status badges for action + confidence; definition list for match metadata; batch summary for target matches; conflicts table when present; collapsible raw JSON
-- **Feedback:** Pending/generating disables submit and AI; `aria-live` for AI status; `ErrorAlert` for parse/API failures
+- **Feedback:** Pending/generating disables submit and AI; `aria-live` for AI status and system source sync; `ErrorAlert` for parse/API failures
 - **Motion:** Prefer `motion-safe:` / short 150–200ms transitions; respect `prefers-reduced-motion`
 
 ### Interaction / a11y
@@ -51,8 +53,11 @@
 ## Page-Specific Components
 
 - `EvaluatePlayground` — client form + result inspector (`admin/components/evaluate-form.tsx`)
-- Server page loads active policies + AI config flag (`admin/app/(console)/evaluate/page.tsx`)
+- `SystemRequestContext` — optional catalog system picker (`admin/components/system-request-context.tsx`)
+- `ProcessRequestContext` — optional catalog process picker (`admin/components/process-request-context.tsx`)
+- Server page loads active policies + active systems/processes + AI config flag (`admin/app/(console)/evaluate/page.tsx`)
 - AI sample endpoint: `POST /api/ai/evaluate-sample` (`admin/app/api/ai/evaluate-sample/route.ts`)
+- Catalog linked policies BFF: `GET /api/systems/[id]/policies`, `GET /api/processes/[id]/policies`
 
 ---
 
@@ -61,4 +66,6 @@
 - Default dry-run for single evaluate; document that batch has no dry-run twin
 - Keep quick samples aligned with `tests/test_api.py` / `config/gdpr_customer.yaml` so first-run works against seeded policies
 - Target policy selection is **UI targeting only** — evaluate still considers all active policies; API-level policy scoping is future work
+- Catalog system selection seeds `source` from `source_key` only; process selection shows linked policies as governance context; neither filters the engine
 - AI sample generation requires LiteLLM env vars; offline users can still use quick samples and manual JSON
+- AI sample row receives selected **System** / **Process** snapshots so prompts prefer `source_key` and may include process context entries; server re-applies `source_key` on the response

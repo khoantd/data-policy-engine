@@ -13,7 +13,11 @@ Method | HTTP request | Description
 [**GetPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet**](PoliciesAPI.md#GetPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet) | **Get** /api/v1/policies/{policy_id}/versions/{ver} | Get Policy Version
 [**ImportPoliciesApiV1PoliciesImportPost**](PoliciesAPI.md#ImportPoliciesApiV1PoliciesImportPost) | **Post** /api/v1/policies/import | Import Policies
 [**ListPoliciesApiV1PoliciesGet**](PoliciesAPI.md#ListPoliciesApiV1PoliciesGet) | **Get** /api/v1/policies | List Policies
+[**ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet**](PoliciesAPI.md#ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet) | **Get** /api/v1/policies/{policy_id}/processes | List Policy Processes
+[**ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet**](PoliciesAPI.md#ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet) | **Get** /api/v1/policies/{policy_id}/systems | List Policy Systems
 [**ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGet**](PoliciesAPI.md#ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGet) | **Get** /api/v1/policies/{policy_id}/versions | List Policy Versions
+[**SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut**](PoliciesAPI.md#SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut) | **Put** /api/v1/policies/{policy_id}/processes | Set Policy Processes
+[**SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut**](PoliciesAPI.md#SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut) | **Put** /api/v1/policies/{policy_id}/systems | Set Policy Systems
 [**UpdatePolicyApiV1PoliciesPolicyIdPut**](PoliciesAPI.md#UpdatePolicyApiV1PoliciesPolicyIdPut) | **Put** /api/v1/policies/{policy_id} | Update Policy
 [**ValidatePolicyApiV1PoliciesValidatePost**](PoliciesAPI.md#ValidatePolicyApiV1PoliciesValidatePost) | **Post** /api/v1/policies/validate | Validate Policy
 
@@ -631,6 +635,142 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet
+
+> []ProcessResponse ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet(ctx, policyId).Execute()
+
+List Policy Processes
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/drpe/drpe/drpe"
+)
+
+func main() {
+	policyId := "policyId_example" // string | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.PoliciesAPI.ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet(context.Background(), policyId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `PoliciesAPI.ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet`: []ProcessResponse
+	fmt.Fprintf(os.Stdout, "Response from `PoliciesAPI.ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**policyId** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**[]ProcessResponse**](ProcessResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet
+
+> []SystemResponse ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet(ctx, policyId).Execute()
+
+List Policy Systems
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/drpe/drpe/drpe"
+)
+
+func main() {
+	policyId := "policyId_example" // string | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.PoliciesAPI.ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet(context.Background(), policyId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `PoliciesAPI.ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet`: []SystemResponse
+	fmt.Fprintf(os.Stdout, "Response from `PoliciesAPI.ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**policyId** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**[]SystemResponse**](SystemResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGet
 
 > []PolicyVersionInfo ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGet(ctx, policyId).Execute()
@@ -692,6 +832,146 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut
+
+> []ProcessResponse SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(ctx, policyId).ProcessIdsRequest(processIdsRequest).Execute()
+
+Set Policy Processes
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/drpe/drpe/drpe"
+)
+
+func main() {
+	policyId := "policyId_example" // string | 
+	processIdsRequest := *openapiclient.NewProcessIdsRequest() // ProcessIdsRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.PoliciesAPI.SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(context.Background(), policyId).ProcessIdsRequest(processIdsRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `PoliciesAPI.SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut`: []ProcessResponse
+	fmt.Fprintf(os.Stdout, "Response from `PoliciesAPI.SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**policyId** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiSetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **processIdsRequest** | [**ProcessIdsRequest**](ProcessIdsRequest.md) |  | 
+
+### Return type
+
+[**[]ProcessResponse**](ProcessResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut
+
+> []SystemResponse SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut(ctx, policyId).SystemIdsRequest(systemIdsRequest).Execute()
+
+Set Policy Systems
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/drpe/drpe/drpe"
+)
+
+func main() {
+	policyId := "policyId_example" // string | 
+	systemIdsRequest := *openapiclient.NewSystemIdsRequest() // SystemIdsRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.PoliciesAPI.SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut(context.Background(), policyId).SystemIdsRequest(systemIdsRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `PoliciesAPI.SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut`: []SystemResponse
+	fmt.Fprintf(os.Stdout, "Response from `PoliciesAPI.SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**policyId** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiSetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **systemIdsRequest** | [**SystemIdsRequest**](SystemIdsRequest.md) |  | 
+
+### Return type
+
+[**[]SystemResponse**](SystemResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

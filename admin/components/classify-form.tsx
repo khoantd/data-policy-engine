@@ -18,7 +18,12 @@ import {
   type ClassifySampleRecord,
   type ClassifySampleScenario,
 } from "@/lib/ai/classify-sample-schema";
-import type { ClassificationPolicy, PolicyListItem } from "@/lib/types";
+import type {
+  ClassificationPolicy,
+  PolicyListItem,
+  ProcessResponse,
+  SystemResponse,
+} from "@/lib/types";
 import {
   applyClassificationPolicyDefaults,
   applyClassifySampleRecordToForm,
@@ -30,10 +35,21 @@ import {
   explainScopeReason,
   getResultViewState,
 } from "@/lib/classify-playground";
+import {
+  applySystemToRequestFields,
+  findProcessById,
+  findSystemById,
+} from "@/lib/system-request-context";
+import {
+  trimProcessForSample,
+  trimSystemForSample,
+} from "@/lib/ai/catalog-sample-context";
 import { useLazyPolicy } from "@/lib/use-lazy-policy";
 import { AiPrivacyBadge } from "@/components/ai-privacy-badge";
 import { AiPrivacyFootnote } from "@/components/ai-privacy-footnote";
 import { AiTracingFootnote } from "@/components/ai-tracing-footnote";
+import { ProcessRequestContext } from "@/components/process-request-context";
+import { SystemRequestContext } from "@/components/system-request-context";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/field";
@@ -137,11 +153,19 @@ function sensitivityClass(sensitivity: string | undefined): string {
 
 export function ClassifyPlayground({
   policies,
+  systems = [],
+  processes = [],
+  initialSystemId = null,
+  initialProcessId = null,
   aiConfigured,
   tracingConfigured,
   privacyConfigured,
 }: {
   policies: PolicyListItem[];
+  systems?: SystemResponse[];
+  processes?: ProcessResponse[];
+  initialSystemId?: string | null;
+  initialProcessId?: string | null;
   aiConfigured: boolean;
   tracingConfigured: boolean;
   privacyConfigured: boolean;
@@ -149,6 +173,14 @@ export function ClassifyPlayground({
   const formId = useId();
   const [presetId, setPresetId] = useState(PRESETS[0].id);
   const [policyId, setPolicyId] = useState(policies[0]?.id ?? "");
+  const [systemId, setSystemId] = useState(() => {
+    const found = findSystemById(systems, initialSystemId);
+    return found?.id ?? "";
+  });
+  const [processId, setProcessId] = useState(() => {
+    const found = findProcessById(processes, initialProcessId);
+    return found?.id ?? "";
+  });
   const [scenario, setScenario] = useState<ClassifySampleScenario>("auto");
   const [generating, setGenerating] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
@@ -156,7 +188,13 @@ export function ClassifyPlayground({
   const [dataType, setDataType] = useState(PRESETS[0].data_type);
   const [recordId, setRecordId] = useState(PRESETS[0].record_id);
   const [jurisdiction, setJurisdiction] = useState(PRESETS[0].jurisdiction);
-  const [source, setSource] = useState(PRESETS[0].source);
+  const [source, setSource] = useState(() => {
+    const found = findSystemById(systems, initialSystemId);
+    if (found) {
+      return applySystemToRequestFields(found).source || PRESETS[0].source;
+    }
+    return PRESETS[0].source;
+  });
   const [metadata, setMetadata] = useState(PRESETS[0].metadata);
 
   const [state, action, pending] = useActionState<
@@ -237,6 +275,9 @@ export function ClassifyPlayground({
     setGenerating(true);
     setAiStatus("Generating sample data…");
 
+    const selectedSystem = findSystemById(systems, systemId || null);
+    const selectedProcess = findProcessById(processes, processId || null);
+
     try {
       const res = await fetch("/api/ai/classify-sample", {
         method: "POST",
@@ -244,6 +285,12 @@ export function ClassifyPlayground({
         body: JSON.stringify({
           scenario,
           policy: trimClassificationPolicyForSample(selectedFullPolicy),
+          system: selectedSystem
+            ? trimSystemForSample(selectedSystem)
+            : undefined,
+          process: selectedProcess
+            ? trimProcessForSample(selectedProcess)
+            : undefined,
         }),
       });
 
@@ -265,7 +312,11 @@ export function ClassifyPlayground({
       setPresetId("");
       setDataType(applied.dataType);
       setRecordId(applied.recordId);
-      setSource(applied.source);
+      setSource(
+        selectedSystem
+          ? applySystemToRequestFields(selectedSystem).source || applied.source
+          : applied.source,
+      );
       setJurisdiction(applied.jurisdiction || selectedFullPolicy.jurisdiction);
       setMetadata(applied.metadata);
       setAiStatus("AI sample ready — review before scan");
@@ -277,7 +328,16 @@ export function ClassifyPlayground({
     } finally {
       setGenerating(false);
     }
-  }, [aiConfigured, generating, scenario, selectedFullPolicy]);
+  }, [
+    aiConfigured,
+    generating,
+    scenario,
+    selectedFullPolicy,
+    systems,
+    systemId,
+    processes,
+    processId,
+  ]);
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1.2fr]">
@@ -439,6 +499,25 @@ export function ClassifyPlayground({
               )}
             </div>
           )}
+
+          <SystemRequestContext
+            systems={systems}
+            systemId={systemId}
+            onSystemIdChange={setSystemId}
+            onSourceFromSystem={setSource}
+            selectedPolicyId={policyId}
+            disabled={generating}
+            selectId={`${formId}-system`}
+          />
+
+          <ProcessRequestContext
+            processes={processes}
+            processId={processId}
+            onProcessIdChange={setProcessId}
+            selectedPolicyId={policyId}
+            disabled={generating}
+            selectId={`${formId}-process`}
+          />
 
           <Input
             label="Data type"

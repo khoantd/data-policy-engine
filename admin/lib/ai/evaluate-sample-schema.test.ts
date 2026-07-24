@@ -90,6 +90,20 @@ describe("evaluateSampleBodySchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts optional system and process catalog snapshots", () => {
+    const result = evaluateSampleBodySchema.safeParse({
+      mode: "single",
+      policy: samplePolicy,
+      system: {
+        id: "sys_crm",
+        name: "CRM",
+        source_key: "crm_system",
+      },
+      process: { id: "proc_a", name: "Onboarding" },
+    });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe("evaluateSample output schemas", () => {

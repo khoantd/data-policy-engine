@@ -51,7 +51,7 @@ import com.drpe.client.JSON;
 /**
  * ValidateRequest
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-24T11:39:51.464132+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-24T12:43:19.315082+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class ValidateRequest {
   public static final String SERIALIZED_NAME_YAML = "yaml";
   @SerializedName(SERIALIZED_NAME_YAML)

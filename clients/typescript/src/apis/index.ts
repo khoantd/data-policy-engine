@@ -10,4 +10,6 @@ export * from './HealthApi';
 export * from './JurisdictionsApi';
 export * from './PoliciesApi';
 export * from './PrivacyApi';
+export * from './ProcessesApi';
+export * from './SystemsApi';
 export * from './WebhooksApi';

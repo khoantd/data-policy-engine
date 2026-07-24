@@ -25,6 +25,10 @@ import type {
   PolicyListItem,
   PolicyStatusChangeRequest,
   PolicyVersionInfo,
+  ProcessIdsRequest,
+  ProcessResponse,
+  SystemIdsRequest,
+  SystemResponse,
   ValidateRequest,
   ValidateResponse,
 } from '../models/index';
@@ -70,8 +74,26 @@ export interface ListPoliciesApiV1PoliciesGetRequest {
     policyKind?: PolicyKind | null;
 }
 
+export interface ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest {
+    policyId: string;
+}
+
+export interface ListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest {
+    policyId: string;
+}
+
 export interface ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGetRequest {
     policyId: string;
+}
+
+export interface SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest {
+    policyId: string;
+    processIdsRequest: ProcessIdsRequest;
+}
+
+export interface SetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest {
+    policyId: string;
+    systemIdsRequest: SystemIdsRequest;
 }
 
 export interface UpdatePolicyApiV1PoliciesPolicyIdPutRequest {
@@ -558,6 +580,96 @@ export class PoliciesApi extends runtime.BaseAPI {
     }
 
     /**
+     * List Policy Processes
+     */
+    async listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRaw(requestParameters: ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ProcessResponse>>> {
+        if (requestParameters['policyId'] == null) {
+            throw new runtime.RequiredError(
+                'policyId',
+                'Required parameter "policyId" was null or undefined when calling listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/api/v1/policies/{policy_id}/processes`;
+        urlPath = urlPath.replace(`{${"policy_id"}}`, encodeURIComponent(String(requestParameters['policyId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response);
+    }
+
+    /**
+     * List Policy Processes
+     */
+    async listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet(requestParameters: ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ProcessResponse>> {
+        const response = await this.listPolicyProcessesApiV1PoliciesPolicyIdProcessesGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * List Policy Systems
+     */
+    async listPolicySystemsApiV1PoliciesPolicyIdSystemsGetRaw(requestParameters: ListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<SystemResponse>>> {
+        if (requestParameters['policyId'] == null) {
+            throw new runtime.RequiredError(
+                'policyId',
+                'Required parameter "policyId" was null or undefined when calling listPolicySystemsApiV1PoliciesPolicyIdSystemsGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/api/v1/policies/{policy_id}/systems`;
+        urlPath = urlPath.replace(`{${"policy_id"}}`, encodeURIComponent(String(requestParameters['policyId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response);
+    }
+
+    /**
+     * List Policy Systems
+     */
+    async listPolicySystemsApiV1PoliciesPolicyIdSystemsGet(requestParameters: ListPolicySystemsApiV1PoliciesPolicyIdSystemsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<SystemResponse>> {
+        const response = await this.listPolicySystemsApiV1PoliciesPolicyIdSystemsGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * List Policy Versions
      */
     async listPolicyVersionsApiV1PoliciesPolicyIdVersionsGetRaw(requestParameters: ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<PolicyVersionInfo>>> {
@@ -599,6 +711,116 @@ export class PoliciesApi extends runtime.BaseAPI {
      */
     async listPolicyVersionsApiV1PoliciesPolicyIdVersionsGet(requestParameters: ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<PolicyVersionInfo>> {
         const response = await this.listPolicyVersionsApiV1PoliciesPolicyIdVersionsGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Set Policy Processes
+     */
+    async setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRaw(requestParameters: SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ProcessResponse>>> {
+        if (requestParameters['policyId'] == null) {
+            throw new runtime.RequiredError(
+                'policyId',
+                'Required parameter "policyId" was null or undefined when calling setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut().'
+            );
+        }
+
+        if (requestParameters['processIdsRequest'] == null) {
+            throw new runtime.RequiredError(
+                'processIdsRequest',
+                'Required parameter "processIdsRequest" was null or undefined when calling setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/api/v1/policies/{policy_id}/processes`;
+        urlPath = urlPath.replace(`{${"policy_id"}}`, encodeURIComponent(String(requestParameters['policyId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['processIdsRequest'],
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response);
+    }
+
+    /**
+     * Set Policy Processes
+     */
+    async setPolicyProcessesApiV1PoliciesPolicyIdProcessesPut(requestParameters: SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ProcessResponse>> {
+        const response = await this.setPolicyProcessesApiV1PoliciesPolicyIdProcessesPutRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Set Policy Systems
+     */
+    async setPolicySystemsApiV1PoliciesPolicyIdSystemsPutRaw(requestParameters: SetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<SystemResponse>>> {
+        if (requestParameters['policyId'] == null) {
+            throw new runtime.RequiredError(
+                'policyId',
+                'Required parameter "policyId" was null or undefined when calling setPolicySystemsApiV1PoliciesPolicyIdSystemsPut().'
+            );
+        }
+
+        if (requestParameters['systemIdsRequest'] == null) {
+            throw new runtime.RequiredError(
+                'systemIdsRequest',
+                'Required parameter "systemIdsRequest" was null or undefined when calling setPolicySystemsApiV1PoliciesPolicyIdSystemsPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/api/v1/policies/{policy_id}/systems`;
+        urlPath = urlPath.replace(`{${"policy_id"}}`, encodeURIComponent(String(requestParameters['policyId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['systemIdsRequest'],
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response);
+    }
+
+    /**
+     * Set Policy Systems
+     */
+    async setPolicySystemsApiV1PoliciesPolicyIdSystemsPut(requestParameters: SetPolicySystemsApiV1PoliciesPolicyIdSystemsPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<SystemResponse>> {
+        const response = await this.setPolicySystemsApiV1PoliciesPolicyIdSystemsPutRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

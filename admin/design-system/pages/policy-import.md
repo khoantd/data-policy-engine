@@ -16,6 +16,7 @@
 - **Grid:** `xl` breakpoint uses `1fr / 1.4fr` — AI assist panel left, YAML draft right; stack on smaller viewports
 - **Sections:** Page header → Assist + YAML panels → Validate / Import footer
 - **One job:** Compose or paste a policy draft, validate, then import — AI never auto-imports
+- **Entry labels:** Policies list CTA, sidebar nav, page title, and breadcrumb use **Create Policy**; the in-page submit action remains **Import** / **Importing…** (YAML → API)
 
 ### Spacing Overrides
 

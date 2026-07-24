@@ -30,7 +30,7 @@ describe("buildBreadcrumbs", () => {
     expect(buildBreadcrumbs("/policies/import")).toEqual([
       { label: "ROS Policy", href: "/" },
       { label: "Policies", href: "/policies" },
-      { label: "Import" },
+      { label: "Create Policy" },
     ]);
   });
 
@@ -39,6 +39,27 @@ describe("buildBreadcrumbs", () => {
       { label: "ROS Policy", href: "/" },
       { label: "Policies", href: "/policies" },
       { label: "Structure graph" },
+    ]);
+  });
+
+  it("builds systems catalog trail", () => {
+    expect(buildBreadcrumbs("/systems")).toEqual([
+      { label: "ROS Policy", href: "/" },
+      { label: "Systems" },
+    ]);
+    expect(
+      buildBreadcrumbs("/systems/sys_abc", { tailLabel: "CRM" }),
+    ).toEqual([
+      { label: "ROS Policy", href: "/" },
+      { label: "Systems", href: "/systems" },
+      { label: "CRM" },
+    ]);
+  });
+
+  it("builds processes catalog trail", () => {
+    expect(buildBreadcrumbs("/processes")).toEqual([
+      { label: "ROS Policy", href: "/" },
+      { label: "Processes" },
     ]);
   });
 });

@@ -191,6 +191,206 @@ export async function toggleWebhookAction(
   }
 }
 
+function parseTagList(raw: string): string[] {
+  return raw
+    .split(/[,\s]+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
+function parseIdList(raw: string): string[] {
+  return raw
+    .split(/[,\s]+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
+export async function createSystemAction(
+  _prev: { error?: string; ok?: boolean } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean }> {
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return { error: "Name is required" };
+  try {
+    const created = await drpe.createSystem({
+      name,
+      description: String(formData.get("description") || "").trim() || undefined,
+      owner: String(formData.get("owner") || "").trim() || undefined,
+      source_key: String(formData.get("source_key") || "").trim() || undefined,
+      status: (String(formData.get("status") || "active") as
+        | "active"
+        | "retired"),
+      tags: parseTagList(String(formData.get("tags") || "")),
+    });
+    revalidatePath("/systems");
+    redirect(`/systems/${encodeURIComponent(created.id)}`);
+  } catch (err) {
+    rethrowRedirect(err);
+    return { error: errMsg(err) };
+  }
+}
+
+export async function updateSystemAction(
+  systemId: string,
+  _prev: { error?: string; ok?: boolean; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean; message?: string }> {
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return { error: "Name is required" };
+  try {
+    await drpe.updateSystem(systemId, {
+      name,
+      description: String(formData.get("description") || "").trim(),
+      owner: String(formData.get("owner") || "").trim(),
+      source_key: String(formData.get("source_key") || "").trim(),
+      status: String(formData.get("status") || "active") as "active" | "retired",
+      tags: parseTagList(String(formData.get("tags") || "")),
+    });
+    revalidatePath("/systems");
+    revalidatePath(`/systems/${systemId}`);
+    return { ok: true, message: "System saved" };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
+export async function deleteSystemAction(
+  systemId: string,
+): Promise<{ error?: string }> {
+  try {
+    await drpe.deleteSystem(systemId);
+    revalidatePath("/systems");
+    redirect("/systems");
+  } catch (err) {
+    rethrowRedirect(err);
+    return { error: errMsg(err) };
+  }
+}
+
+export async function setSystemPoliciesAction(
+  systemId: string,
+  _prev: { error?: string; ok?: boolean; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean; message?: string }> {
+  const policy_ids = parseIdList(String(formData.get("policy_ids") || ""));
+  try {
+    await drpe.setSystemPolicies(systemId, policy_ids);
+    revalidatePath(`/systems/${systemId}`);
+    revalidatePath("/policies");
+    return { ok: true, message: "Linked policies updated" };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
+export async function createProcessAction(
+  _prev: { error?: string; ok?: boolean } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean }> {
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return { error: "Name is required" };
+  try {
+    const created = await drpe.createProcess({
+      name,
+      description: String(formData.get("description") || "").trim() || undefined,
+      owner: String(formData.get("owner") || "").trim() || undefined,
+      status: (String(formData.get("status") || "active") as
+        | "active"
+        | "retired"),
+      tags: parseTagList(String(formData.get("tags") || "")),
+    });
+    revalidatePath("/processes");
+    redirect(`/processes/${encodeURIComponent(created.id)}`);
+  } catch (err) {
+    rethrowRedirect(err);
+    return { error: errMsg(err) };
+  }
+}
+
+export async function updateProcessAction(
+  processId: string,
+  _prev: { error?: string; ok?: boolean; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean; message?: string }> {
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return { error: "Name is required" };
+  try {
+    await drpe.updateProcess(processId, {
+      name,
+      description: String(formData.get("description") || "").trim(),
+      owner: String(formData.get("owner") || "").trim(),
+      status: String(formData.get("status") || "active") as "active" | "retired",
+      tags: parseTagList(String(formData.get("tags") || "")),
+    });
+    revalidatePath("/processes");
+    revalidatePath(`/processes/${processId}`);
+    return { ok: true, message: "Process saved" };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
+export async function deleteProcessAction(
+  processId: string,
+): Promise<{ error?: string }> {
+  try {
+    await drpe.deleteProcess(processId);
+    revalidatePath("/processes");
+    redirect("/processes");
+  } catch (err) {
+    rethrowRedirect(err);
+    return { error: errMsg(err) };
+  }
+}
+
+export async function setProcessPoliciesAction(
+  processId: string,
+  _prev: { error?: string; ok?: boolean; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean; message?: string }> {
+  const policy_ids = parseIdList(String(formData.get("policy_ids") || ""));
+  try {
+    await drpe.setProcessPolicies(processId, policy_ids);
+    revalidatePath(`/processes/${processId}`);
+    revalidatePath("/policies");
+    return { ok: true, message: "Linked policies updated" };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
+export async function setPolicySystemsAction(
+  policyId: string,
+  _prev: { error?: string; ok?: boolean; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean; message?: string }> {
+  const system_ids = parseIdList(String(formData.get("system_ids") || ""));
+  try {
+    await drpe.setPolicySystems(policyId, system_ids);
+    revalidatePath(`/policies/${policyId}`);
+    revalidatePath("/systems");
+    return { ok: true, message: "Systems updated" };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
+export async function setPolicyProcessesAction(
+  policyId: string,
+  _prev: { error?: string; ok?: boolean; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean; message?: string }> {
+  const process_ids = parseIdList(String(formData.get("process_ids") || ""));
+  try {
+    await drpe.setPolicyProcesses(policyId, process_ids);
+    revalidatePath(`/policies/${policyId}`);
+    revalidatePath("/processes");
+    return { ok: true, message: "Processes updated" };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
 export async function triggerEnforceAction(
   _prev: { error?: string; jobId?: string } | null,
   formData: FormData,

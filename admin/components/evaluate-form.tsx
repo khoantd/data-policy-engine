@@ -20,13 +20,30 @@ import {
   trimPolicyForSample,
   type TargetMatchStatus,
 } from "@/lib/evaluate-playground";
-import type { EvaluationResponse, Policy, PolicyListItem } from "@/lib/types";
+import {
+  applySystemToRequestFields,
+  findProcessById,
+  findSystemById,
+} from "@/lib/system-request-context";
+import {
+  trimProcessForSample,
+  trimSystemForSample,
+} from "@/lib/ai/catalog-sample-context";
+import type {
+  EvaluationResponse,
+  Policy,
+  PolicyListItem,
+  ProcessResponse,
+  SystemResponse,
+} from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { useLazyPolicy } from "@/lib/use-lazy-policy";
 import { AiPrivacyBadge } from "@/components/ai-privacy-badge";
 import { AiPrivacyFootnote } from "@/components/ai-privacy-footnote";
 import { StatusBadge } from "@/components/status-badge";
 import { AiTracingFootnote } from "@/components/ai-tracing-footnote";
+import { ProcessRequestContext } from "@/components/process-request-context";
+import { SystemRequestContext } from "@/components/system-request-context";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/field";
 import {
@@ -301,11 +318,19 @@ function ResultDetail({
 
 export function EvaluatePlayground({
   policies,
+  systems = [],
+  processes = [],
+  initialSystemId = null,
+  initialProcessId = null,
   aiConfigured,
   tracingConfigured,
   privacyConfigured,
 }: {
   policies: PolicyListItem[];
+  systems?: SystemResponse[];
+  processes?: ProcessResponse[];
+  initialSystemId?: string | null;
+  initialProcessId?: string | null;
   aiConfigured: boolean;
   tracingConfigured: boolean;
   privacyConfigured: boolean;
@@ -320,13 +345,25 @@ export function EvaluatePlayground({
   const [targetPolicyId, setTargetPolicyId] = useState(
     () => policies[0]?.id ?? "",
   );
+  const [systemId, setSystemId] = useState(() => {
+    const found = findSystemById(systems, initialSystemId);
+    return found?.id ?? "";
+  });
+  const [processId, setProcessId] = useState(() => {
+    const found = findProcessById(processes, initialProcessId);
+    return found?.id ?? "";
+  });
   const [scenario, setScenario] = useState<EvaluateSampleScenario>("auto");
   const [generating, setGenerating] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
   const [aiError, setAiError] = useState<string | null>(null);
   const [dataType, setDataType] = useState(PRESETS[0].data_type);
   const [recordId, setRecordId] = useState(PRESETS[0].record_id);
-  const [source, setSource] = useState(PRESETS[0].source);
+  const [source, setSource] = useState(() => {
+    const found = findSystemById(systems, initialSystemId);
+    if (found) return applySystemToRequestFields(found).source || PRESETS[0].source;
+    return PRESETS[0].source;
+  });
   const [jurisdiction, setJurisdiction] = useState(PRESETS[0].jurisdiction);
   const [metadata, setMetadata] = useState(PRESETS[0].metadata);
   const [context, setContext] = useState(PRESETS[0].context);
@@ -375,6 +412,9 @@ export function EvaluatePlayground({
     setGenerating(true);
     setAiStatus("Generating sample data…");
 
+    const selectedSystem = findSystemById(systems, systemId || null);
+    const selectedProcess = findProcessById(processes, processId || null);
+
     try {
       const res = await fetch("/api/ai/evaluate-sample", {
         method: "POST",
@@ -383,6 +423,12 @@ export function EvaluatePlayground({
           mode,
           scenario: mode === "single" ? scenario : "auto",
           policy: trimPolicyForSample(selectedFullPolicy),
+          system: selectedSystem
+            ? trimSystemForSample(selectedSystem)
+            : undefined,
+          process: selectedProcess
+            ? trimProcessForSample(selectedProcess)
+            : undefined,
         }),
       });
 
@@ -410,7 +456,12 @@ export function EvaluatePlayground({
         const applied = applySampleRecordToForm(body.record);
         setDataType(applied.dataType);
         setRecordId(applied.recordId);
-        setSource(applied.source);
+        setSource(
+          selectedSystem
+            ? applySystemToRequestFields(selectedSystem).source ||
+                applied.source
+            : applied.source,
+        );
         setJurisdiction(applied.jurisdiction || selectedFullPolicy.jurisdiction);
         setMetadata(applied.metadata);
         setContext(applied.context);
@@ -424,7 +475,17 @@ export function EvaluatePlayground({
     } finally {
       setGenerating(false);
     }
-  }, [aiConfigured, generating, mode, scenario, selectedFullPolicy]);
+  }, [
+    aiConfigured,
+    generating,
+    mode,
+    scenario,
+    selectedFullPolicy,
+    systems,
+    systemId,
+    processes,
+    processId,
+  ]);
 
   function applyPreset(preset: Preset) {
     setMode("single");
@@ -504,6 +565,25 @@ export function EvaluatePlayground({
               )}
             </>
           )}
+
+          <SystemRequestContext
+            systems={systems}
+            systemId={systemId}
+            onSystemIdChange={setSystemId}
+            onSourceFromSystem={setSource}
+            selectedPolicyId={targetPolicyId}
+            disabled={generating}
+            selectId={`${formId}-system`}
+          />
+
+          <ProcessRequestContext
+            processes={processes}
+            processId={processId}
+            onProcessIdChange={setProcessId}
+            selectedPolicyId={targetPolicyId}
+            disabled={generating}
+            selectId={`${formId}-process`}
+          />
 
           <div className="flex flex-wrap gap-2" role="group" aria-label="Mode">
             <Button

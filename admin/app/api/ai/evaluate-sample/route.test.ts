@@ -141,6 +141,32 @@ describe("POST /api/ai/evaluate-sample", () => {
     expect(call.prompt).toContain("Generate 2–5 distinct records");
   });
 
+  it("forces source from catalog system source_key", async () => {
+    const { POST } = await import("@/app/api/ai/evaluate-sample/route");
+    const res = await POST(
+      new Request("http://localhost/api/ai/evaluate-sample", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "single",
+          policy: samplePolicy,
+          system: {
+            id: "sys_crm",
+            name: "CRM",
+            source_key: "crm_system",
+          },
+          process: { id: "proc_a", name: "Onboarding" },
+        }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { record: { source: string | null } };
+    expect(body.record.source).toBe("crm_system");
+    const call = generateObjectMock.mock.calls[0]?.[0] as { prompt?: string };
+    expect(call.prompt).toContain("crm_system");
+    expect(call.prompt).toContain("Onboarding");
+  });
+
   it("returns 400 for invalid body", async () => {
     const { POST } = await import("@/app/api/ai/evaluate-sample/route");
     const res = await POST(

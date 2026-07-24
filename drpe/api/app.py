@@ -16,6 +16,7 @@ from drpe.adapters.memory_grace_holds import InMemoryGraceHoldStore
 from drpe.adapters.memory_jobs import InMemoryEnforcementJobStore
 from drpe.adapters.memory_records import InMemoryRecordSource
 from drpe.adapters.memory_store import InMemoryPolicyStore
+from drpe.adapters.memory_catalog import InMemoryCatalogStore
 from drpe.adapters.memory_webhooks import InMemoryWebhookStore
 from drpe.adapters.redis_cache import (
     CachingPolicyStore,
@@ -23,6 +24,7 @@ from drpe.adapters.redis_cache import (
     create_redis_client,
 )
 from drpe.adapters.sqlalchemy_audit import SqlAlchemyAuditStore
+from drpe.adapters.sqlalchemy_catalog import SqlAlchemyCatalogStore
 from drpe.adapters.sqlalchemy_dsar import SqlAlchemyDsarStore
 from drpe.adapters.sqlalchemy_grace_holds import SqlAlchemyGraceHoldStore
 from drpe.adapters.sqlalchemy_jobs import SqlAlchemyEnforcementJobStore
@@ -37,6 +39,8 @@ from drpe.api.routes_misc import health_router, jurisdictions_router
 from drpe.api.routes_classify import router as classify_router
 from drpe.api.routes_policies import router as policies_router
 from drpe.api.routes_privacy import router as privacy_router
+from drpe.api.routes_processes import router as processes_router
+from drpe.api.routes_systems import router as systems_router
 from drpe.api.routes_webhooks import router as webhooks_router
 from drpe.api.settings import Settings
 from drpe.core.dsar import DsarService
@@ -156,12 +160,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         dsar_store = SqlAlchemyDsarStore(session_factory)
         webhook_store = SqlAlchemyWebhookStore(session_factory)
         grace_hold_store = SqlAlchemyGraceHoldStore(session_factory)
+        catalog_store = SqlAlchemyCatalogStore(session_factory)
     else:
         job_store = InMemoryEnforcementJobStore()
         audit_store = InMemoryAuditStore()
         dsar_store = InMemoryDsarStore()
         webhook_store = InMemoryWebhookStore()
         grace_hold_store = InMemoryGraceHoldStore()
+        catalog_store = InMemoryCatalogStore()
 
     record_source = InMemoryRecordSource()
     dispatcher = build_dispatcher(settings)
@@ -219,6 +225,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.dsar_store = dsar_store
     app.state.dsar_service = dsar_service
     app.state.webhook_store = webhook_store
+    app.state.catalog_store = catalog_store
     app.state.record_source = record_source
     app.state.dispatcher = dispatcher
     app.state.grace_hold_store = grace_hold_store
@@ -226,6 +233,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.celery = celery
 
     app.include_router(policies_router, prefix="/api/v1")
+    app.include_router(systems_router, prefix="/api/v1")
+    app.include_router(processes_router, prefix="/api/v1")
     app.include_router(classify_router, prefix="/api/v1")
     app.include_router(evaluate_router, prefix="/api/v1")
     app.include_router(enforce_router, prefix="/api/v1")

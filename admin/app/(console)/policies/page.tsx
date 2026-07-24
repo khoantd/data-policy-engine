@@ -65,7 +65,7 @@ export default async function PoliciesPage({
         breadcrumbs={buildBreadcrumbs("/policies")}
         actions={
           <Link href="/policies/import">
-            <Button>Import YAML</Button>
+            <Button>Create Policy</Button>
           </Link>
         }
       />

@@ -109,12 +109,30 @@ Class | Method | HTTP request | Description
 *PoliciesAPI* | [**GetPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet**](docs/PoliciesAPI.md#getpolicyversionapiv1policiespolicyidversionsverget) | **Get** /api/v1/policies/{policy_id}/versions/{ver} | Get Policy Version
 *PoliciesAPI* | [**ImportPoliciesApiV1PoliciesImportPost**](docs/PoliciesAPI.md#importpoliciesapiv1policiesimportpost) | **Post** /api/v1/policies/import | Import Policies
 *PoliciesAPI* | [**ListPoliciesApiV1PoliciesGet**](docs/PoliciesAPI.md#listpoliciesapiv1policiesget) | **Get** /api/v1/policies | List Policies
+*PoliciesAPI* | [**ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet**](docs/PoliciesAPI.md#listpolicyprocessesapiv1policiespolicyidprocessesget) | **Get** /api/v1/policies/{policy_id}/processes | List Policy Processes
+*PoliciesAPI* | [**ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet**](docs/PoliciesAPI.md#listpolicysystemsapiv1policiespolicyidsystemsget) | **Get** /api/v1/policies/{policy_id}/systems | List Policy Systems
 *PoliciesAPI* | [**ListPolicyVersionsApiV1PoliciesPolicyIdVersionsGet**](docs/PoliciesAPI.md#listpolicyversionsapiv1policiespolicyidversionsget) | **Get** /api/v1/policies/{policy_id}/versions | List Policy Versions
+*PoliciesAPI* | [**SetPolicyProcessesApiV1PoliciesPolicyIdProcessesPut**](docs/PoliciesAPI.md#setpolicyprocessesapiv1policiespolicyidprocessesput) | **Put** /api/v1/policies/{policy_id}/processes | Set Policy Processes
+*PoliciesAPI* | [**SetPolicySystemsApiV1PoliciesPolicyIdSystemsPut**](docs/PoliciesAPI.md#setpolicysystemsapiv1policiespolicyidsystemsput) | **Put** /api/v1/policies/{policy_id}/systems | Set Policy Systems
 *PoliciesAPI* | [**UpdatePolicyApiV1PoliciesPolicyIdPut**](docs/PoliciesAPI.md#updatepolicyapiv1policiespolicyidput) | **Put** /api/v1/policies/{policy_id} | Update Policy
 *PoliciesAPI* | [**ValidatePolicyApiV1PoliciesValidatePost**](docs/PoliciesAPI.md#validatepolicyapiv1policiesvalidatepost) | **Post** /api/v1/policies/validate | Validate Policy
 *PrivacyAPI* | [**PrivacyMaskApiV1PrivacyMaskPost**](docs/PrivacyAPI.md#privacymaskapiv1privacymaskpost) | **Post** /api/v1/privacy/mask | Privacy Mask
 *PrivacyAPI* | [**PrivacyStatusApiV1PrivacyStatusGet**](docs/PrivacyAPI.md#privacystatusapiv1privacystatusget) | **Get** /api/v1/privacy/status | Privacy Status
 *PrivacyAPI* | [**PrivacyUnmaskApiV1PrivacyUnmaskPost**](docs/PrivacyAPI.md#privacyunmaskapiv1privacyunmaskpost) | **Post** /api/v1/privacy/unmask | Privacy Unmask
+*ProcessesAPI* | [**CreateProcessApiV1ProcessesPost**](docs/ProcessesAPI.md#createprocessapiv1processespost) | **Post** /api/v1/processes | Create Process
+*ProcessesAPI* | [**DeleteProcessApiV1ProcessesProcessIdDelete**](docs/ProcessesAPI.md#deleteprocessapiv1processesprocessiddelete) | **Delete** /api/v1/processes/{process_id} | Delete Process
+*ProcessesAPI* | [**GetProcessApiV1ProcessesProcessIdGet**](docs/ProcessesAPI.md#getprocessapiv1processesprocessidget) | **Get** /api/v1/processes/{process_id} | Get Process
+*ProcessesAPI* | [**ListProcessPoliciesApiV1ProcessesProcessIdPoliciesGet**](docs/ProcessesAPI.md#listprocesspoliciesapiv1processesprocessidpoliciesget) | **Get** /api/v1/processes/{process_id}/policies | List Process Policies
+*ProcessesAPI* | [**ListProcessesApiV1ProcessesGet**](docs/ProcessesAPI.md#listprocessesapiv1processesget) | **Get** /api/v1/processes | List Processes
+*ProcessesAPI* | [**SetProcessPoliciesApiV1ProcessesProcessIdPoliciesPut**](docs/ProcessesAPI.md#setprocesspoliciesapiv1processesprocessidpoliciesput) | **Put** /api/v1/processes/{process_id}/policies | Set Process Policies
+*ProcessesAPI* | [**UpdateProcessApiV1ProcessesProcessIdPatch**](docs/ProcessesAPI.md#updateprocessapiv1processesprocessidpatch) | **Patch** /api/v1/processes/{process_id} | Update Process
+*SystemsAPI* | [**CreateSystemApiV1SystemsPost**](docs/SystemsAPI.md#createsystemapiv1systemspost) | **Post** /api/v1/systems | Create System
+*SystemsAPI* | [**DeleteSystemApiV1SystemsSystemIdDelete**](docs/SystemsAPI.md#deletesystemapiv1systemssystemiddelete) | **Delete** /api/v1/systems/{system_id} | Delete System
+*SystemsAPI* | [**GetSystemApiV1SystemsSystemIdGet**](docs/SystemsAPI.md#getsystemapiv1systemssystemidget) | **Get** /api/v1/systems/{system_id} | Get System
+*SystemsAPI* | [**ListSystemPoliciesApiV1SystemsSystemIdPoliciesGet**](docs/SystemsAPI.md#listsystempoliciesapiv1systemssystemidpoliciesget) | **Get** /api/v1/systems/{system_id}/policies | List System Policies
+*SystemsAPI* | [**ListSystemsApiV1SystemsGet**](docs/SystemsAPI.md#listsystemsapiv1systemsget) | **Get** /api/v1/systems | List Systems
+*SystemsAPI* | [**SetSystemPoliciesApiV1SystemsSystemIdPoliciesPut**](docs/SystemsAPI.md#setsystempoliciesapiv1systemssystemidpoliciesput) | **Put** /api/v1/systems/{system_id}/policies | Set System Policies
+*SystemsAPI* | [**UpdateSystemApiV1SystemsSystemIdPatch**](docs/SystemsAPI.md#updatesystemapiv1systemssystemidpatch) | **Patch** /api/v1/systems/{system_id} | Update System
 *WebhooksAPI* | [**CreateWebhookApiV1WebhooksPost**](docs/WebhooksAPI.md#createwebhookapiv1webhookspost) | **Post** /api/v1/webhooks | Create Webhook
 *WebhooksAPI* | [**DeleteWebhookApiV1WebhooksWebhookIdDelete**](docs/WebhooksAPI.md#deletewebhookapiv1webhookswebhookiddelete) | **Delete** /api/v1/webhooks/{webhook_id} | Delete Webhook
 *WebhooksAPI* | [**GetWebhookApiV1WebhooksWebhookIdGet**](docs/WebhooksAPI.md#getwebhookapiv1webhookswebhookidget) | **Get** /api/v1/webhooks/{webhook_id} | Get Webhook
@@ -130,6 +148,7 @@ Class | Method | HTTP request | Description
  - [AuditEventType](docs/AuditEventType.md)
  - [BatchClassificationRequest](docs/BatchClassificationRequest.md)
  - [BatchEvaluateRequest](docs/BatchEvaluateRequest.md)
+ - [CatalogStatus](docs/CatalogStatus.md)
  - [ClassificationAction](docs/ClassificationAction.md)
  - [ClassificationDiagnostics](docs/ClassificationDiagnostics.md)
  - [ClassificationEntity](docs/ClassificationEntity.md)
@@ -179,6 +198,7 @@ Class | Method | HTTP request | Description
  - [PolicyDiffChange](docs/PolicyDiffChange.md)
  - [PolicyDiffRequest](docs/PolicyDiffRequest.md)
  - [PolicyDiffResponse](docs/PolicyDiffResponse.md)
+ - [PolicyIdsRequest](docs/PolicyIdsRequest.md)
  - [PolicyKind](docs/PolicyKind.md)
  - [PolicyListItem](docs/PolicyListItem.md)
  - [PolicyRule](docs/PolicyRule.md)
@@ -187,11 +207,19 @@ Class | Method | HTTP request | Description
  - [PolicyStatusChangeRequest](docs/PolicyStatusChangeRequest.md)
  - [PolicyVersionInfo](docs/PolicyVersionInfo.md)
  - [PrivacyStatusResponse](docs/PrivacyStatusResponse.md)
+ - [ProcessCreateRequest](docs/ProcessCreateRequest.md)
+ - [ProcessIdsRequest](docs/ProcessIdsRequest.md)
+ - [ProcessResponse](docs/ProcessResponse.md)
+ - [ProcessUpdateRequest](docs/ProcessUpdateRequest.md)
  - [ReadyResponse](docs/ReadyResponse.md)
  - [RecordRef](docs/RecordRef.md)
  - [ReferenceSource](docs/ReferenceSource.md)
  - [ScopeExclude](docs/ScopeExclude.md)
  - [Sensitivity](docs/Sensitivity.md)
+ - [SystemCreateRequest](docs/SystemCreateRequest.md)
+ - [SystemIdsRequest](docs/SystemIdsRequest.md)
+ - [SystemResponse](docs/SystemResponse.md)
+ - [SystemUpdateRequest](docs/SystemUpdateRequest.md)
  - [UnmaskRequest](docs/UnmaskRequest.md)
  - [UnmaskResponse](docs/UnmaskResponse.md)
  - [ValidateRequest](docs/ValidateRequest.md)

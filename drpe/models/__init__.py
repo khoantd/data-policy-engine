@@ -42,12 +42,26 @@ from drpe.models.webhook import (
     WebhookResponse,
     WebhookUpdateRequest,
 )
+from drpe.models.system import (
+    CatalogStatus,
+    SystemCreateRequest,
+    SystemRecord,
+    SystemResponse,
+    SystemUpdateRequest,
+)
+from drpe.models.process import (
+    ProcessCreateRequest,
+    ProcessRecord,
+    ProcessResponse,
+    ProcessUpdateRequest,
+)
 
 __all__ = [
     "Action",
     "AuditEntry",
     "AuditEntryCreate",
     "AuditEventType",
+    "CatalogStatus",
     "Confidence",
     "ConflictingPolicy",
     "DataClassification",
@@ -77,8 +91,16 @@ __all__ = [
     "PolicyRule",
     "PolicyStatus",
     "PolicyVersionInfo",
+    "ProcessCreateRequest",
+    "ProcessRecord",
+    "ProcessResponse",
+    "ProcessUpdateRequest",
     "RecordRef",
     "ReferenceSource",
+    "SystemCreateRequest",
+    "SystemRecord",
+    "SystemResponse",
+    "SystemUpdateRequest",
     "WebhookCreateRequest",
     "WebhookCreateResponse",
     "WebhookRegistration",

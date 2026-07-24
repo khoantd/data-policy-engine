@@ -6,6 +6,8 @@ const NAV_HREFS = [
   "/policies",
   "/policies/graph",
   "/policies/import",
+  "/systems",
+  "/processes",
   "/dsar",
   "/audit",
   "/insights",
@@ -60,5 +62,11 @@ describe("isNavActive", () => {
   it("activates Overview only on /", () => {
     expect(isNavActive("/", "/", NAV_HREFS)).toBe(true);
     expect(isNavActive("/policies", "/", NAV_HREFS)).toBe(false);
+  });
+
+  it("activates Systems on list and detail", () => {
+    expect(isNavActive("/systems", "/systems", NAV_HREFS)).toBe(true);
+    expect(isNavActive("/systems/sys_1", "/systems", NAV_HREFS)).toBe(true);
+    expect(isNavActive("/systems", "/processes", NAV_HREFS)).toBe(false);
   });
 });

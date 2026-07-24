@@ -11,6 +11,7 @@ import { VersionsPanel } from "@/components/versions-panel";
 import { StatusDot } from "@/components/status-dot";
 import { AiSourceReferences } from "@/components/ai-source-references";
 import { PolicyStructureGraph } from "@/components/policy-structure-graph";
+import { PolicyAppliesToPanel } from "@/components/policy-applies-to";
 import { Button } from "@/components/ui/button";
 import {
   ErrorAlert,
@@ -30,14 +31,34 @@ export default async function PolicyDetailPage({
   let error: string | null = null;
   let policy: Awaited<ReturnType<typeof drpe.getPolicy>> | null = null;
   let versions: Awaited<ReturnType<typeof drpe.listVersions>> = [];
+  let linkedSystems: Awaited<ReturnType<typeof drpe.listPolicySystems>> = [];
+  let linkedProcesses: Awaited<ReturnType<typeof drpe.listPolicyProcesses>> =
+    [];
+  let allSystems: Awaited<ReturnType<typeof drpe.listSystems>> = [];
+  let allProcesses: Awaited<ReturnType<typeof drpe.listProcesses>> = [];
 
   try {
-    const [loaded, versionsLoaded] = await Promise.all([
+    const [
+      loaded,
+      versionsLoaded,
+      systemsLinked,
+      processesLinked,
+      systemsAll,
+      processesAll,
+    ] = await Promise.all([
       drpe.getPolicy(id),
       drpe.listVersions(id),
+      drpe.listPolicySystems(id).catch(() => []),
+      drpe.listPolicyProcesses(id).catch(() => []),
+      drpe.listSystems("limit=500").catch(() => []),
+      drpe.listProcesses("limit=500").catch(() => []),
     ]);
     policy = loaded;
     versions = versionsLoaded;
+    linkedSystems = systemsLinked;
+    linkedProcesses = processesLinked;
+    allSystems = systemsAll;
+    allProcesses = processesAll;
   } catch (err) {
     if (err instanceof DrpeApiError && err.status === 404) notFound();
     error = err instanceof Error ? err.message : "Failed to load policy";
@@ -46,7 +67,10 @@ export default async function PolicyDetailPage({
   if (!policy) {
     return (
       <>
-        <PageHeader title="Policy" breadcrumbs={buildBreadcrumbs(`/policies/${id}`)} />
+        <PageHeader
+          title="Policy"
+          breadcrumbs={buildBreadcrumbs(`/policies/${id}`)}
+        />
         {error && <ErrorAlert message={error} />}
       </>
     );
@@ -65,6 +89,17 @@ export default async function PolicyDetailPage({
         : policy.policy_kind;
 
   const referenceSources = policy.reference_sources ?? [];
+  const catalogLinks = {
+    systems: linkedSystems.map((s) => ({
+      id: s.id,
+      name: s.name,
+      source_key: s.source_key,
+    })),
+    processes: linkedProcesses.map((p) => ({
+      id: p.id,
+      name: p.name,
+    })),
+  };
 
   return (
     <>
@@ -75,7 +110,9 @@ export default async function PolicyDetailPage({
             {policy.id} · jurisdiction {policy.jurisdiction} · {kindLabel}
           </span>
         }
-        breadcrumbs={buildBreadcrumbs(`/policies/${id}`, { tailLabel: policy.id })}
+        breadcrumbs={buildBreadcrumbs(`/policies/${id}`, {
+          tailLabel: policy.id,
+        })}
         actions={<StatusDot status={String(policy.status)} />}
       />
       <PolicyStatusActions
@@ -84,14 +121,19 @@ export default async function PolicyDetailPage({
       />
       <div className="mb-4 flex flex-wrap gap-3 text-sm text-muted-fg">
         <span>
-          Version <span className="font-mono text-foreground">v{policy.version}</span>
+          Version{" "}
+          <span className="font-mono text-foreground">v{policy.version}</span>
         </span>
         <span>
-          Rules <span className="font-mono text-foreground">{policy.rules.length}</span>
+          Rules{" "}
+          <span className="font-mono text-foreground">
+            {policy.rules.length}
+          </span>
         </span>
         {policy.owner && (
           <span>
-            Owner <span className="font-mono text-foreground">{policy.owner}</span>
+            Owner{" "}
+            <span className="font-mono text-foreground">{policy.owner}</span>
           </span>
         )}
       </div>
@@ -109,6 +151,7 @@ export default async function PolicyDetailPage({
           <PolicyStructureGraph
             mode="detail"
             policy={policy}
+            catalogLinks={catalogLinks}
             initialFocus={sp.focus || null}
           />
         </Panel>
@@ -118,6 +161,15 @@ export default async function PolicyDetailPage({
           <PolicyYamlEditor policyId={policy.id} initialYaml={initialYaml} />
         </Panel>
         <div className="flex flex-col gap-6">
+          <Panel title="Applies to">
+            <PolicyAppliesToPanel
+              policyId={policy.id}
+              linkedSystems={linkedSystems}
+              linkedProcesses={linkedProcesses}
+              allSystems={allSystems}
+              allProcesses={allProcesses}
+            />
+          </Panel>
           {referenceSources.length > 0 && (
             <Panel title="Provenance">
               <AiSourceReferences

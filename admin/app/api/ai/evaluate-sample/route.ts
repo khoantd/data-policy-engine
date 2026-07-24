@@ -10,6 +10,7 @@ import {
   evaluateSampleSingleOutputSchema,
   normalizeEvaluateSampleRecord,
 } from "@/lib/ai/evaluate-sample-schema";
+import { applyCatalogSourceToRecord } from "@/lib/ai/catalog-sample-context";
 import { getLiteLLMConfig } from "@/lib/ai/litellm";
 import {
   finalizeLlmObject,
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  const { mode, scenario, policy } = parsed.data;
+  const { mode, scenario, policy, system, process } = parsed.data;
   const openai = createOpenAI({
     baseURL: config.baseURL,
     apiKey: config.apiKey,
@@ -78,7 +79,13 @@ export async function POST(request: Request) {
 
   const { generateObject, client } = getTracedAI();
 
-  const rawPrompt = buildEvaluateSampleUserPrompt({ mode, scenario, policy });
+  const rawPrompt = buildEvaluateSampleUserPrompt({
+    mode,
+    scenario,
+    policy,
+    system,
+    process,
+  });
   const prepared = await prepareLlmPrompt([rawPrompt]);
   const llmPrompt = prepared?.maskedText ?? rawPrompt;
   const mappingToken = prepared?.mappingToken ?? null;
@@ -93,12 +100,12 @@ export async function POST(request: Request) {
   });
 
   try {
-    const system = buildEvaluateSampleSystemPrompt();
+    const systemPrompt = buildEvaluateSampleSystemPrompt();
 
     if (mode === "batch") {
       const result = await generateObject({
         model: openai.chat(config.model),
-        system,
+        system: systemPrompt,
         prompt: llmPrompt,
         schema: evaluateSampleBatchOutputSchema,
         maxOutputTokens: 4_096,
@@ -110,7 +117,9 @@ export async function POST(request: Request) {
         : result.object;
       return NextResponse.json(
         {
-          records: output.records.map(normalizeEvaluateSampleRecord),
+          records: output.records
+            .map(normalizeEvaluateSampleRecord)
+            .map((record) => applyCatalogSourceToRecord(record, system)),
         },
         {
           headers: {
@@ -123,7 +132,7 @@ export async function POST(request: Request) {
 
     const result = await generateObject({
       model: openai.chat(config.model),
-      system,
+      system: systemPrompt,
       prompt: llmPrompt,
       schema: evaluateSampleSingleOutputSchema,
       maxOutputTokens: 2_048,
@@ -134,7 +143,12 @@ export async function POST(request: Request) {
       ? await finalizeLlmObject(result.object, mappingToken)
       : result.object;
     return NextResponse.json(
-      { record: normalizeEvaluateSampleRecord(output.record) },
+      {
+        record: applyCatalogSourceToRecord(
+          normalizeEvaluateSampleRecord(output.record),
+          system,
+        ),
+      },
       {
         headers: {
           "Cache-Control": "no-store",
