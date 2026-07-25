@@ -1,189 +1,178 @@
+// file: architecture.c4
+// Purpose: Full LikeC4 model for ROS Policy system
+// Owner: platform-team
+
 specification {
   element actor
   element system
   element container
   element component
+  element db {
+    style {
+      shape cylinder;
+      icon tech:postgresql;
+    }
+  }
+  element cache {
+    style {
+      shape storage;
+      icon tech:redis;
+    }
+  }
 }
 
 model {
-  admin = actor 'Policy Admin'
-  dpo = actor 'DPO / Compliance'
-  apps = actor 'Integrating Apps'
-
-  liteLLM = system 'LiteLLM' {
-    description 'Optional AI assist for Admin import/samples'
+  // Actors
+  admin = actor 'Policy Admin' {
+    description 'Authors policies, runs evaluate/classify playgrounds';
   }
-  webhookTargets = system 'Webhook Targets' {
-    description 'Receive enforcement actions'
+  dpo = actor 'DPO / Compliance' {
+    description 'Reviews audit, DSAR, grace holds';
   }
 
-  drpePolicy = system 'ROS Policy' {
-    description 'Retention & classification policy engine + Admin'
-
-    adminConsole = container 'Admin Console' {
-      technology 'Next.js App Router'
-      description 'BFF, playgrounds, policy import AI'
-      metadata {
-        owner 'admin'
-      }
-    }
-
-    restApi = container 'REST API' {
-      technology 'FastAPI'
-      description '/api/v1 policy, evaluate, classify, enforce, DSAR'
-      metadata {
-        owner 'api'
-      }
-    }
-
-    pythonSdk = container 'Python SDK' {
-      technology 'drpe package'
-      description 'Remote client + embedded evaluator'
-      metadata {
-        owner 'sdk'
-      }
-    }
-
-    engineCore = container 'Engine Core' {
-      technology 'Python'
-      description 'DSL, evaluate, classify, enforce, DSAR'
-      metadata {
-        owner 'core'
-      }
-
-      dslParser = component 'DSL Parser' {
-        description 'YAML to Policy model'
-        metadata {
-          owner 'core'
-        }
-      }
-      evaluator = component 'Evaluator' {
-        description 'Match scope + rules'
-        metadata {
-          owner 'core'
-        }
-      }
-      classifier = component 'Classifier' {
-        description 'Entity detection vs classification policies'
-        metadata {
-          owner 'core'
-        }
-      }
-      conflictResolver = component 'Conflict Resolver' {
-        description 'Surface overlapping matches'
-        metadata {
-          owner 'core'
-        }
-      }
-      jurisdictions = component 'Jurisdictions' {
-        description 'Built-in jurisdiction metadata'
-        metadata {
-          owner 'core'
-        }
-      }
-      policyDiff = component 'Policy Diff' {
-        description 'Structural version diff'
-        metadata {
-          owner 'core'
-        }
-      }
-      enforcement = component 'Enforcement' {
-        description 'Scan records, grace, dispatch, audit'
-        metadata {
-          owner 'core'
-        }
-      }
-      dsarService = component 'DSAR Service' {
-        description 'Sync access/erasure workflows'
-        metadata {
-          owner 'core'
-        }
-      }
-      privacy = component 'Privacy' {
-        description 'Optional PII mask for AI / privacy APIs'
-        metadata {
-          owner 'core'
-        }
-      }
-    }
-
-    scheduler = container 'Scheduler' {
-      technology 'Celery'
-      description 'Periodic + queued enforcement'
-      metadata {
-        owner 'worker'
-      }
-    }
-
-    database = container 'PostgreSQL' {
-      technology 'Supabase / local'
-      description 'drpe schema'
-      metadata {
-        owner 'data'
-      }
-    }
-
-    cache = container 'Redis' {
-      technology 'Cache + broker'
-      description 'Policy cache, gen stamp, Celery'
-      metadata {
-        owner 'data'
-      }
-    }
+  // External systems
+  apps = system 'Integrating apps' {
+    description 'CRM / ERP / data platform';
+  }
+  llm = system 'LiteLLM' {
+    description 'Optional AI assist for Admin import/samples';
+  }
+  hooks = system 'Downstream webhooks' {
+    description 'Receive enforcement actions';
   }
 
-  admin -> adminConsole 'DRPE_API_URL + Bearer key'
-  dpo -> restApi 'Audit / DSAR / grace holds'
-  apps -> restApi 'SDK or REST /api/v1'
-  adminConsole -> restApi 'DRPE_API_URL + Bearer key'
-  pythonSdk -> restApi 'HTTP'
-  pythonSdk -> engineCore 'Embedded mode'
-  restApi -> engineCore 'In-process'
-  restApi -> database 'SQLAlchemy'
-  restApi -> cache 'Optional CachingPolicyStore'
-  scheduler -> engineCore 'EnforcementRunner'
-  scheduler -> database 'Jobs + audit'
-  scheduler -> cache 'Broker / backend'
-  engineCore -> database 'PolicyStore, AuditStore'
-  engineCore -> cache 'CachingPolicyStore (Redis)'
-  adminConsole -> liteLLM 'AI assist (masked prompts)'
-  engineCore -> webhookTargets 'Action dispatch'
-  restApi -> webhookTargets 'Registers webhooks'
+  // Root system
+  drpe = system 'ROS Policy' {
+    description 'Retention & classification policy engine + Admin';
+  }
+
+  // Containers inside ROS Policy
+  adminConsole = container 'Admin Console' {
+    description 'Next.js App Router, BFF, playgrounds, policy import AI';
+    metadata { owner 'platform-team' }
+  }
+  api = container 'REST API' {
+    description 'FastAPI, /api/v1 policy, evaluate, classify, enforce, DSAR…';
+    metadata { owner 'platform-team' }
+  }
+  sdk = container 'Python SDK' {
+    description 'drpe package, remote client + embedded evaluator';
+    metadata { owner 'platform-team' }
+  }
+  coreEngine = container 'Engine Core' {
+    description 'Python – DSL, evaluate, classify, enforce, DSAR';
+    metadata { owner 'platform-team' }
+
+    component dslParser 'DSL Parser' {
+      description 'YAML → Pydantic Policy and Classification models';
+    }
+    component evaluator 'Evaluator' {
+      description 'Match scope + rules; lowest priority wins';
+    }
+    component classifier 'Classifier' {
+      description 'Entity detection vs classification policies';
+    }
+    component conflictResolver 'Conflict Resolver' {
+      description 'Surface overlapping matches';
+    }
+    component jurisdictions 'Jurisdictions' {
+      description 'Built‑in jurisdiction metadata';
+    }
+    component policyDiff 'Policy Diff' {
+      description 'Structural version diff';
+    }
+    component enforcement 'Enforcement' {
+      description 'Scan records, grace, dispatch action';
+    }
+    component dsarService 'DSAR Service' {
+      description 'Sync access/erasure workflows';
+    }
+    component privacy 'Privacy' {
+      description 'Optional PII mask for AI / privacy APIs';
+    }
+  }
+  scheduler = container 'Scheduler' {
+    description 'Celery – periodic + queued enforcement';
+    metadata { owner 'platform-team' }
+
+    component celeryWorker 'Celery Worker' {
+      description 'Runs queued POST /enforce jobs';
+    }
+    component celeryBeat 'Celery Beat' {
+      description 'Periodically triggers scan_due_policies';
+    }
+  }
+  db = db 'PostgreSQL' {
+    description 'drpe schema (Supabase / local)';
+    metadata { owner 'platform-team' }
+  }
+  cache = cache 'Redis' {
+    description 'Policy cache, gen stamps, Celery broker';
+    metadata { owner 'platform-team' }
+  }
+
+  // Relationships
+  admin -> drpe 'Admin UI + API key';
+  dpo -> drpe 'Audit / DSAR / grace holds';
+  apps -> drpe 'SDK or REST /api/v1';
+  llm -> drpe 'Admin BFF only (masked prompts)';
+  hooks -> drpe 'Action dispatch';
+
+  adminConsole -> api 'DRPE_API_URL + Bearer key';
+  adminConsole -> llm 'AI suggest / samples';
+  sdk -> api 'HTTP';
+  sdk -> coreEngine 'Embedded mode';
+  api -> coreEngine 'In-process';
+  api -> db 'SQLAlchemy';
+  api -> cache 'Optional CachingPolicyStore';
+  api -> hooks 'Action dispatch';
+
+  scheduler -> coreEngine 'EnforcementRunner';
+  scheduler -> db 'Jobs + audit';
+  scheduler -> cache 'Broker / backend';
 }
 
 views {
   view index {
-    title 'ROS Policy — System Context'
-    include *
+    title 'ROS Policy Landscape';
+    autoLayout LeftRight;
+    include *;
   }
 
-  view adminConsoleView {
-    title 'Admin Console'
-    include adminConsole, restApi, pythonSdk, liteLLM
+  view apiContext of drpe.api {
+    title 'API Process';
+    autoLayout LeftRight;
+    include *;
+    include -> db;
+    include -> cache;
+    include -> llm;
+    include -> hooks;
   }
 
-  view restApiView {
-    title 'REST API'
-    include restApi, engineCore, database, cache, pythonSdk, webhookTargets, dpo, apps
+  view coreEngineInternals of drpe.coreEngine {
+    title 'Engine Core';
+    autoLayout TopBottom;
+    include *;
   }
 
-  view engineCoreView {
-    title 'Engine Core'
-    include engineCore, dslParser, evaluator, classifier, conflictResolver, jurisdictions, policyDiff, enforcement, dsarService, privacy, database, cache
+  view schedulerInternals of drpe.scheduler {
+    title 'Scheduler';
+    autoLayout TopBottom;
+    include *;
   }
 
-  view schedulerView {
-    title 'Scheduler'
-    include scheduler, engineCore, database, cache
+  view storage of drpe {
+    title 'Data Plane';
+    autoLayout LeftRight;
+    include db;
+    include cache;
   }
 
-  view dataPlaneView {
-    title 'Data Plane'
-    include database, cache
-  }
-
-  view externalView {
-    title 'External Services'
-    include liteLLM, webhookTargets, adminConsole, engineCore
+  view externalSystems of drpe {
+    title 'External Systems';
+    autoLayout LeftRight;
+    include apps;
+    include llm;
+    include hooks;
   }
 }
