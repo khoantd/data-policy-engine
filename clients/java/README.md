@@ -2,7 +2,7 @@
 
 ROS Policy
 - API version: 0.1.0
-  - Build date: 2026-07-24T12:43:19.315082+07:00[Asia/Ho_Chi_Minh]
+  - Build date: 2026-07-25T13:38:59.026431+07:00[Asia/Ho_Chi_Minh]
   - Generator version: 7.14.0
 
 Define, evaluate, and enforce data retention policies
@@ -158,6 +158,7 @@ Class | Method | HTTP request | Description
 *PoliciesApi* | [**getPolicyApiV1PoliciesPolicyIdGet**](docs/PoliciesApi.md#getPolicyApiV1PoliciesPolicyIdGet) | **GET** /api/v1/policies/{policy_id} | Get Policy
 *PoliciesApi* | [**getPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet**](docs/PoliciesApi.md#getPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet) | **GET** /api/v1/policies/{policy_id}/versions/{ver} | Get Policy Version
 *PoliciesApi* | [**importPoliciesApiV1PoliciesImportPost**](docs/PoliciesApi.md#importPoliciesApiV1PoliciesImportPost) | **POST** /api/v1/policies/import | Import Policies
+*PoliciesApi* | [**listCatalogLinksApiV1PoliciesCatalogLinksGet**](docs/PoliciesApi.md#listCatalogLinksApiV1PoliciesCatalogLinksGet) | **GET** /api/v1/policies/catalog-links | List Catalog Links
 *PoliciesApi* | [**listPoliciesApiV1PoliciesGet**](docs/PoliciesApi.md#listPoliciesApiV1PoliciesGet) | **GET** /api/v1/policies | List Policies
 *PoliciesApi* | [**listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet**](docs/PoliciesApi.md#listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet) | **GET** /api/v1/policies/{policy_id}/processes | List Policy Processes
 *PoliciesApi* | [**listPolicySystemsApiV1PoliciesPolicyIdSystemsGet**](docs/PoliciesApi.md#listPolicySystemsApiV1PoliciesPolicyIdSystemsGet) | **GET** /api/v1/policies/{policy_id}/systems | List Policy Systems
@@ -198,6 +199,8 @@ Class | Method | HTTP request | Description
  - [AuditEventType](docs/AuditEventType.md)
  - [BatchClassificationRequest](docs/BatchClassificationRequest.md)
  - [BatchEvaluateRequest](docs/BatchEvaluateRequest.md)
+ - [CatalogLinkProcessRef](docs/CatalogLinkProcessRef.md)
+ - [CatalogLinkSystemRef](docs/CatalogLinkSystemRef.md)
  - [CatalogStatus](docs/CatalogStatus.md)
  - [ClassificationAction](docs/ClassificationAction.md)
  - [ClassificationDiagnostics](docs/ClassificationDiagnostics.md)
@@ -244,6 +247,7 @@ Class | Method | HTTP request | Description
  - [MaskResponse](docs/MaskResponse.md)
  - [Operator](docs/Operator.md)
  - [Policy](docs/Policy.md)
+ - [PolicyCatalogLinksResponse](docs/PolicyCatalogLinksResponse.md)
  - [PolicyCreateRequest](docs/PolicyCreateRequest.md)
  - [PolicyDiffChange](docs/PolicyDiffChange.md)
  - [PolicyDiffRequest](docs/PolicyDiffRequest.md)

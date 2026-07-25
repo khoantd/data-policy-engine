@@ -56,6 +56,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/policies/catalog-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Catalog Links
+         * @description Bulk systems/processes linked to policies (fleet graph).
+         */
+        get: operations["list_catalog_links_api_v1_policies_catalog_links_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/policies/{policy_id}": {
         parameters: {
             query?: never;
@@ -840,6 +860,28 @@ export interface components {
             records: components["schemas"]["EvaluationRequest"][];
         };
         /**
+         * CatalogLinkProcessRef
+         * @description Lean process ref for fleet graph / bulk catalog links.
+         */
+        CatalogLinkProcessRef: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+        };
+        /**
+         * CatalogLinkSystemRef
+         * @description Lean system ref for fleet graph / bulk catalog links.
+         */
+        CatalogLinkSystemRef: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Source Key */
+            source_key?: string | null;
+        };
+        /**
          * CatalogStatus
          * @enum {string}
          */
@@ -1485,6 +1527,16 @@ export interface components {
             reference_sources?: components["schemas"]["ReferenceSource"][];
         };
         /**
+         * PolicyCatalogLinksResponse
+         * @description Systems and processes linked to one policy (bulk catalog-links entry).
+         */
+        PolicyCatalogLinksResponse: {
+            /** Systems */
+            systems?: components["schemas"]["CatalogLinkSystemRef"][];
+            /** Processes */
+            processes?: components["schemas"]["CatalogLinkProcessRef"][];
+        };
+        /**
          * PolicyCreateRequest
          * @description Create from YAML string or JSON policy object.
          */
@@ -2125,6 +2177,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_catalog_links_api_v1_policies_catalog_links_get: {
+        parameters: {
+            query?: {
+                policy_ids?: string[] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: components["schemas"]["PolicyCatalogLinksResponse"];
+                    };
                 };
             };
             /** @description Validation Error */

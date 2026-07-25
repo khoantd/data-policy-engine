@@ -50,7 +50,7 @@ import com.drpe.client.JSON;
 /**
  * Replace-set body for linking policies to a catalog entity.
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-24T12:43:19.315082+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-25T13:38:59.026431+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class PolicyIdsRequest {
   public static final String SERIALIZED_NAME_POLICY_IDS = "policy_ids";
   @SerializedName(SERIALIZED_NAME_POLICY_IDS)

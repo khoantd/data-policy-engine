@@ -30,6 +30,7 @@ import java.io.IOException;
 import com.drpe.client.model.HTTPValidationError;
 import com.drpe.client.model.ImportRequest;
 import com.drpe.client.model.ImportResponse;
+import com.drpe.client.model.PolicyCatalogLinksResponse;
 import com.drpe.client.model.PolicyCreateRequest;
 import com.drpe.client.model.PolicyDiffRequest;
 import com.drpe.client.model.PolicyDiffResponse;
@@ -1172,6 +1173,135 @@ public class PoliciesApi {
 
         okhttp3.Call localVarCall = importPoliciesApiV1PoliciesImportPostValidateBeforeCall(importRequest, _callback);
         Type localVarReturnType = new TypeToken<ImportResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for listCatalogLinksApiV1PoliciesCatalogLinksGet
+     * @param policyIds  (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listCatalogLinksApiV1PoliciesCatalogLinksGetCall(@javax.annotation.Nullable List<String> policyIds, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/api/v1/policies/catalog-links";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (policyIds != null) {
+            localVarCollectionQueryParams.addAll(localVarApiClient.parameterToPairs("multi", "policy_ids", policyIds));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "BearerAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listCatalogLinksApiV1PoliciesCatalogLinksGetValidateBeforeCall(@javax.annotation.Nullable List<String> policyIds, final ApiCallback _callback) throws ApiException {
+        return listCatalogLinksApiV1PoliciesCatalogLinksGetCall(policyIds, _callback);
+
+    }
+
+    /**
+     * List Catalog Links
+     * Bulk systems/processes linked to policies (fleet graph).
+     * @param policyIds  (optional)
+     * @return Map&lt;String, PolicyCatalogLinksResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public Map<String, PolicyCatalogLinksResponse> listCatalogLinksApiV1PoliciesCatalogLinksGet(@javax.annotation.Nullable List<String> policyIds) throws ApiException {
+        ApiResponse<Map<String, PolicyCatalogLinksResponse>> localVarResp = listCatalogLinksApiV1PoliciesCatalogLinksGetWithHttpInfo(policyIds);
+        return localVarResp.getData();
+    }
+
+    /**
+     * List Catalog Links
+     * Bulk systems/processes linked to policies (fleet graph).
+     * @param policyIds  (optional)
+     * @return ApiResponse&lt;Map&lt;String, PolicyCatalogLinksResponse&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Map<String, PolicyCatalogLinksResponse>> listCatalogLinksApiV1PoliciesCatalogLinksGetWithHttpInfo(@javax.annotation.Nullable List<String> policyIds) throws ApiException {
+        okhttp3.Call localVarCall = listCatalogLinksApiV1PoliciesCatalogLinksGetValidateBeforeCall(policyIds, null);
+        Type localVarReturnType = new TypeToken<Map<String, PolicyCatalogLinksResponse>>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * List Catalog Links (asynchronously)
+     * Bulk systems/processes linked to policies (fleet graph).
+     * @param policyIds  (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Successful Response </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> Validation Error </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listCatalogLinksApiV1PoliciesCatalogLinksGetAsync(@javax.annotation.Nullable List<String> policyIds, final ApiCallback<Map<String, PolicyCatalogLinksResponse>> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listCatalogLinksApiV1PoliciesCatalogLinksGetValidateBeforeCall(policyIds, _callback);
+        Type localVarReturnType = new TypeToken<Map<String, PolicyCatalogLinksResponse>>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

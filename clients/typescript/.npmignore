@@ -1,1 +1,9 @@
-README.md
+# Ignore local tooling; publish only what "files" in package.json lists.
+node_modules
+src
+tsconfig.json
+tsconfig.esm.json
+.openapi-generator
+.openapi-generator-ignore
+.gitignore
+*.tgz

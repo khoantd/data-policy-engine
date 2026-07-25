@@ -207,6 +207,44 @@ class InMemoryCatalogStore:
                 if pid in self._processes
             ]
 
+    def list_catalog_links_for_policies(
+        self, policy_ids: list[str] | None = None
+    ) -> dict[str, tuple[list[SystemRecord], list[ProcessRecord]]]:
+        with self._lock:
+            if policy_ids is not None:
+                wanted = set(policy_ids)
+                if not wanted:
+                    return {}
+                sys_map = {
+                    pid: ids
+                    for pid, ids in self._policy_systems.items()
+                    if pid in wanted
+                }
+                proc_map = {
+                    pid: ids
+                    for pid, ids in self._policy_processes.items()
+                    if pid in wanted
+                }
+            else:
+                sys_map = dict(self._policy_systems)
+                proc_map = dict(self._policy_processes)
+
+            result: dict[str, tuple[list[SystemRecord], list[ProcessRecord]]] = {}
+            for pid in sorted(set(sys_map) | set(proc_map)):
+                systems = [
+                    self._systems[sid].model_copy(deep=True)
+                    for sid in sorted(sys_map.get(pid, set()))
+                    if sid in self._systems
+                ]
+                processes = [
+                    self._processes[prid].model_copy(deep=True)
+                    for prid in sorted(proc_map.get(pid, set()))
+                    if prid in self._processes
+                ]
+                if systems or processes:
+                    result[pid] = (systems, processes)
+            return result
+
     def list_policy_ids_for_system(self, system_id: str) -> list[str]:
         with self._lock:
             return sorted(

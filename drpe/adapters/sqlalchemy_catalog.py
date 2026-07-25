@@ -287,6 +287,44 @@ class SqlAlchemyCatalogStore:
             rows = session.scalars(stmt).all()
             return [_process_from_row(r) for r in rows]
 
+    def list_catalog_links_for_policies(
+        self, policy_ids: list[str] | None = None
+    ) -> dict[str, tuple[list[SystemRecord], list[ProcessRecord]]]:
+        if policy_ids is not None and len(policy_ids) == 0:
+            return {}
+
+        sys_stmt = (
+            select(PolicySystemLinkRow.policy_id, SystemRow)
+            .join(SystemRow, SystemRow.id == PolicySystemLinkRow.system_id)
+            .order_by(PolicySystemLinkRow.policy_id, SystemRow.id)
+        )
+        proc_stmt = (
+            select(PolicyProcessLinkRow.policy_id, ProcessRow)
+            .join(ProcessRow, ProcessRow.id == PolicyProcessLinkRow.process_id)
+            .order_by(PolicyProcessLinkRow.policy_id, ProcessRow.id)
+        )
+        if policy_ids is not None:
+            sys_stmt = sys_stmt.where(PolicySystemLinkRow.policy_id.in_(policy_ids))
+            proc_stmt = proc_stmt.where(
+                PolicyProcessLinkRow.policy_id.in_(policy_ids)
+            )
+
+        systems_by: dict[str, list[SystemRecord]] = {}
+        processes_by: dict[str, list[ProcessRecord]] = {}
+        with self._session_factory() as session:
+            for pid, row in session.execute(sys_stmt).all():
+                systems_by.setdefault(pid, []).append(_system_from_row(row))
+            for pid, row in session.execute(proc_stmt).all():
+                processes_by.setdefault(pid, []).append(_process_from_row(row))
+
+        result: dict[str, tuple[list[SystemRecord], list[ProcessRecord]]] = {}
+        for pid in sorted(set(systems_by) | set(processes_by)):
+            systems = systems_by.get(pid, [])
+            processes = processes_by.get(pid, [])
+            if systems or processes:
+                result[pid] = (systems, processes)
+        return result
+
     def list_policy_ids_for_system(self, system_id: str) -> list[str]:
         stmt = (
             select(PolicySystemLinkRow.policy_id)

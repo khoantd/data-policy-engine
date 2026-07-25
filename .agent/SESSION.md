@@ -6,138 +6,68 @@
 
 | Field | Value |
 |-------|-------|
-| **Updated** | 2026-07-24 |
+| **Updated** | 2026-07-25 |
 | **Phase** | build |
 | **Tool** | cursor |
 | **Persona** | backend |
 
 ## Goal
 
-Keep Python SDK + Admin BFF client aligned with current `/api/v1` (evaluate/classify); OpenAPI clients cover full admin/governance surface.
+Speed up Admin `/policies/graph` by replacing N+1 catalog-link fetches with a bulk API.
 
 ## Done
 
-- Package layout under `drpe/` (models, dsl, core, api, sdk, ports, adapters)
-- YAML DSL parser + Pydantic validation
-- Evaluator with operators, priority conflict resolution, jurisdiction filter, grace/notify timestamps
-- FastAPI `/api/v1` policies, evaluate, jurisdictions, health
-- SDK: `DRPEClient` (evaluate/classify + batch/dry-run + `@enforce`), embedded `PolicyEvaluator` (retention + classification)
-- Example policy `config/gdpr_customer.yaml`
-- Docs: `README.md`, `docs/ARCHITECTURE.md`
-- **SqlAlchemyPolicyStore** + Alembic migrations (`drpe` schema)
-- App switches on `DATABASE_URL`; in-memory default for tests
-- **CachingPolicyStore** + Redis helpers (`REDIS_URL`); ready PING; engine gen sync
-- **Celery enforcement scheduler** + append-only **AuditStore**
-- **DSAR workflow** (sync)
-- **Webhook registration CRUD**
-- **Policy diff and rollback**
-- **Admin UI (Next.js)** under `admin/`
-  - BFF + httpOnly API-key cookie; Overview, Policies (YAML/versions/diff/activate), DSAR, Audit, Webhooks, Enforce, **Evaluate playground**
-  - Design system: Fira Sans/Code, blue/amber (`admin/design-system/`)
-  - FastAPI `DRPE_CORS_ORIGINS` optional CORS
-- **OpenAPI client generation** — `openapi/openapi.json` + `clients/{typescript,go,java}` via `npm run openapi`; Admin types via `openapi-typescript` → `admin/lib/generated/schema.d.ts`
-- **Evaluate playground** — Admin `/evaluate` (single/batch, dry-run default); `DRPEClient.evaluate_dry_run`
-- **Policy Import AI assist** — Admin `/policies/import` compose workspace (Generate/Polish/Enhance/Expand) via LiteLLM BFF `POST /api/ai/policy-suggest`; Monaco draft + validate/import; design override `admin/design-system/pages/policy-import.md`
-- **Classification scan UX diagnostics** — `/classify` now returns policy applicability diagnostics, surfaces policy scope hints/source input, and distinguishes out-of-scope vs clean scans
-- **Scan AI sample generation** — Admin `/classify` Generate sample data via LiteLLM BFF `POST /api/ai/classify-sample` (scenarios: auto/pii/spii/mixed/clean); fills single-record form only; never auto-runs scan
-- **Docker** — `scripts/docker-build.sh` + README build/run steps (API + Admin images / Compose)
-- **Postman** — README import guidelines for `postman/DRPE.postman_collection.json` + local env
-- **Product rename** — user-facing brand is **ROS Policy** (Admin UI, API OpenAPI title, README, Postman display names, docs). Technical IDs unchanged: package `drpe`, env `DRPE_*`, SDK `DRPEClient`, Docker image names `drpe-api` / `drpe-admin`
-- **Admin Vercel readiness** — `admin/vercel.json` (framework nextjs); `engines.node >=20`; dual-target `next.config` (standalone when not `VERCEL`); docs for Root Directory=`admin` + `DRPE_API_URL`; build/tests green
-- **Backend VPS build** — `scripts/build-backend.sh` builds API image only; `--save` writes `dist/drpe-api-<tag>.tar.gz` for scp/load on VPS
-- **Admin Vercel deploy** — `scripts/deploy-admin.sh` defaults to **Royal Platform** (`SCOPE=royal-platform`, project `ros-policy-admin`); `--link --yes` creates/links; preview / `--prod`
-- **Celery worker boot** — lazy imports in `drpe.api` / `drpe.scheduler` break circular import so `celery -A drpe.scheduler.celery_app.celery_app worker` starts; README notes worker is required when Redis broker is set
-- **API Docker alignment** — `INSTALL_AI` build-arg; Compose `worker`/`beat` via `--profile celery`; README + `build-backend.sh` VPS recipes document Redis+worker; smoke OK (`celery`/`alembic`/`006`/health)
-- **Admin load UX** — `(console)/loading.tsx` + `PageSkeleton`; Overview/Insights Suspense streaming; Overview single audit fetch (limit 250) + lazy Recharts; Evaluate/Classify list+lazy `GET /api/policies/[id]` + parallel privacy probe; policy detail `Promise.all` get+versions
-- **Admin list pagination** — shared `admin/lib/pagination.ts` + `PaginationBar` / `PaginationControls`; `?page=` on Policies (client slice), Audit/DSAR/Enforce/Grace holds/Webhooks (API `limit`/`offset` over-fetch), Observability traces (client slice); page size 25
-- **AI reference sources persistence** — Import posts Tavily `reference_sources` with YAML; stored on Policy/ClassificationPolicy + DB column `008`; detail page shows saved `AiSourceReferences` (collapsed); YAML editor strips provenance
-- **Policy structure network graph** — Admin `/policies/graph` (fleet) + Structure panel on policy detail via `reagraph`; shared `buildPolicyStructureGraph` + adjacency a11y; Insights remains ReactFlow
-- **Systems & Processes catalog (governance)** — CRUD `/api/v1/systems` + `/processes`; many-to-many policy links (replace-set); Admin Catalog nav + list/detail; policy **Applies to** panel; structure graph `system`/`process` + `applies_to`; migration `009`; does **not** affect evaluate/classify
-- **System request context (Admin UX)** — Evaluate/Scan optional System picker seeds `source` from `source_key`; optional Process picker shows governance-linked policies; `?system=` / `?process=` deep links + catalog detail Try evaluate/scan CTAs; AI sample endpoints accept system/process snapshots and force `source` from `source_key`; no engine matching change
-- **Redis connection pool caps** — `create_redis_client` defaults `max_connections=20` + timeouts; Celery `broker_pool_limit` / `redis_max_connections` / transport `max_connections`; env `DRPE_REDIS_MAX_CONNECTIONS`, `DRPE_CELERY_BROKER_POOL_LIMIT`
-- **SDK alignment** — `DRPEClient.classify_batch`; Bearer headers on injected `http_client`; embedded `PolicyEvaluator` splits retention vs classification + `classify`/`classify_dry_run`/`classify_batch`; exports `ClassificationRequest`/`ClassificationResponse`; Admin BFF `classifyBatch`; sample `config/gdpr_pii_classification.yaml` → `active`; README/ARCHITECTURE updated; OpenAPI clients already path-complete (systems/processes included)
-- **Postman alignment** — `postman/DRPE.postman_collection.json` now covers all 44 OpenAPI paths: Systems, Processes, Grace Holds folders + policy systems/processes link requests; env vars `systemId` / `processId` / `holdId`
+- Prior platform work (API, Admin, OpenAPI, Redis, Celery, catalog, etc.) — see history
+- **Python SDK packaging** — base deps SDK-only; `[api]` server; `scripts/build-sdk.sh` → `dist/drpe-*.whl`
+- **TypeScript OpenAPI client packaging (2026-07-25)**
+  - Hardened `clients/typescript/package.json` (`exports`, `files`, types, engines)
+  - Consumer README + tsconfig (CJS + ESM); overlays in `.openapi-generator-ignore`
+  - `scripts/build-ts-client.sh` / `npm run build:ts-client` → `dist/drpe-api-client-0.1.0.tgz`
+  - Root scripts: `build:sdk`, `build:ts-client`, `build:clients`
+  - Verified: clean `npm install` of tarball; exports all `*Api` + `Configuration`
+- **`/policies/graph` performance (2026-07-25)**
+  - `CatalogStore.list_catalog_links_for_policies` (memory + SQLAlchemy; two joins)
+  - `GET /api/v1/policies/catalog-links` (cap 200 `policy_ids`; slim refs)
+  - Fleet page: filter by `q` then one bulk fetch (was up to 100 per-policy GETs)
+  - Admin `drpe.listCatalogLinks`; OpenAPI regen (admin + TS/Go/Java clients)
+  - Tests: `tests/test_catalog_stores.py`, `tests/test_catalog_api.py::test_bulk_catalog_links`
 
 ## In progress
 
 - _(none)_
-- **Blockers:** Supabase/local DB may need `alembic upgrade head` (through `009_systems_processes`) where schema is behind
+- **Blockers:** Supabase/local DB may need `alembic upgrade head` (through `009`) where schema is behind
 
 ## Next
 
-1. Apply `alembic upgrade head` anywhere the DB schema is not yet at 009+
-2. Set `DRPE_API_URL` on Vercel project `royal-platform/ros-policy-admin` (Production/Preview), then redeploy
-3. When Redis/Celery broker is set: `docker compose --profile celery up` (or separate worker/beat containers); else `DRPE_CELERY_EAGER=true`
-4. **Redeploy API** after Redis pool caps (`DRPE_REDIS_MAX_CONNECTIONS`, `DRPE_CELERY_BROKER_POOL_LIMIT`) — then confirm Redis `connected_clients` stays under `maxclients`
-5. Optional: AI assist on policy detail editor (same BFF)
-6. Optional: fan-out delivery from registered webhooks (beyond `DRPE_WEBHOOK_URL`)
-7. Optional: JWT OAuth2 scopes
-8. Optional: audit_logs monthly partitioning
-9. Optional: rename technical IDs (`drpe` package / `DRPE_*` env) if full code rebrand is desired
-10. Optional: short `revalidate`/tagged cache for list GETs if Admin→API RTT still dominates after load UX pass
-11. Optional: API `total` count on list endpoints for exact page-of-N UI without over-fetch
-12. Optional: lazy full-policy expand on fleet structure graph (v1 uses list summaries only)
-13. Optional: sync catalog `source_key` into evaluate `scope.sources` (explicitly out of scope for v1 governance catalog)
-14. Optional: process↔system edges; richer RoPA fields
+1. **npm publish `@khoadue/drpe-api-client@0.1.0`** — scope must match npm user `khoadue` (not GitHub `khoantd`). Run `npm run publish:local` in `clients/typescript` (re-run `./scripts/build-ts-client.sh` after OpenAPI regen if distributing the tarball)
+2. Optional: publish Python wheel to private PyPI / GitHub Releases
+3. Apply `alembic upgrade head` where schema behind; set `DRPE_API_URL` on Vercel; Celery profile when Redis set
+4. After API schema changes: `npm run openapi` then bump + `npm run publish:local` in `clients/typescript`
 
 ## Decisions
 
-- Redis client pools are capped per process (`DRPE_REDIS_MAX_CONNECTIONS=20`, Celery `DRPE_CELERY_BROKER_POOL_LIMIT=10`) to avoid prod `max number of clients reached`
-- Python FastAPI (not TypeScript) per user choice and original specs
-- Persistence: Supabase lead-flow (`yshqwmldepsfckiacjwu`), private schema `drpe`
-- `DATABASE_URL` unset → `InMemoryPolicyStore`; set → `SqlAlchemyPolicyStore`
-- `REDIS_URL` unset → no cache; set → wrap store with `CachingPolicyStore`
-- Auth: optional Bearer `DRPE_API_KEY` only (full OAuth2 deferred)
-- Lowest rule `priority` number wins; conflicts listed in response
-- Multi-worker engine sync via Redis generation stamp (`on_before_evaluate`), not pub/sub
-- Enforcement: pluggable `RecordSource` + optional inline records on `POST /enforce`
-- Celery broker: `CELERY_BROKER_URL` or `REDIS_URL`; memory/eager when unset
-- Audit built with scheduler (append-only; partitioning deferred)
-- DSAR: synchronous processing (no Celery); records via inline + RecordSource (`subject_id` match); erasure uses `legal_basis` / `erasure_exception` metadata vs policy `erasure_exceptions`
-- Webhooks: registration CRUD only; env `DRPE_WEBHOOK_URL` still used for dispatch until fan-out lands
-- Policy activate = rollback-as-new-version (never rewrite `policy_versions` history)
-- Admin UI: Next.js App Router BFF in `admin/` (not static html-tailwind); API key in httpOnly cookie
-- Policy Import AI: Admin BFF → remote LiteLLM (OpenAI-compatible); FastAPI stays validate/import only; never auto-import AI drafts
-- AI reference sources: provenance metadata on the policy (not YAML DSL / not `scope.sources`); HTTPS-only URLs; preserved across YAML re-saves
-- Product name: **ROS Policy** (display); technical package/env remain `drpe` / `DRPE_*` unless a breaking rebrand is desired
-- Admin load UX: prefer `loading.tsx` + Suspense over `revalidate` for ops freshness; playgrounds use list metadata + lazy full policy
-- List pagination: URL `?page=` (1-based), default 25 rows; API lists over-fetch `pageSize+1` for `hasNext` (no total in API); Policies/Observability slice client-side after filter
-- Systems/Processes: governance catalog only (1A); full Admin slice (2A); links do not change evaluate matching
-- Python SDK stays focused on evaluate/classify/`@enforce`; full CRUD/governance via OpenAPI clients
-- Example classification YAML is `active` so local seed + README classify examples match retention fixture behavior
+- TS package is **`@khoadue/drpe-api-client`** (npm user `khoadue`; GitHub repo stays `khoantd/data-policy-engine`)
+- Ship built `dist/` in the npm tarball; no `prepare` (avoids consumer install needing TypeScript)
+- Regenerating OpenAPI must not overwrite `package.json` / README / tsconfigs (ignore list)
+- Python base install = SDK; `[api]` for server; monorepo uses `.[dev]`
+- Fleet graph uses bulk catalog-links API instead of Redis-caching links (invalidation cost not worth it for this pass)
 
 ## Gotchas
 
-- Audit log is **not** an HTTP access log: only `EnforcementRunner` + `DsarService` call `AuditStore.append`. Privacy/evaluate/policies/classify GETs write nothing. Live `POST /enforce` stays `queued` until a Celery worker consumes Redis (or eager mode); DSAR is sync and audits immediately.
-- Use project venv: `source .venv/bin/activate` then `python -m pip` / `python -m pytest`
-- httpx `ASGITransport` is async-only; SDK tests inject FastAPI `TestClient` as `http_client`
-- Policies load eagerly in `create_app()`; DB mode seeds YAML only when store empty (or `DRPE_SEED_YAML=true`)
-- Prefer Supabase session pooler URI if direct `db.*.supabase.co` fails
-- Redis tests use `fakeredis`; patch `drpe.api.app.create_redis_client` for API integration tests
-- Celery `memory://` broker needs `cache+memory://` result backend (not `memory://`)
-- Set enforcement runtime via `create_app` / `set_enforcement_runtime` before eager tasks run
-- SQLite returns naive datetimes; `SqlAlchemyWebhookStore` / version `created_at` normalized to UTC-aware on read
-- Admin: `cd admin && npm run dev` (port 3000); set `DRPE_API_URL`; server actions catch `NEXT_REDIRECT` when wrapping `redirect()`
-- Admin AI assist: set `LITELLM_BASE_URL`, `LITELLM_API_KEY`, `LITELLM_MODEL` in `admin/.env.local`; import still works without them
-- Admin unit tests: `cd admin && npm test` (vitest)
-- OpenAPI clients: `npm run openapi` from repo root (venv active); regenerates `openapi/openapi.json` + `clients/*` + `admin/lib/generated/schema.d.ts`
-- AI references: require migration `008_policy_reference_sources`; Import body optional `reference_sources`; detail Provenance panel only when non-empty
-- Catalog: require migration `009_systems_processes`; policy deprecate clears links; system/process delete clears their links
-- SDK tests: isolate Settings with `_env_file=None` + `drpe_api_key=None` (local `.env` API key otherwise forces Bearer); `python -m pytest tests/test_sdk.py -v`
-- OpenAPI clients path-complete vs current schema; regenerate with `npm run openapi` only after API route/schema changes
+- After OpenAPI regen, re-run `./scripts/build-ts-client.sh` before distributing the tarball
+- Generated method names are verbose: `evaluateOneApiV1EvaluatePost`, `classifyOneApiV1ClassifyPost`, `listPoliciesApiV1PoliciesGet`, `listCatalogLinksApiV1PoliciesCatalogLinksGet`
+- Bare `pip install -e .` is SDK-only — use `.[api]` / `.[dev]` for the server
+- `dist/` is gitignored; rebuild artifacts after clone
+- `GET /policies/catalog-links` must stay registered **before** `/{policy_id}` or FastAPI treats `catalog-links` as an id
 
 ## Pointers
 
 | Item | Location |
 |------|----------|
-| Spec | `docs/ARCHITECTURE.md`, `README.md` |
-| Tasks | `tasks/todo.md` |
-| Admin UI | `admin/` (Next.js), `admin/design-system/MASTER.md` |
-| Key files | `drpe/api/app.py` (CORS), `admin/lib/drpe-client.ts`, `admin/middleware.ts`, `openapi/openapi.json`, `clients/` |
-| Load UX | `admin/app/(console)/loading.tsx`, `admin/components/ui/page-skeleton.tsx`, `admin/lib/use-lazy-policy.ts` |
-| Pagination | `admin/lib/pagination.ts`, `admin/components/ui/pagination.tsx` |
-| AI references | `drpe/models/policy.py` (`ReferenceSource`), `008_policy_reference_sources`, `admin/components/ai-source-references.tsx`, `admin/lib/reference-sources.ts` |
-| Policy structure graph | `admin/lib/policy-structure-graph.ts`, `admin/components/policy-structure-graph.tsx`, `/policies/graph`, design `admin/design-system/pages/policy-graph.md` |
-| Systems / Processes | `drpe/models/system.py`, `drpe/models/process.py`, `drpe/api/routes_systems.py`, `drpe/api/routes_processes.py`, `009_systems_processes`, Admin `/systems` `/processes`, `admin/components/policy-applies-to.tsx` |
-| Python SDK | `drpe/sdk/client.py`, `drpe/sdk/embedded.py`, `drpe/__init__.py`, `tests/test_sdk.py` |
-| Tests | `python -m pytest tests/ -v` |
+| Bulk catalog links | `drpe/api/routes_policies.py` (`list_catalog_links`), `drpe/ports/catalog_store.py` |
+| Fleet graph page | `admin/app/(console)/policies/graph/page.tsx` |
+| Python SDK build | `scripts/build-sdk.sh`, `pyproject.toml`, `dist/drpe-*.whl` |
+| TS OpenAPI client | `clients/typescript/`, `scripts/build-ts-client.sh`, `dist/drpe-api-client-*.tgz` |
+| Regenerate OpenAPI | `npm run openapi` |
+| Spec / tasks | `docs/ARCHITECTURE.md`, `tasks/todo.md` |
+| Tests | `python -m pytest tests/ -v` (use `.venv/bin/python`) |

@@ -159,6 +159,50 @@ export interface BatchEvaluateRequest {
      */
     records: Array<EvaluationRequest>;
 }
+/**
+ * Lean process ref for fleet graph / bulk catalog links.
+ * @export
+ * @interface CatalogLinkProcessRef
+ */
+export interface CatalogLinkProcessRef {
+    /**
+     * 
+     * @type {string}
+     * @memberof CatalogLinkProcessRef
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CatalogLinkProcessRef
+     */
+    name: string;
+}
+/**
+ * Lean system ref for fleet graph / bulk catalog links.
+ * @export
+ * @interface CatalogLinkSystemRef
+ */
+export interface CatalogLinkSystemRef {
+    /**
+     * 
+     * @type {string}
+     * @memberof CatalogLinkSystemRef
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CatalogLinkSystemRef
+     */
+    name: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CatalogLinkSystemRef
+     */
+    sourceKey?: string | null;
+}
 
 /**
  * 
@@ -1762,6 +1806,25 @@ export interface Policy {
 }
 
 
+/**
+ * Systems and processes linked to one policy (bulk catalog-links entry).
+ * @export
+ * @interface PolicyCatalogLinksResponse
+ */
+export interface PolicyCatalogLinksResponse {
+    /**
+     * 
+     * @type {Array<CatalogLinkSystemRef>}
+     * @memberof PolicyCatalogLinksResponse
+     */
+    systems?: Array<CatalogLinkSystemRef>;
+    /**
+     * 
+     * @type {Array<CatalogLinkProcessRef>}
+     * @memberof PolicyCatalogLinksResponse
+     */
+    processes?: Array<CatalogLinkProcessRef>;
+}
 /**
  * Create from YAML string or JSON policy object.
  * @export

@@ -10,28 +10,46 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "ROS Policy" }]
+keywords = ["policy", "retention", "gdpr", "pdpa", "sdk", "compliance"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Security",
+  "Typing :: Typed",
+]
+# Base install = SDK (remote DRPEClient + embedded PolicyEvaluator).
+# Server stack is optional: pip install "drpe[api]"
 dependencies = [
-  "fastapi>=0.115.0",
-  "uvicorn[standard]>=0.32.0",
   "pydantic>=2.9.0",
-  "pydantic-settings>=2.6.0",
   "pyyaml>=6.0.2",
   "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+api = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "pydantic-settings>=2.6.0",
   "sqlalchemy>=2.0.36",
   "psycopg[binary]>=3.2.0",
   "alembic>=1.14.0",
   "redis>=5.0.0",
   "celery[redis]>=5.4.0",
 ]
-
-[project.optional-dependencies]
+# Alias kept for docs / older install lines — base package is already the SDK.
+sdk = []
 ai = [
   "privalyse-mask>=0.1.0",
   # Required by privalyse-mask but not declared in its package metadata
   "phonenumbers>=8.13.0",
 ]
-sdk = ["httpx>=0.27.0"]
 dev = [
+  "drpe[api]",
   "pytest>=8.3.0",
   "pytest-asyncio>=0.24.0",
   "httpx>=0.27.0",
@@ -39,7 +57,11 @@ dev = [
 ]
 
 [project.scripts]
-drpe = "drpe.api.app:main"
+drpe = "drpe.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/drpe/drpe"
+Documentation = "https://github.com/drpe/drpe#readme"
 
 [tool.setuptools.packages.find]
 where = ["."]

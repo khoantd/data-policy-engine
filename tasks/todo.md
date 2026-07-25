@@ -45,3 +45,16 @@
 - [x] Example `config/gdpr_pii_classification.yaml` set to `active` (matches evaluate sample)
 - [x] Admin BFF `classifyBatch`
 - [x] Postman: Systems / Processes / Grace Holds + policy catalog links (44/44 OpenAPI paths)
+
+## SDK packaging (2026-07-25)
+- [x] Base `pip install` = lightweight SDK (`pydantic`/`pyyaml`/`httpx`); server via `[api]`
+- [x] `scripts/build-sdk.sh` → `dist/drpe-*.whl` + sdist for other projects
+- [x] Dockerfile installs `.[api]` / `.[api,ai]`; `drpe.cli:main` entry with clear missing-extra error
+- [x] README: install + consume-in-other-project docs
+
+## TypeScript OpenAPI client packaging (2026-07-25)
+- [x] `clients/typescript` npm package hardened (`exports`, `files`, CJS+ESM)
+- [x] Packaging overlays preserved on regen (`.openapi-generator-ignore`)
+- [x] `scripts/build-ts-client.sh` / `npm run build:ts-client` → `dist/drpe-api-client-0.1.0.tgz`
+- [x] Verified clean-project `npm install` of tarball exports all `*Api` + `Configuration`
+

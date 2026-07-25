@@ -125,6 +125,42 @@ paths:
       summary: Create Policy
       tags:
       - policies
+  /api/v1/policies/catalog-links:
+    get:
+      description: Bulk systems/processes linked to policies (fleet graph).
+      operationId: list_catalog_links_api_v1_policies_catalog_links_get
+      parameters:
+      - explode: true
+        in: query
+        name: policy_ids
+        required: false
+        schema:
+          items:
+            nullable: true
+            type: string
+          nullable: true
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  $ref: "#/components/schemas/PolicyCatalogLinksResponse"
+                title: Response List Catalog Links Api V1 Policies Catalog Links Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Catalog Links
+      tags:
+      - policies
   /api/v1/policies/{policy_id}:
     delete:
       operationId: delete_policy_api_v1_policies__policy_id__delete
@@ -2198,6 +2234,35 @@ components:
       required:
       - records
       title: BatchEvaluateRequest
+    CatalogLinkProcessRef:
+      description: Lean process ref for fleet graph / bulk catalog links.
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+      required:
+      - id
+      - name
+      title: CatalogLinkProcessRef
+    CatalogLinkSystemRef:
+      description: Lean system ref for fleet graph / bulk catalog links.
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        source_key:
+          nullable: true
+          type: string
+      required:
+      - id
+      - name
+      title: CatalogLinkSystemRef
     CatalogStatus:
       enum:
       - active
@@ -3812,6 +3877,19 @@ components:
       - name
       - rules
       title: Policy
+    PolicyCatalogLinksResponse:
+      description: Systems and processes linked to one policy (bulk catalog-links
+        entry).
+      properties:
+        systems:
+          items:
+            $ref: "#/components/schemas/CatalogLinkSystemRef"
+          type: array
+        processes:
+          items:
+            $ref: "#/components/schemas/CatalogLinkProcessRef"
+          type: array
+      title: PolicyCatalogLinksResponse
     PolicyCreateRequest:
       description: Create from YAML string or JSON policy object.
       example:

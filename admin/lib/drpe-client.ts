@@ -323,6 +323,23 @@ export const drpe = {
         body: JSON.stringify({ process_ids }),
       },
     ),
+  /** Bulk systems/processes for many policies (fleet structure graph). */
+  listCatalogLinks: (policyIds?: string[]) => {
+    const params = new URLSearchParams();
+    for (const id of policyIds ?? []) {
+      params.append("policy_ids", id);
+    }
+    const qs = params.toString();
+    return drpeFetch<
+      Record<
+        string,
+        {
+          systems: { id: string; name: string; source_key?: string | null }[];
+          processes: { id: string; name: string }[];
+        }
+      >
+    >(qs ? `/policies/catalog-links?${qs}` : "/policies/catalog-links");
+  },
 
   listJobs: (qs?: string) =>
     drpeFetch<EnforcementJob[]>(`/enforce/jobs${qs ? `?${qs}` : ""}`),

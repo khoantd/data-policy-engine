@@ -108,6 +108,7 @@ Class | Method | HTTP request | Description
 *PoliciesAPI* | [**GetPolicyApiV1PoliciesPolicyIdGet**](docs/PoliciesAPI.md#getpolicyapiv1policiespolicyidget) | **Get** /api/v1/policies/{policy_id} | Get Policy
 *PoliciesAPI* | [**GetPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet**](docs/PoliciesAPI.md#getpolicyversionapiv1policiespolicyidversionsverget) | **Get** /api/v1/policies/{policy_id}/versions/{ver} | Get Policy Version
 *PoliciesAPI* | [**ImportPoliciesApiV1PoliciesImportPost**](docs/PoliciesAPI.md#importpoliciesapiv1policiesimportpost) | **Post** /api/v1/policies/import | Import Policies
+*PoliciesAPI* | [**ListCatalogLinksApiV1PoliciesCatalogLinksGet**](docs/PoliciesAPI.md#listcataloglinksapiv1policiescataloglinksget) | **Get** /api/v1/policies/catalog-links | List Catalog Links
 *PoliciesAPI* | [**ListPoliciesApiV1PoliciesGet**](docs/PoliciesAPI.md#listpoliciesapiv1policiesget) | **Get** /api/v1/policies | List Policies
 *PoliciesAPI* | [**ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet**](docs/PoliciesAPI.md#listpolicyprocessesapiv1policiespolicyidprocessesget) | **Get** /api/v1/policies/{policy_id}/processes | List Policy Processes
 *PoliciesAPI* | [**ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet**](docs/PoliciesAPI.md#listpolicysystemsapiv1policiespolicyidsystemsget) | **Get** /api/v1/policies/{policy_id}/systems | List Policy Systems
@@ -148,6 +149,8 @@ Class | Method | HTTP request | Description
  - [AuditEventType](docs/AuditEventType.md)
  - [BatchClassificationRequest](docs/BatchClassificationRequest.md)
  - [BatchEvaluateRequest](docs/BatchEvaluateRequest.md)
+ - [CatalogLinkProcessRef](docs/CatalogLinkProcessRef.md)
+ - [CatalogLinkSystemRef](docs/CatalogLinkSystemRef.md)
  - [CatalogStatus](docs/CatalogStatus.md)
  - [ClassificationAction](docs/ClassificationAction.md)
  - [ClassificationDiagnostics](docs/ClassificationDiagnostics.md)
@@ -194,6 +197,7 @@ Class | Method | HTTP request | Description
  - [MaskResponse](docs/MaskResponse.md)
  - [Operator](docs/Operator.md)
  - [Policy](docs/Policy.md)
+ - [PolicyCatalogLinksResponse](docs/PolicyCatalogLinksResponse.md)
  - [PolicyCreateRequest](docs/PolicyCreateRequest.md)
  - [PolicyDiffChange](docs/PolicyDiffChange.md)
  - [PolicyDiffRequest](docs/PolicyDiffRequest.md)

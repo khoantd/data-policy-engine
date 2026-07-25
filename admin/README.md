@@ -115,6 +115,6 @@ Policy Import, Evaluate, and Scan playgrounds call LiteLLM through Next.js BFF r
 | `LANGSMITH_WORKSPACE_ID` | Required for **service keys** (`lsv2_sk_…`) only — workspace tenant UUID, not project ID |
 | `PRIVACY_MASK_ENABLED` | Optional — default on; masks PII before LiteLLM via FastAPI `privalyse-mask` |
 
-**Privacy masking:** install the Python extra on the API (`pip install -e ".[ai]"` from repo root). The Admin BFF calls `POST /api/v1/privacy/mask` before LiteLLM and unmasks responses — mappings never leave the API process. See [privalyse-mask](https://github.com/khoantd/privalyse-mask).
+**Privacy masking:** install the Python extras on the API (`pip install -e ".[api,ai]"` from repo root). The Admin BFF calls `POST /api/v1/privacy/mask` before LiteLLM and unmasks responses — mappings never leave the API process. See [privalyse-mask](https://github.com/khoantd/privalyse-mask).
 
 When LangSmith is configured, open **Observability** in the console (`/observability`) to filter recent traces and jump to the LangSmith UI. Personal keys (`lsv2_pt_…`) should not set `LANGSMITH_WORKSPACE_ID` unless it is the tenant UUID. AI features work without LangSmith, Tavily, or privacy masking.

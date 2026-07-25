@@ -108,3 +108,43 @@ def test_update_missing_raises() -> None:
         store.update_system("sys_missing", name="x")
     with pytest.raises(KeyError):
         store.update_process("proc_missing", name="x")
+
+
+def _exercise_bulk_catalog_links(
+    store: InMemoryCatalogStore | SqlAlchemyCatalogStore,
+) -> None:
+    sys_a = store.create_system(name="CRM", source_key="crm")
+    sys_b = store.create_system(name="ERP", source_key="erp")
+    proc_a = store.create_process(name="Onboarding")
+    proc_b = store.create_process(name="Billing")
+
+    store.set_policy_systems("pol_a", [sys_a.id])
+    store.set_policy_processes("pol_a", [proc_a.id])
+    store.set_policy_systems("pol_b", [sys_b.id])
+    store.set_policy_processes("pol_b", [proc_b.id])
+    store.set_policy_systems("pol_c", [sys_a.id, sys_b.id])
+
+    # Filter to a subset — pol_c omitted; unknown id omitted
+    filtered = store.list_catalog_links_for_policies(["pol_a", "pol_b", "pol_missing"])
+    assert set(filtered.keys()) == {"pol_a", "pol_b"}
+    assert [s.id for s in filtered["pol_a"][0]] == [sys_a.id]
+    assert [p.id for p in filtered["pol_a"][1]] == [proc_a.id]
+    assert [s.id for s in filtered["pol_b"][0]] == [sys_b.id]
+    assert [p.id for p in filtered["pol_b"][1]] == [proc_b.id]
+
+    # Empty filter → empty result
+    assert store.list_catalog_links_for_policies([]) == {}
+
+    # None → all policies that have at least one link
+    all_links = store.list_catalog_links_for_policies(None)
+    assert set(all_links.keys()) == {"pol_a", "pol_b", "pol_c"}
+    assert {s.id for s in all_links["pol_c"][0]} == {sys_a.id, sys_b.id}
+    assert all_links["pol_c"][1] == []
+
+
+def test_memory_bulk_catalog_links() -> None:
+    _exercise_bulk_catalog_links(InMemoryCatalogStore())
+
+
+def test_sqlalchemy_bulk_catalog_links(session_factory: sessionmaker) -> None:  # type: ignore[type-arg]
+    _exercise_bulk_catalog_links(SqlAlchemyCatalogStore(session_factory))

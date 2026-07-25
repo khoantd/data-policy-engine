@@ -18,6 +18,7 @@ import type {
   HTTPValidationError,
   ImportRequest,
   ImportResponse,
+  PolicyCatalogLinksResponse,
   PolicyCreateRequest,
   PolicyDiffRequest,
   PolicyDiffResponse,
@@ -67,6 +68,10 @@ export interface GetPolicyVersionApiV1PoliciesPolicyIdVersionsVerGetRequest {
 
 export interface ImportPoliciesApiV1PoliciesImportPostRequest {
     importRequest: ImportRequest;
+}
+
+export interface ListCatalogLinksApiV1PoliciesCatalogLinksGetRequest {
+    policyIds?: Array<string> | null;
 }
 
 export interface ListPoliciesApiV1PoliciesGetRequest {
@@ -531,6 +536,49 @@ export class PoliciesApi extends runtime.BaseAPI {
      */
     async importPoliciesApiV1PoliciesImportPost(requestParameters: ImportPoliciesApiV1PoliciesImportPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ImportResponse> {
         const response = await this.importPoliciesApiV1PoliciesImportPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Bulk systems/processes linked to policies (fleet graph).
+     * List Catalog Links
+     */
+    async listCatalogLinksApiV1PoliciesCatalogLinksGetRaw(requestParameters: ListCatalogLinksApiV1PoliciesCatalogLinksGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: PolicyCatalogLinksResponse; }>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['policyIds'] != null) {
+            queryParameters['policy_ids'] = requestParameters['policyIds'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/api/v1/policies/catalog-links`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response);
+    }
+
+    /**
+     * Bulk systems/processes linked to policies (fleet graph).
+     * List Catalog Links
+     */
+    async listCatalogLinksApiV1PoliciesCatalogLinksGet(requestParameters: ListCatalogLinksApiV1PoliciesCatalogLinksGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: PolicyCatalogLinksResponse; }> {
+        const response = await this.listCatalogLinksApiV1PoliciesCatalogLinksGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

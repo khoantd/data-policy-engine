@@ -4,7 +4,7 @@ Standalone HTTP clients generated from [`../openapi/openapi.json`](../openapi/op
 
 | Language | Path | Generator |
 |----------|------|-----------|
-| TypeScript | [`typescript/`](typescript/) | `typescript-fetch` (`drpe-api-client`) |
+| TypeScript | [`typescript/`](typescript/) | `typescript-fetch` (`@khoadue/drpe-api-client`) |
 | Go | [`go/`](go/) | `go` (`github.com/drpe/drpe/clients/go`) |
 | Java | [`java/`](java/) | `java` / okhttp-gson (`com.drpe:drpe-api-client`) |
 
@@ -13,6 +13,48 @@ The Admin UI keeps a hand-written BFF fetch wrapper (`admin/lib/drpe-client.ts`)
 ```bash
 npm run openapi:generate:admin   # → admin/lib/generated/schema.d.ts
 # included in `npm run openapi`
+```
+
+## Install TypeScript client in another project
+
+```bash
+npm install @khoadue/drpe-api-client
+```
+
+From a local build (without npm):
+
+```bash
+# from this repo
+./scripts/build-ts-client.sh
+# or: npm run build:ts-client
+
+# in your app
+npm install /path/to/data-policy-engine/dist/khoadue-drpe-api-client-0.1.0.tgz
+```
+
+```ts
+import { Configuration, PoliciesApi } from "@khoadue/drpe-api-client";
+
+const config = new Configuration({
+  basePath: "http://localhost:8000",
+  accessToken: process.env.DRPE_API_KEY,
+});
+const policies = new PoliciesApi(config);
+const list = await policies.listPoliciesApiV1PoliciesGet();
+```
+
+See [`typescript/README.md`](typescript/README.md) for classify/evaluate examples.
+
+### Publish to npm (maintainers)
+
+npm returns a misleading **E404** when the auth token is invalid (confirm with `npm whoami`). Re-login, then publish the scoped package:
+
+```bash
+npm login
+npm whoami   # expect: khoadue
+cd clients/typescript
+npm run build
+npm run publish:local   # npm publish --access public --provenance=false
 ```
 
 ## Regenerate
@@ -50,7 +92,7 @@ When the server has `DRPE_API_KEY` set, send `Authorization: Bearer <key>`.
 ### TypeScript
 
 ```ts
-import { Configuration, PoliciesApi } from "drpe-api-client";
+import { Configuration, PoliciesApi } from "@khoadue/drpe-api-client";
 
 const config = new Configuration({
   basePath: "http://localhost:8000",

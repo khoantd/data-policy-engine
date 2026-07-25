@@ -12,6 +12,7 @@ All URIs are relative to *http://localhost:8000*
 | [**getPolicyApiV1PoliciesPolicyIdGet**](PoliciesApi.md#getPolicyApiV1PoliciesPolicyIdGet) | **GET** /api/v1/policies/{policy_id} | Get Policy |
 | [**getPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet**](PoliciesApi.md#getPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet) | **GET** /api/v1/policies/{policy_id}/versions/{ver} | Get Policy Version |
 | [**importPoliciesApiV1PoliciesImportPost**](PoliciesApi.md#importPoliciesApiV1PoliciesImportPost) | **POST** /api/v1/policies/import | Import Policies |
+| [**listCatalogLinksApiV1PoliciesCatalogLinksGet**](PoliciesApi.md#listCatalogLinksApiV1PoliciesCatalogLinksGet) | **GET** /api/v1/policies/catalog-links | List Catalog Links |
 | [**listPoliciesApiV1PoliciesGet**](PoliciesApi.md#listPoliciesApiV1PoliciesGet) | **GET** /api/v1/policies | List Policies |
 | [**listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet**](PoliciesApi.md#listPolicyProcessesApiV1PoliciesPolicyIdProcessesGet) | **GET** /api/v1/policies/{policy_id}/processes | List Policy Processes |
 | [**listPolicySystemsApiV1PoliciesPolicyIdSystemsGet**](PoliciesApi.md#listPolicySystemsApiV1PoliciesPolicyIdSystemsGet) | **GET** /api/v1/policies/{policy_id}/systems | List Policy Systems |
@@ -550,6 +551,74 @@ public class Example {
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Successful Response |  -  |
+| **422** | Validation Error |  -  |
+
+<a id="listCatalogLinksApiV1PoliciesCatalogLinksGet"></a>
+# **listCatalogLinksApiV1PoliciesCatalogLinksGet**
+> Map&lt;String, PolicyCatalogLinksResponse&gt; listCatalogLinksApiV1PoliciesCatalogLinksGet(policyIds)
+
+List Catalog Links
+
+Bulk systems/processes linked to policies (fleet graph).
+
+### Example
+```java
+// Import classes:
+import com.drpe.client.ApiClient;
+import com.drpe.client.ApiException;
+import com.drpe.client.Configuration;
+import com.drpe.client.auth.*;
+import com.drpe.client.models.*;
+import com.drpe.client.api.PoliciesApi;
+
+public class Example {
+  public static void main(String[] args) {
+    ApiClient defaultClient = Configuration.getDefaultApiClient();
+    defaultClient.setBasePath("http://localhost:8000");
+    
+    // Configure HTTP bearer authorization: BearerAuth
+    HttpBearerAuth BearerAuth = (HttpBearerAuth) defaultClient.getAuthentication("BearerAuth");
+    BearerAuth.setBearerToken("BEARER TOKEN");
+
+    PoliciesApi apiInstance = new PoliciesApi(defaultClient);
+    List<String> policyIds = Arrays.asList(); // List<String> | 
+    try {
+      Map<String, PolicyCatalogLinksResponse> result = apiInstance.listCatalogLinksApiV1PoliciesCatalogLinksGet(policyIds);
+      System.out.println(result);
+    } catch (ApiException e) {
+      System.err.println("Exception when calling PoliciesApi#listCatalogLinksApiV1PoliciesCatalogLinksGet");
+      System.err.println("Status code: " + e.getCode());
+      System.err.println("Reason: " + e.getResponseBody());
+      System.err.println("Response headers: " + e.getResponseHeaders());
+      e.printStackTrace();
+    }
+  }
+}
+```
+
+### Parameters
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **policyIds** | [**List&lt;String&gt;**](String.md)|  | [optional] |
+
+### Return type
+
+[**Map&lt;String, PolicyCatalogLinksResponse&gt;**](PolicyCatalogLinksResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details

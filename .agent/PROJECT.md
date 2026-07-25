@@ -83,7 +83,8 @@ Folder name under `TypeScript/` is historical; the product is **Python**, not Ty
 
 | Action | Command |
 |--------|---------|
-| Install | `source .venv/bin/activate` then `pip install -e ".[dev]"` |
+| Install | `source .venv/bin/activate` then `pip install -e ".[dev]"` (API + tests); SDK-only: `pip install -e .` |
+| Build SDK wheel | `./scripts/build-sdk.sh` → `dist/drpe-*.whl` |
 | Dev server | `uvicorn drpe.api.app:app --reload --port 8000` |
 | Test | `python -m pytest tests/ -v` |
 | Migrate | `alembic upgrade head` (requires `DATABASE_URL`) |

@@ -19,9 +19,12 @@ from drpe.models.policy_version import (
 __all__ = [
     "BatchClassificationRequest",
     "BatchEvaluateRequest",
+    "CatalogLinkProcessRef",
+    "CatalogLinkSystemRef",
     "HealthResponse",
     "ImportRequest",
     "ImportResponse",
+    "PolicyCatalogLinksResponse",
     "PolicyCreateRequest",
     "PolicyDiffChange",
     "PolicyDiffRequest",
@@ -101,3 +104,25 @@ class HealthResponse(BaseModel):
 class ReadyResponse(BaseModel):
     status: str
     policies_loaded: int
+
+
+class CatalogLinkSystemRef(BaseModel):
+    """Lean system ref for fleet graph / bulk catalog links."""
+
+    id: str
+    name: str
+    source_key: str | None = None
+
+
+class CatalogLinkProcessRef(BaseModel):
+    """Lean process ref for fleet graph / bulk catalog links."""
+
+    id: str
+    name: str
+
+
+class PolicyCatalogLinksResponse(BaseModel):
+    """Systems and processes linked to one policy (bulk catalog-links entry)."""
+
+    systems: list[CatalogLinkSystemRef] = Field(default_factory=list)
+    processes: list[CatalogLinkProcessRef] = Field(default_factory=list)

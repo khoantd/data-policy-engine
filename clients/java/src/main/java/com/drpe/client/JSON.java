@@ -100,6 +100,8 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.AuditEntry.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.BatchClassificationRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.BatchEvaluateRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.CatalogLinkProcessRef.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.CatalogLinkSystemRef.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ClassificationDiagnostics.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ClassificationEntity.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ClassificationPolicy.CustomTypeAdapterFactory());
@@ -137,6 +139,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.MaskRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.MaskResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.Policy.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.PolicyCatalogLinksResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.PolicyCreateRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.PolicyDiffChange.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.PolicyDiffRequest.CustomTypeAdapterFactory());

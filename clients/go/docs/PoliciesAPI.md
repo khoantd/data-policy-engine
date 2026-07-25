@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**GetPolicyApiV1PoliciesPolicyIdGet**](PoliciesAPI.md#GetPolicyApiV1PoliciesPolicyIdGet) | **Get** /api/v1/policies/{policy_id} | Get Policy
 [**GetPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet**](PoliciesAPI.md#GetPolicyVersionApiV1PoliciesPolicyIdVersionsVerGet) | **Get** /api/v1/policies/{policy_id}/versions/{ver} | Get Policy Version
 [**ImportPoliciesApiV1PoliciesImportPost**](PoliciesAPI.md#ImportPoliciesApiV1PoliciesImportPost) | **Post** /api/v1/policies/import | Import Policies
+[**ListCatalogLinksApiV1PoliciesCatalogLinksGet**](PoliciesAPI.md#ListCatalogLinksApiV1PoliciesCatalogLinksGet) | **Get** /api/v1/policies/catalog-links | List Catalog Links
 [**ListPoliciesApiV1PoliciesGet**](PoliciesAPI.md#ListPoliciesApiV1PoliciesGet) | **Get** /api/v1/policies | List Policies
 [**ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet**](PoliciesAPI.md#ListPolicyProcessesApiV1PoliciesPolicyIdProcessesGet) | **Get** /api/v1/policies/{policy_id}/processes | List Policy Processes
 [**ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet**](PoliciesAPI.md#ListPolicySystemsApiV1PoliciesPolicyIdSystemsGet) | **Get** /api/v1/policies/{policy_id}/systems | List Policy Systems
@@ -562,6 +563,72 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ListCatalogLinksApiV1PoliciesCatalogLinksGet
+
+> map[string]PolicyCatalogLinksResponse ListCatalogLinksApiV1PoliciesCatalogLinksGet(ctx).PolicyIds(policyIds).Execute()
+
+List Catalog Links
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/drpe/drpe/drpe"
+)
+
+func main() {
+	policyIds := []*string{"Inner_example"} // []*string |  (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.PoliciesAPI.ListCatalogLinksApiV1PoliciesCatalogLinksGet(context.Background()).PolicyIds(policyIds).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `PoliciesAPI.ListCatalogLinksApiV1PoliciesCatalogLinksGet``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListCatalogLinksApiV1PoliciesCatalogLinksGet`: map[string]PolicyCatalogLinksResponse
+	fmt.Fprintf(os.Stdout, "Response from `PoliciesAPI.ListCatalogLinksApiV1PoliciesCatalogLinksGet`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListCatalogLinksApiV1PoliciesCatalogLinksGetRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **policyIds** | **[]string** |  | 
+
+### Return type
+
+[**map[string]PolicyCatalogLinksResponse**](PolicyCatalogLinksResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

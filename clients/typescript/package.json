@@ -1,21 +1,56 @@
 {
-  "name": "drpe-api-client",
+  "name": "@khoadue/drpe-api-client",
   "version": "0.1.0",
-  "description": "OpenAPI client for drpe-api-client",
-  "author": "OpenAPI-Generator",
+  "description": "ROS Policy TypeScript HTTP client (OpenAPI / fetch) for /api/v1",
+  "license": "MIT",
+  "author": "ROS Policy",
+  "keywords": [
+    "drpe",
+    "ros-policy",
+    "openapi",
+    "retention",
+    "gdpr",
+    "pdpa",
+    "fetch"
+  ],
+  "homepage": "https://github.com/khoantd/data-policy-engine/tree/main/clients/typescript#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/GIT_USER_ID/GIT_REPO_ID.git"
+    "url": "git+https://github.com/khoantd/data-policy-engine.git",
+    "directory": "clients/typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/khoantd/data-policy-engine/issues"
   },
   "main": "./dist/index.js",
-  "typings": "./dist/index.d.ts",
   "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsc && tsc -p tsconfig.esm.json",
-    "prepare": "npm run build"
+    "prepack": "npm run build",
+    "clean": "rm -rf dist",
+    "publish:local": "npm publish --access public --provenance=false"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "typescript": "^4.0 || ^5.0"
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Query, Request, status
 
 from drpe.api.deps import AuthDep, ClassifierDep, EngineDep, StoreDep
 from drpe.api.schemas import (
+    CatalogLinkProcessRef,
+    CatalogLinkSystemRef,
     ImportRequest,
     ImportResponse,
+    PolicyCatalogLinksResponse,
     PolicyCreateRequest,
     PolicyDiffRequest,
     PolicyDiffResponse,
@@ -194,6 +197,43 @@ def create_policy(
     stored = store.upsert(policy)
     _register_policy(stored, engine, classifier)
     return stored
+
+
+CATALOG_LINKS_MAX_POLICY_IDS = 200
+
+
+@router.get(
+    "/catalog-links",
+    response_model=dict[str, PolicyCatalogLinksResponse],
+)
+def list_catalog_links(
+    _: AuthDep,
+    request: Request,
+    policy_ids: list[str] | None = Query(default=None),
+) -> dict[str, PolicyCatalogLinksResponse]:
+    """Bulk systems/processes linked to policies (fleet graph)."""
+    if policy_ids is not None and len(policy_ids) > CATALOG_LINKS_MAX_POLICY_IDS:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"policy_ids must have at most {CATALOG_LINKS_MAX_POLICY_IDS} items"
+            ),
+        )
+    raw = _catalog(request).list_catalog_links_for_policies(policy_ids)
+    return {
+        pid: PolicyCatalogLinksResponse(
+            systems=[
+                CatalogLinkSystemRef(
+                    id=s.id, name=s.name, source_key=s.source_key
+                )
+                for s in systems
+            ],
+            processes=[
+                CatalogLinkProcessRef(id=p.id, name=p.name) for p in processes
+            ],
+        )
+        for pid, (systems, processes) in raw.items()
+    }
 
 
 @router.get("/{policy_id}", response_model=Any)

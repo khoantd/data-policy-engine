@@ -157,6 +157,60 @@ def test_policy_system_and_process_links(client: TestClient) -> None:
     )
 
 
+def test_bulk_catalog_links(client: TestClient) -> None:
+    policies = client.get("/api/v1/policies").json()
+    assert len(policies) >= 2
+    pol_a = policies[0]["id"]
+    pol_b = policies[1]["id"]
+
+    system = client.post(
+        "/api/v1/systems",
+        json={"name": "BulkCRM", "source_key": "bulk_crm"},
+    ).json()
+    process = client.post(
+        "/api/v1/processes",
+        json={"name": "BulkOnboarding"},
+    ).json()
+
+    assert (
+        client.put(
+            f"/api/v1/policies/{pol_a}/systems",
+            json={"system_ids": [system["id"]]},
+        ).status_code
+        == 200
+    )
+    assert (
+        client.put(
+            f"/api/v1/policies/{pol_b}/processes",
+            json={"process_ids": [process["id"]]},
+        ).status_code
+        == 200
+    )
+
+    resp = client.get(
+        "/api/v1/policies/catalog-links",
+        params=[("policy_ids", pol_a), ("policy_ids", pol_b), ("policy_ids", "pol_missing")],
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert set(body.keys()) == {pol_a, pol_b}
+    assert body[pol_a]["systems"] == [
+        {"id": system["id"], "name": "BulkCRM", "source_key": "bulk_crm"}
+    ]
+    assert body[pol_a]["processes"] == []
+    assert body[pol_b]["systems"] == []
+    assert body[pol_b]["processes"] == [
+        {"id": process["id"], "name": "BulkOnboarding"}
+    ]
+
+    # Cap: more than 200 policy_ids → 422
+    too_many = client.get(
+        "/api/v1/policies/catalog-links",
+        params=[("policy_ids", f"pol_{i}") for i in range(201)],
+    )
+    assert too_many.status_code == 422
+
+
 def test_catalog_links_do_not_affect_evaluate(client: TestClient) -> None:
     """Governance links must not change evaluate matching (still uses scope.sources)."""
     policies = client.get("/api/v1/policies").json()

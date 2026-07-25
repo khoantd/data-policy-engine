@@ -7,14 +7,59 @@ Define, evaluate, and enforce data retention policies with full audit trail and 
 ### Install
 
 ```bash
-pip install -e .           # full (API server + SDK)
-pip install -e ".[sdk]"    # SDK only (for integrating apps)
+pip install -e .             # SDK only (remote client + embedded evaluator)
+pip install -e ".[api]"      # API server (+ SDK)
+pip install -e ".[dev]"      # this monorepo: API + pytest
+```
+
+### Use the SDK in another project
+
+Build a wheel from this repo, then install it elsewhere:
+
+```bash
+./scripts/build-sdk.sh
+# in the other project:
+pip install /path/to/data-policy-engine/dist/drpe-0.1.0-py3-none-any.whl
+```
+
+Or install directly from the repo path (no wheel):
+
+```bash
+pip install /path/to/data-policy-engine          # SDK
+pip install "/path/to/data-policy-engine[api]"   # if you also need the server
+```
+
+Then:
+
+```python
+from drpe import DRPEClient, PolicyEvaluator
+```
+
+OpenAPI-generated clients (full admin surface) live under `clients/typescript`, `clients/go`, and `clients/java` — regenerate with `npm run openapi`.
+
+**TypeScript client in another project:**
+
+```bash
+npm install @khoadue/drpe-api-client
+```
+
+Or from a local build:
+
+```bash
+./scripts/build-ts-client.sh   # or: npm run build:ts-client
+npm install /path/to/data-policy-engine/dist/khoadue-drpe-api-client-0.1.0.tgz
+```
+
+```ts
+import { Configuration, PoliciesApi, EvaluateApi } from "@khoadue/drpe-api-client";
 ```
 
 ### Start the API Server
 
 ```bash
+pip install -e ".[api]"
 uvicorn drpe.api.app:app --host 0.0.0.0 --port 8000
+# or: drpe
 ```
 
 API docs at `http://localhost:8000/docs`
@@ -39,7 +84,7 @@ Open `http://localhost:3000`, connect with your `DRPE_API_KEY` (or leave empty i
 
 Or import the repo in the Vercel dashboard under **Royal Platform**, set **Root Directory** to `admin`, and set `DRPE_API_URL` to your public FastAPI base URL. Full steps: [admin/README.md — Deploy on Vercel](admin/README.md#deploy-on-vercel).
 
-Optional **privacy-safe AI** (local): `pip install -e ".[ai]"` then `python -m spacy download en_core_web_lg` installs [privalyse-mask](https://github.com/Privalyse/privalyse-mask) so Policy Import and Evaluate mask PII before LiteLLM.
+Optional **privacy-safe AI** (local): `pip install -e ".[api,ai]"` then `python -m spacy download en_core_web_lg` installs [privalyse-mask](https://github.com/Privalyse/privalyse-mask) so Policy Import and Evaluate mask PII before LiteLLM.
 
 ### Docker
 
@@ -328,12 +373,17 @@ Committed clients live under [`clients/`](clients/) (see [`clients/README.md`](c
 
 ```bash
 npm install
-npm run openapi   # export schema + regenerate TS/Go/Java clients + Admin types
+npm run openapi          # export schema + regenerate TS/Go/Java clients + Admin types
+npm run build:ts-client  # pack TypeScript client → dist/drpe-api-client-*.tgz
+```
+
+```bash
+# in another Node/TypeScript project
+npm install @khoadue/drpe-api-client
 ```
 
 ```ts
-// After: cd clients/typescript && npm install && npm run build
-import { Configuration, PoliciesApi } from "drpe-api-client";
+import { Configuration, PoliciesApi, EvaluateApi, ClassifyApi } from "@khoadue/drpe-api-client";
 
 const api = new PoliciesApi(
   new Configuration({

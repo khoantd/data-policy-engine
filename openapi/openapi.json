@@ -216,6 +216,68 @@
         }
       }
     },
+    "/api/v1/policies/catalog-links": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "List Catalog Links",
+        "description": "Bulk systems/processes linked to policies (fleet graph).",
+        "operationId": "list_catalog_links_api_v1_policies_catalog_links_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_ids",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Ids"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/PolicyCatalogLinksResponse"
+                  },
+                  "title": "Response List Catalog Links Api V1 Policies Catalog Links Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/policies/{policy_id}": {
       "get": {
         "tags": [
@@ -3535,6 +3597,55 @@
         ],
         "title": "BatchEvaluateRequest"
       },
+      "CatalogLinkProcessRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "CatalogLinkProcessRef",
+        "description": "Lean process ref for fleet graph / bulk catalog links."
+      },
+      "CatalogLinkSystemRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "source_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "CatalogLinkSystemRef",
+        "description": "Lean system ref for fleet graph / bulk catalog links."
+      },
       "CatalogStatus": {
         "type": "string",
         "enum": [
@@ -5372,6 +5483,27 @@
         ],
         "title": "Policy",
         "description": "Full retention policy definition."
+      },
+      "PolicyCatalogLinksResponse": {
+        "properties": {
+          "systems": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogLinkSystemRef"
+            },
+            "type": "array",
+            "title": "Systems"
+          },
+          "processes": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogLinkProcessRef"
+            },
+            "type": "array",
+            "title": "Processes"
+          }
+        },
+        "type": "object",
+        "title": "PolicyCatalogLinksResponse",
+        "description": "Systems and processes linked to one policy (bulk catalog-links entry)."
       },
       "PolicyCreateRequest": {
         "properties": {

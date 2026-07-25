@@ -11,6 +11,9 @@ import {
   Panel,
 } from "@/components/ui/layout";
 
+/** API caps catalog-links at 200 policy_ids; stay under that. */
+const CATALOG_LINKS_FETCH_CAP = 200;
+
 export default async function PolicyStructureGraphPage({
   searchParams,
 }: {
@@ -31,29 +34,6 @@ export default async function PolicyStructureGraphPage({
       sp.status || undefined,
       sp.kind || undefined,
     );
-    const linkEntries = await Promise.all(
-      policies.slice(0, 50).map(async (p) => {
-        const [systems, processes] = await Promise.all([
-          drpe.listPolicySystems(p.id).catch(() => []),
-          drpe.listPolicyProcesses(p.id).catch(() => []),
-        ]);
-        return [
-          p.id,
-          {
-            systems: systems.map((s) => ({
-              id: s.id,
-              name: s.name,
-              source_key: s.source_key,
-            })),
-            processes: processes.map((pr) => ({
-              id: pr.id,
-              name: pr.name,
-            })),
-          },
-        ] as const;
-      }),
-    );
-    fleetCatalogLinks = Object.fromEntries(linkEntries);
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load policies";
   }
@@ -67,6 +47,18 @@ export default async function PolicyStructureGraphPage({
           p.jurisdiction.toLowerCase().includes(q),
       )
     : policies;
+
+  if (!error && filtered.length > 0) {
+    try {
+      const ids = filtered
+        .slice(0, CATALOG_LINKS_FETCH_CAP)
+        .map((p) => p.id);
+      fleetCatalogLinks = await drpe.listCatalogLinks(ids);
+    } catch (err) {
+      error =
+        err instanceof Error ? err.message : "Failed to load catalog links";
+    }
+  }
 
   return (
     <>

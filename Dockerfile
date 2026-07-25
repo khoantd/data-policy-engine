@@ -10,10 +10,10 @@ COPY drpe/ drpe/
 # Set --build-arg INSTALL_AI=0 for a smaller image without PII masking.
 ARG INSTALL_AI=1
 RUN if [ "$INSTALL_AI" = "1" ]; then \
-      pip install --no-cache-dir ".[ai]" \
+      pip install --no-cache-dir ".[api,ai]" \
       && python -m spacy download en_core_web_lg; \
     else \
-      pip install --no-cache-dir .; \
+      pip install --no-cache-dir ".[api]"; \
     fi
 
 # --- runtime ---
