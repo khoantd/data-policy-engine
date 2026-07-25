@@ -1,0 +1,77 @@
+specification {
+  element actor
+  element system
+  element container
+  element component
+}
+
+model {
+  admin = actor "Admin user"
+  apps = actor "Integrating applications"
+
+  ros = system "ROS Policy" {
+    description "Standalone retention & classification policy engine (DRPE)"
+
+    adminUi = container "Admin UI" {
+      description "Next.js BFF"
+      metadata {
+        owner "platform"
+      }
+    }
+
+    api = container "API" {
+      description "FastAPI /api/v1"
+      metadata {
+        owner "platform"
+      }
+    }
+
+    workers = container "Workers" {
+      description "Celery worker + beat"
+      metadata {
+        owner "platform"
+      }
+    }
+
+    postgres = container "PostgreSQL" {
+      description "schema drpe"
+      technology "PostgreSQL"
+      metadata {
+        owner "platform"
+      }
+    }
+
+    redis = container "Redis" {
+      description "Cache + Celery broker"
+      technology "Redis"
+      metadata {
+        owner "platform"
+      }
+    }
+  }
+
+  litellm = system "LiteLLM" {
+    description "Admin AI assist only"
+  }
+
+  admin -> ros.adminUi "operates"
+  apps -> ros.api "HTTP / SDK"
+  ros.adminUi -> ros.api "BFF / server actions"
+  ros.api -> ros.postgres "read/write"
+  ros.api -> ros.redis "cache"
+  ros.workers -> ros.postgres "jobs"
+  ros.workers -> ros.redis "broker"
+  ros.adminUi -> litellm "AI suggest"
+}
+
+views {
+  view index {
+    title "ROS Policy landscape"
+    include *
+  }
+
+  view containers of ros {
+    title "ROS Policy containers"
+    include *
+  }
+}
