@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, AsyncIterator
@@ -9,6 +11,7 @@ from typing import Any, AsyncIterator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import OperationalError
 
 from drpe.adapters.memory_audit import InMemoryAuditStore
 from drpe.adapters.memory_dsar import InMemoryDsarStore
@@ -53,6 +56,11 @@ from drpe.ports.policy_store import PolicyStore
 from drpe.scheduler.celery_app import create_celery_app
 from drpe.scheduler.runtime import build_dispatcher, build_runtime, set_enforcement_runtime
 
+logger = logging.getLogger(__name__)
+
+# Brief reconnects to managed Postgres / poolers during container start.
+_BOOTSTRAP_RETRY_DELAYS_SECONDS = (0.5, 1.0, 2.0)
+
 
 def _seed_from_yaml(store: Any, path: Path) -> None:
     if not path.is_dir():
@@ -68,7 +76,7 @@ def _seed_from_yaml(store: Any, path: Path) -> None:
             store.upsert(policy)
 
 
-def _bootstrap_store(
+def _bootstrap_store_once(
     store: PolicyStore,
     engine: PolicyEvaluatorEngine,
     classifier: ClassificationEngine,
@@ -86,6 +94,40 @@ def _bootstrap_store(
         retention = as_retention(policy)
         if retention is not None:
             engine.add_policy(retention)
+
+
+def _bootstrap_store(
+    store: PolicyStore,
+    engine: PolicyEvaluatorEngine,
+    classifier: ClassificationEngine,
+    path: Path,
+    *,
+    force_seed: bool,
+) -> None:
+    """Load policies into engines; retry transient DB disconnects at startup."""
+    attempts = 1 + len(_BOOTSTRAP_RETRY_DELAYS_SECONDS)
+    last_exc: OperationalError | None = None
+    for attempt in range(attempts):
+        try:
+            _bootstrap_store_once(
+                store, engine, classifier, path, force_seed=force_seed
+            )
+            return
+        except OperationalError as exc:
+            last_exc = exc
+            if attempt >= attempts - 1:
+                break
+            delay = _BOOTSTRAP_RETRY_DELAYS_SECONDS[attempt]
+            logger.warning(
+                "Database bootstrap failed (attempt %s/%s): %s; retrying in %.1fs",
+                attempt + 1,
+                attempts,
+                exc,
+                delay,
+            )
+            time.sleep(delay)
+    assert last_exc is not None
+    raise last_exc
 
 
 def _build_inner_store(

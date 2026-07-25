@@ -400,7 +400,7 @@ By default DRPE uses an in-memory store (YAML from `DRPE_POLICIES_DIR` seeded at
 
 To persist policies on **Supabase Postgres** (project lead-flow / schema `drpe`):
 
-1. Set `DATABASE_URL` in `.env` (see `.env.example`). Prefer the **Session pooler** URI from the Supabase dashboard if the direct host is unreachable.
+1. Set `DATABASE_URL` in `.env` (see `.env.example`). Prefer the **Session pooler** URI from the Supabase dashboard if the direct host is unreachable (Docker/IPv4). Transaction pooler (port `6543`) also works — the engine disables prepared statements and sets `sslmode=require` for `*.supabase.*` hosts.
 2. Run migrations:
 
 ```bash

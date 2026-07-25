@@ -13,61 +13,47 @@
 
 ## Goal
 
-Speed up Admin `/policies/graph` by replacing N+1 catalog-link fetches with a bulk API.
+Fix prod API crash: `psycopg.OperationalError: the connection is lost` during uvicorn startup bootstrap against Supabase.
 
 ## Done
 
-- Prior platform work (API, Admin, OpenAPI, Redis, Celery, catalog, etc.) — see history
-- **Python SDK packaging** — base deps SDK-only; `[api]` server; `scripts/build-sdk.sh` → `dist/drpe-*.whl`
-- **TypeScript OpenAPI client packaging (2026-07-25)**
-  - Hardened `clients/typescript/package.json` (`exports`, `files`, types, engines)
-  - Consumer README + tsconfig (CJS + ESM); overlays in `.openapi-generator-ignore`
-  - `scripts/build-ts-client.sh` / `npm run build:ts-client` → `dist/drpe-api-client-0.1.0.tgz`
-  - Root scripts: `build:sdk`, `build:ts-client`, `build:clients`
-  - Verified: clean `npm install` of tarball; exports all `*Api` + `Configuration`
-- **`/policies/graph` performance (2026-07-25)**
-  - `CatalogStore.list_catalog_links_for_policies` (memory + SQLAlchemy; two joins)
-  - `GET /api/v1/policies/catalog-links` (cap 200 `policy_ids`; slim refs)
-  - Fleet page: filter by `q` then one bulk fetch (was up to 100 per-policy GETs)
-  - Admin `drpe.listCatalogLinks`; OpenAPI regen (admin + TS/Go/Java clients)
-  - Tests: `tests/test_catalog_stores.py`, `tests/test_catalog_api.py::test_bulk_catalog_links`
+- Prior platform work — see history
+- **Prod DB connection loss on startup (2026-07-25)**
+  - Root cause: SQLAlchemy/psycopg3 first connect through Supabase Supavisor without pooler-safe settings; bootstrap `list_policies()` killed the process
+  - `create_db_engine`: `prepare_threshold=None`, `pool_recycle=300`, TCP keepalives, `sslmode=require` for `*.supabase.*`
+  - `normalize_database_url` helper; startup `_bootstrap_store` retries transient `OperationalError` (0.5s/1s/2s)
+  - Tests: `tests/test_db_session.py` (8); `.env.example` / README pooler notes
 
 ## In progress
 
 - _(none)_
-- **Blockers:** Supabase/local DB may need `alembic upgrade head` (through `009`) where schema is behind
+- **Blockers:** Redeploy API image/wheel with this fix; confirm `DATABASE_URL` uses pooler host (not IPv6-only `db.*.supabase.co`) from Docker
 
 ## Next
 
-1. **npm publish `@khoadue/drpe-api-client@0.1.0`** — scope must match npm user `khoadue` (not GitHub `khoantd`). Run `npm run publish:local` in `clients/typescript` (re-run `./scripts/build-ts-client.sh` after OpenAPI regen if distributing the tarball)
-2. Optional: publish Python wheel to private PyPI / GitHub Releases
-3. Apply `alembic upgrade head` where schema behind; set `DRPE_API_URL` on Vercel; Celery profile when Redis set
-4. After API schema changes: `npm run openapi` then bump + `npm run publish:local` in `clients/typescript`
+1. **Redeploy** API (rebuild Docker image / reinstall wheel) so prod picks up `drpe/db/session.py` + `drpe/api/app.py`
+2. Verify container starts: logs show policies loaded (or retry then ready), `/api/v1/health` OK
+3. If still failing: confirm `DATABASE_URL` is session pooler (`*.pooler.supabase.com:5432`) or transaction (`:6543`) with `postgres.<ref>` user — not direct `db.*` from IPv4-only hosts
+4. Optional: `npm run publish:local` for TS client; apply `alembic upgrade head` where schema behind
 
 ## Decisions
 
-- TS package is **`@khoadue/drpe-api-client`** (npm user `khoadue`; GitHub repo stays `khoantd/data-policy-engine`)
-- Ship built `dist/` in the npm tarball; no `prepare` (avoids consumer install needing TypeScript)
-- Regenerating OpenAPI must not overwrite `package.json` / README / tsconfigs (ignore list)
-- Python base install = SDK; `[api]` for server; monorepo uses `.[dev]`
-- Fleet graph uses bulk catalog-links API instead of Redis-caching links (invalidation cost not worth it for this pass)
+- Always disable psycopg prepared statements — required for transaction pooler, harmless elsewhere
+- Fail startup after 4 bootstrap attempts (still fail closed if DB is truly down)
 
 ## Gotchas
 
-- After OpenAPI regen, re-run `./scripts/build-ts-client.sh` before distributing the tarball
-- Generated method names are verbose: `evaluateOneApiV1EvaluatePost`, `classifyOneApiV1ClassifyPost`, `listPoliciesApiV1PoliciesGet`, `listCatalogLinksApiV1PoliciesCatalogLinksGet`
-- Bare `pip install -e .` is SDK-only — use `.[api]` / `.[dev]` for the server
-- `dist/` is gitignored; rebuild artifacts after clone
-- `GET /policies/catalog-links` must stay registered **before** `/{policy_id}` or FastAPI treats `catalog-links` as an id
+- `from drpe.api import app` resolves the ASGI app via package `__getattr__` and calls `create_app()` (loads `.env`) — tests must `import drpe.api.app as app_module`
+- Prefer Supabase **session pooler** URI for Docker/IPv4; direct host is often IPv6-only
+- Wrong pooler region/host → `FATAL tenant/user ... not found`
 
 ## Pointers
 
 | Item | Location |
 |------|----------|
-| Bulk catalog links | `drpe/api/routes_policies.py` (`list_catalog_links`), `drpe/ports/catalog_store.py` |
-| Fleet graph page | `admin/app/(console)/policies/graph/page.tsx` |
-| Python SDK build | `scripts/build-sdk.sh`, `pyproject.toml`, `dist/drpe-*.whl` |
-| TS OpenAPI client | `clients/typescript/`, `scripts/build-ts-client.sh`, `dist/drpe-api-client-*.tgz` |
-| Regenerate OpenAPI | `npm run openapi` |
+| Engine hardening | `drpe/db/session.py` |
+| Bootstrap retry | `drpe/api/app.py` (`_bootstrap_store`) |
+| Tests | `tests/test_db_session.py` |
+| Env examples | `.env.example` |
 | Spec / tasks | `docs/ARCHITECTURE.md`, `tasks/todo.md` |
 | Tests | `python -m pytest tests/ -v` (use `.venv/bin/python`) |
