@@ -1,77 +1,110 @@
-specification {
-  element actor
-  element system
-  element container
-  element component
-}
+specification { element actor; element system; element container; element component }
 
 model {
-  admin = actor "Admin user"
-  apps = actor "Integrating applications"
+  // Actors
+  actor(admin, "Policy Admin");
+  actor(dpo, "DPO / Compliance");
+  actor(apps, "Integrating Apps");
 
-  ros = system "ROS Policy" {
-    description "Standalone retention & classification policy engine (DRPE)"
+  // System
+  system(drpePolicy, "ROS Policy", "Retention & classification policy engine + Admin");
 
-    adminUi = container "Admin UI" {
-      description "Next.js BFF"
-      metadata {
-        owner "platform"
-      }
-    }
+  // External systems
+  system(liteLLM, "LiteLLM", "Optional AI assist for Admin import/samples");
+  system(webhookTargets, "Webhook Targets", "Receive enforcement actions");
 
-    api = container "API" {
-      description "FastAPI /api/v1"
-      metadata {
-        owner "platform"
-      }
-    }
+  // Containers
+  container(adminConsole, "Admin Console", "Next.js App Router", "BFF, playgrounds, policy import AI") { metadata { owner "admin" } }
+  container(restApi, "REST API", "FastAPI", "/api/v1 policy, evaluate, classify, enforce, DSAR…") { metadata { owner "api" } }
+  container(pythonSdk, "Python SDK", "drpe package", "Remote client + embedded evaluator") { metadata { owner "sdk" } }
+  container(engineCore, "Engine Core", "Python", "DSL, evaluate, classify, enforce, DSAR") { metadata { owner "core" } }
+  container(scheduler, "Scheduler", "Celery", "Periodic + queued enforcement") { metadata { owner "worker" } }
+  containerDb(database, "PostgreSQL", "Supabase / local", "drpe schema") { metadata { owner "data" } }
+  container(cache, "Redis", "Cache + broker", "Policy cache, gen stamp, Celery") { metadata { owner "data" } }
 
-    workers = container "Workers" {
-      description "Celery worker + beat"
-      metadata {
-        owner "platform"
-      }
-    }
+  // Components inside Engine Core
+  component(dslParser, "DSL Parser", "YAML → Policy model") { metadata { owner "core" } }
+  component(evaluator, "Evaluator", "Match scope + rules") { metadata { owner "core" } }
+  component(classifier, "Classifier", "Entity detection vs classification policies") { metadata { owner "core" } }
+  component(conflictResolver, "Conflict Resolver", "Surface overlapping matches") { metadata { owner "core" } }
+  component(jurisdictions, "Jurisdictions", "Built-in jurisdiction metadata") { metadata { owner "core" } }
+  component(policyDiff, "Policy Diff", "Structural version diff") { metadata { owner "core" } }
+  component(enforcement, "Enforcement", "Scan records, grace, dispatch, audit") { metadata { owner "core" } }
+  component(dsarService, "DSAR Service", "Sync access/erasure workflows") { metadata { owner "core" } }
+  component(privacy, "Privacy", "Optional PII mask for AI / privacy APIs") { metadata { owner "core" } }
 
-    postgres = container "PostgreSQL" {
-      description "schema drpe"
-      technology "PostgreSQL"
-      metadata {
-        owner "platform"
-      }
-    }
-
-    redis = container "Redis" {
-      description "Cache + Celery broker"
-      technology "Redis"
-      metadata {
-        owner "platform"
-      }
-    }
-  }
-
-  litellm = system "LiteLLM" {
-    description "Admin AI assist only"
-  }
-
-  admin -> ros.adminUi "operates"
-  apps -> ros.api "HTTP / SDK"
-  ros.adminUi -> ros.api "BFF / server actions"
-  ros.api -> ros.postgres "read/write"
-  ros.api -> ros.redis "cache"
-  ros.workers -> ros.postgres "jobs"
-  ros.workers -> ros.redis "broker"
-  ros.adminUi -> litellm "AI suggest"
+  // Relationships
+  rel(admin, adminConsole, "DRPE_API_URL + Bearer key");
+  rel(dpo, restApi, "Audit / DSAR / grace holds");
+  rel(apps, restApi, "SDK or REST /api/v1");
+  rel(adminConsole, restApi, "DRPE_API_URL + Bearer key");
+  rel(pythonSdk, restApi, "HTTP");
+  rel(pythonSdk, engineCore, "Embedded mode");
+  rel(restApi, engineCore, "In-process");
+  rel(restApi, database, "SQLAlchemy");
+  rel(restApi, cache, "Optional CachingPolicyStore");
+  rel(scheduler, engineCore, "EnforcementRunner");
+  rel(scheduler, database, "Jobs + audit");
+  rel(scheduler, cache, "Broker / backend");
+  rel(engineCore, database, "PolicyStore, AuditStore");
+  rel(engineCore, cache, "CachingPolicyStore (Redis)");
+  rel(engineCore, dslParser, "Uses");
+  rel(engineCore, evaluator, "Uses");
+  rel(engineCore, classifier, "Uses");
+  rel(engineCore, conflictResolver, "Uses");
+  rel(engineCore, jurisdictions, "Uses");
+  rel(engineCore, policyDiff, "Uses");
+  rel(engineCore, enforcement, "Uses");
+  rel(engineCore, dsarService, "Uses");
+  rel(engineCore, privacy, "Uses");
+  rel(adminConsole, liteLLM, "AI assist (masked prompts)");
+  rel(engineCore, webhookTargets, "Action dispatch");
+  rel(restApi, webhookTargets, "Registers webhooks");
+  rel(restApi, dpo, "API key optional");
 }
 
 views {
   view index {
-    title "ROS Policy landscape"
+    title 'ROS Policy — System Context';
     include *
   }
-
-  view containers of ros {
-    title "ROS Policy containers"
-    include *
+  view adminConsoleView {
+    title 'Admin Console';
+    include adminConsole, restApi, pythonSdk, liteLLM
+    rel(adminConsole, restApi, "BFF, playgrounds");
+    rel(liteLLM, adminConsole, "AI assist");
+  }
+  view restApiView {
+    title 'REST API';
+    include restApi, engineCore, database, cache, pythonSdk, webhookTargets, dpo, apps
+    rel(restApi, engineCore, "In-process");
+    rel(restApi, database, "SQLAlchemy");
+    rel(restApi, cache, "Optional CachingPolicyStore");
+    rel(restApi, pythonSdk, "HTTP");
+    rel(restApi, webhookTargets, "Webhook registration");
+  }
+  view engineCoreView {
+    title 'Engine Core';
+    include engineCore, dslParser, evaluator, classifier, conflictResolver, jurisdictions, policyDiff, enforcement, dsarService, privacy, database, cache
+    rel(engineCore, database, "PolicyStore, AuditStore");
+    rel(engineCore, cache, "CachingPolicyStore (Redis)");
+  }
+  view schedulerView {
+    title 'Scheduler';
+    include scheduler, engineCore, database, cache
+    rel(scheduler, engineCore, "EnforcementRunner");
+    rel(scheduler, database, "Jobs + audit");
+    rel(scheduler, cache, "Broker / backend");
+  }
+  view dataPlaneView {
+    title 'Data Plane';
+    include database, cache;
+    rel(database, cache, "Cache + broker");
+  }
+  view externalView {
+    title 'External Services';
+    include liteLLM, webhookTargets;
+    rel(liteLLM, adminConsole, "AI assist");
+    rel(webhookTargets, engineCore, "Action dispatch");
   }
 }
