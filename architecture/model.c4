@@ -108,4 +108,11 @@ view rosPolicyComponentsView of drpe {
     include core.*
     autoLayout LeftRight
   }
+
+view prodDeployment of prod {
+    title 'ROS Policy Production Deployment'
+    include *
+    includeAncestors true
+    autoLayout TopBottom
+  }
 }
