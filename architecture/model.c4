@@ -173,7 +173,6 @@ deployment view staging {
 deployment view prodAncestors {
     title 'Production Deployment — Full Hierarchy'
     include *
-    includeAncestors: true
     autoLayout TopBottom
   }
 
