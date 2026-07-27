@@ -5,6 +5,10 @@ specification {
   element containerDb { notation 'Database' }
   element queue { notation 'Message Queue' }
   tag external
+
+deploymentNode environment
+deploymentNode region
+deploymentNode kubernetes
 }
 
 model {
@@ -89,6 +93,23 @@ model {
   scheduler -> cache 'Broker / backend'
 }
 
+deployment {
+environment prod {
+    region euWest1 'eu-west-1' {
+      kubernetes cluster {
+        instanceOf adminConsole
+        instanceOf api
+        instanceOf sdk
+        instanceOf coreEngine
+        instanceOf scheduler
+        instanceOf cache
+        instanceOf guardrailsRuntime
+        instanceOf db
+      }
+    }
+  }
+}
+
 views {
   view index {
     title 'ROS Policy Landscape'
@@ -118,5 +139,11 @@ views {
     coreEngine -> guardrailsRuntime 'Guardrails evaluation (if enabled)'
     guardrailsRuntime -> api 'Return verdict'
     api -> cache 'Cache policy'
+  }
+
+deployment view prod {
+    title 'Production Deployment'
+    include *
+    autoLayout TopBottom
   }
 }
