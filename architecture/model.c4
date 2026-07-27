@@ -9,6 +9,8 @@ specification {
 deploymentNode environment
 deploymentNode region
 deploymentNode kubernetes
+
+deploymentNode namespace
 }
 
 model {
@@ -108,6 +110,21 @@ environment prod {
       }
     }
   }
+
+environment staging {
+    region euWest1 {
+      kubernetes cluster {
+        instanceOf adminConsole
+        instanceOf api
+        instanceOf sdk
+        instanceOf coreEngine
+        instanceOf scheduler
+        instanceOf cache
+        instanceOf guardrailsRuntime
+        instanceOf db
+      }
+    }
+  }
 }
 
 views {
@@ -145,5 +162,27 @@ deployment view prod {
     title 'Production Deployment'
     include *
     autoLayout TopBottom
+  }
+
+deployment view staging {
+    title 'Staging Deployment'
+    include *
+    autoLayout TopBottom
+  }
+
+deployment view prodAncestors {
+    title 'Production Deployment — Full Hierarchy'
+    include *
+    includeAncestors: true
+    autoLayout TopBottom
+  }
+
+dynamic view enforcementJobFlow {
+    title 'Enforcement Job Flow'
+    scheduler -> coreEngine 'Run enforcement job'
+    coreEngine -> db 'Read pending jobs'
+    coreEngine -> db 'Write audit logs'
+    coreEngine -> cache 'Publish job to broker'
+    coreEngine -> cache 'Consume job queue'
   }
 }
