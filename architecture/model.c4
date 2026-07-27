@@ -1,138 +1,229 @@
 specification {
-  element actor {
-    style {
-      shape person
-      color amber
-    }
-  }
+  element actor { style { shape person; color amber } }
   element system
-  element container {
-    notation 'Service / Application'
-    technology 'N/A'
-  }
+  element container
   element component
-  element db {
-    style {
-      shape storage
-      icon tech:postgresql
-    }
-  }
+  element db { style { shape storage; icon tech:postgresql } }
+  element queue { style { shape queue; icon tech:kafka } }
 
   tag external
+  tag critical
+  tag legacy
 }
 
 model {
-  // Actors
-  admin = actor 'Policy Admin' 'Authors policies, runs evaluate/classify/guardrails playgrounds'
-  dpo = actor 'DPO / Compliance' 'Reviews audit, DSAR, grace holds'
+  adminActor = actor 'Admin' 'Policy Admin'
+  dpoActor = actor 'DPO' 'Compliance Officer'
 
-  // Main system
-  drpe = system 'ROS Policy' 'Retention, classification, and agent guardrails engine + Admin'
+  drpe = system 'ROS Policy' 'Retention & classification engine with Admin UI'
 
   // External systems
-  apps = system 'Integrating apps' 'CRM / ERP / data platform' {
-    #external
-  }
-  llm = system 'LiteLLM' 'Optional AI assist for Admin import/samples' {
-    #external
-  }
-  ogr = system 'OpenGuardrails' 'Optional runtime for GuardEvent evaluation' {
-    #external
-  }
-  hooks = system 'Downstream webhooks' 'Receive enforcement actions' {
-    #external
-  }
+  apps = system 'Apps' 'Integrating applications' { tags #external }
+  llm = system 'LiteLLM' 'Optional AI assist' { tags #external }
+  ogrExternal = system 'OpenGuardrails' 'Optional runtime' { tags #external }
+  hooks = system 'Hooks' 'Downstream webhooks' { tags #external }
 
   // Containers inside ROS Policy
-  adminConsole = container 'Admin Console' 'Next.js App Router' {
-    technology 'Next.js'
-    metadata { owner 'policy-engine' }
+  admin = container 'Admin Console' 'Next.js BFF' { 
+    metadata { owner 'ops-team' } 
   }
-  api = container 'REST API' 'FastAPI' {
-    technology 'FastAPI'
-    metadata { owner 'policy-engine' }
+  api = container 'REST API' 'FastAPI' '/api/v1' { 
+    metadata { owner 'core-team' } 
   }
-  sdk = container 'Python SDK' 'drpe package' {
-    technology 'Python'
-    metadata { owner 'policy-engine' }
+  sdk = container 'Python SDK' 'drpe package' { 
+    metadata { owner 'core-team' } 
   }
-  core = container 'Engine Core' 'Python' {
-    technology 'Python'
-    metadata { owner 'policy-engine' }
+  core = container 'Engine Core' 'Python' { 
+    metadata { owner 'core-team' } 
+  }
+  sched = container 'Scheduler' 'Celery' { 
+    metadata { owner 'core-team' } 
+  }
+  db = db 'PostgreSQL' 'Supabase / local' { 
+    metadata { owner 'db-team' } 
+  }
+  cache = container 'Redis' 'Cache + broker' { 
+    metadata { owner 'cache-team' } 
+  }
+  ogrRuntime = container 'OpenGuardrails Runtime' 'Python package' { 
+    metadata { owner 'core-team' } 
+  }
 
-    // Components of the core
-    dslParser = component 'DSL Parser' 'YAML → Pydantic Policy objects'
-    evaluator = component 'Evaluator' 'Matches scopes and rules'
-    classifier = component 'Classifier' 'Entity detection vs policies'
-    policyDiff = component 'Policy Diff' 'Structural version diff'
-    enforcement = component 'Enforcement' 'Scan, grace holds, dispatch, audit'
-    dsarService = component 'DSAR Service' 'Access/erasure workflows'
-    guardrails = component 'Guardrails' 'OpenGuardrails runtime wrapper'
-    conflictResolver = component 'Conflict Resolver' 'Surface overlapping matches'
-    jurisdictions = component 'Jurisdictions' 'Built‑in jurisdiction metadata'
+  // Components inside Engine Core
+  dslParser = component 'DSL Parser' 'YAML → Policy objects' { 
+    metadata { owner 'core-team' } 
   }
-  scheduler = container 'Scheduler' 'Celery' {
-    technology 'Celery'
-    metadata { owner 'policy-engine' }
+  evaluator = component 'Evaluator' 'Match rules' { 
+    metadata { owner 'core-team' } 
   }
-  cache = container 'Redis' 'Cache + broker' {
-    technology 'Redis'
-    metadata { owner 'policy-engine' }
+  classifier = component 'Classifier' 'PII detection' { 
+    metadata { owner 'core-team' } 
   }
-  ogrRuntime = container 'OpenGuardrails Runtime' 'Python package' {
-    technology 'Python'
-    metadata { owner 'policy-engine' }
+  conflictResolver = component 'Conflict Resolver' 'Overlapping matches' { 
+    metadata { owner 'core-team' } 
   }
-  db = container 'PostgreSQL' 'Supabase / local' {
-    technology 'PostgreSQL'
-    metadata { owner 'policy-engine' }
+  jurisdictions = component 'Jurisdictions' 'Built‑in metadata' { 
+    metadata { owner 'core-team' } 
+  }
+  policyDiff = component 'Policy Diff' 'Version diff' { 
+    metadata { owner 'core-team' } 
+  }
+  enforcement = component 'Enforcement' 'Scan records' { 
+    metadata { owner 'core-team' } 
+  }
+  dsarService = component 'DSAR Service' 'Access/erasure' { 
+    metadata { owner 'core-team' } 
+  }
+  guardrails = component 'Guardrails' 'OpenGuardrails wrapper' { 
+    metadata { owner 'core-team' } 
+  }
+  privacy = component 'Privacy' 'PII mask helpers' { 
+    metadata { owner 'core-team' } 
+  }
+
+  // Ports as components inside Engine Core
+  policyStore = component 'Policy Store' 'Persist policies' { 
+    metadata { owner 'core-team' } 
+  }
+  auditStore = component 'Audit Store' 'Append‑only logs' { 
+    metadata { owner 'core-team' } 
+  }
+  jobStore = component 'Job Store' 'Enforcement jobs' { 
+    metadata { owner 'core-team' } 
+  }
+  dsarStore = component 'DSAR Store' 'Requests & outcomes' { 
+    metadata { owner 'core-team' } 
+  }
+  webhookStore = component 'Webhook Store' 'Endpoint registry' { 
+    metadata { owner 'core-team' } 
+  }
+  graceHoldStore = component 'Grace Hold Store' 'Pending holds' { 
+    metadata { owner 'core-team' } 
+  }
+  catalogStore = component 'Catalog Store' 'Governance catalog' { 
+    metadata { owner 'core-team' } 
+  }
+  guardrailPolicyStore = component 'Guardrail Policy Store' 'Scratch OGR docs' { 
+    metadata { owner 'core-team' } 
+  }
+  recordSource = component 'Record Source' 'Fetch records' { 
+    metadata { owner 'core-team' } 
+  }
+  actionDispatcher = component 'Action Dispatcher' 'Trigger actions' { 
+    metadata { owner 'core-team' } 
+  }
+  webhookSender = component 'Webhook Sender' 'HTTP calls' { 
+    metadata { owner 'core-team' } 
+  }
+
+  // Scheduler components
+  celeryWorker = component 'Celery Worker' 'EnforcementRunner' { 
+    metadata { owner 'core-team' } 
+  }
+  celeryBeat = component 'Celery Beat' 'Periodic scan' { 
+    metadata { owner 'core-team' } 
   }
 
   // Relationships
+  // System context
+  adminActor -> drpe 'Admin UI + API key'
+  dpoActor -> drpe 'Audit / DSAR / grace holds'
+  apps -> drpe 'SDK or REST /api/v1'
+  drpe -> llm 'Admin BFF only (masked prompts)'
+  drpe -> ogrExternal 'Guardrails evaluation when installed'
+  drpe -> hooks 'Action dispatch'
+
+  // Container context
   admin -> api 'DRPE_API_URL + Bearer key'
   sdk -> api 'HTTP'
   sdk -> core 'Embedded mode'
-  api -> core 'In-process'
+  api -> core 'In‑process'
   api -> db 'SQLAlchemy'
   api -> cache 'Optional CachingPolicyStore'
   core -> ogrRuntime 'Optional runtime adapter'
-  scheduler -> core 'EnforcementRunner'
-  scheduler -> db 'Jobs + audit'
-  scheduler -> cache 'Broker / backend'
-  drpe -> llm 'Admin BFF only (masked prompts)'
-  drpe -> ogr 'Guardrails evaluation when installed'
-  drpe -> hooks 'Action dispatch'
-  dpo -> drpe 'Audit / DSAR / grace holds'
-  apps -> drpe 'SDK or REST /api/v1'
+  sched -> core 'EnforcementRunner'
+  sched -> db 'Jobs + audit'
+  sched -> cache 'Broker / backend'
+
+  // Core to ports
+  core -> policyStore 'Read/write policies'
+  core -> auditStore 'Append audit'
+  core -> jobStore 'Read/write jobs'
+  core -> dsarStore 'Read/write DSAR requests'
+  core -> webhookStore 'Read/write webhooks'
+  core -> graceHoldStore 'Read/write grace holds'
+  core -> catalogStore 'Read/write catalog'
+  core -> guardrailPolicyStore 'Read/write scratch OGR docs'
+  core -> recordSource 'Fetch records'
+  core -> actionDispatcher 'Trigger actions'
+  core -> webhookSender 'Send HTTP webhook'
+
+  // Core to components
+  core -> dslParser 'Parse YAML'
+  core -> evaluator 'Evaluate rules'
+  core -> classifier 'Detect PII'
+  core -> conflictResolver 'Resolve conflicts'
+  core -> jurisdictions 'Provide jurisdiction data'
+  core -> policyDiff 'Diff policies'
+  core -> enforcement 'Enforce policies'
+  core -> dsarService 'DSAR workflows'
+  core -> guardrails 'Guardrails integration'
+  core -> privacy 'Privacy helpers'
+
+  // Scheduler components
+  celeryWorker -> core 'Run enforcement jobs'
+  celeryWorker -> db 'Record audit'
+  celeryWorker -> cache 'Broker'
+  celeryBeat -> cache 'Trigger periodic scans'
 }
 
 views {
   view index {
-    title 'ROS Policy Architecture'
-    description 'High‑level view of the ROS Policy engine, its containers, and interactions'
+    title 'ROS Policy — Landscape'
     include *
     autoLayout LeftRight
   }
 
-  view of drpe {
-    title 'ROS Policy — Containers'
+  view drpeSystem of drpe {
+    title 'ROS Policy System Context'
     include *
-    include -> hooks
     include -> llm
-    include -> ogr
+    include -> ogrExternal
+    include -> hooks
     include -> apps
+    include -> adminActor
+    include -> dpoActor
   }
 
-  dynamic view enforcementFlow {
-    title 'Enforcement Job Flow'
-    sequence
-    admin -> scheduler 'Trigger enforcement job via UI'
-    scheduler -> core 'EnforcementRunner'
-    core -> db 'Record audit log'
-    core -> cache 'Update policy cache'
-    core -> hooks 'Dispatch webhook'
-    core -> ogr 'Evaluate GuardEvent (if runtime available)'
-    core -> db 'Write enforcement result'
-    core -> db 'Write grace hold if needed'
+  view drpeContainers of drpe {
+    title 'ROS Policy Containers'
+    include *
+    include -> db
+    include -> cache
+    include -> ogrRuntime
+  }
+
+  view coreComponents of core {
+    title 'Engine Core Components'
+    include *
+    include -> policyStore
+    include -> auditStore
+    include -> jobStore
+    include -> dsarStore
+    include -> webhookStore
+    include -> graceHoldStore
+    include -> catalogStore
+    include -> guardrailPolicyStore
+    include -> recordSource
+    include -> actionDispatcher
+    include -> webhookSender
+  }
+
+  view scheduler of sched {
+    title 'Scheduler (Celery)'
+    include *
+    include -> core
+    include -> db
+    include -> cache
   }
 }
