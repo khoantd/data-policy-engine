@@ -61,6 +61,8 @@ type APIClient struct {
 
 	GraceHoldsAPI *GraceHoldsAPIService
 
+	GuardrailsAPI *GuardrailsAPIService
+
 	HealthAPI *HealthAPIService
 
 	JurisdictionsAPI *JurisdictionsAPIService
@@ -98,6 +100,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.EnforceAPI = (*EnforceAPIService)(&c.common)
 	c.EvaluateAPI = (*EvaluateAPIService)(&c.common)
 	c.GraceHoldsAPI = (*GraceHoldsAPIService)(&c.common)
+	c.GuardrailsAPI = (*GuardrailsAPIService)(&c.common)
 	c.HealthAPI = (*HealthAPIService)(&c.common)
 	c.JurisdictionsAPI = (*JurisdictionsAPIService)(&c.common)
 	c.PoliciesAPI = (*PoliciesAPIService)(&c.common)

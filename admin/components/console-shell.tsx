@@ -17,6 +17,7 @@ import {
   ScanSearch,
   Server,
   Shield,
+  ShieldAlert,
   Webhook,
   Workflow,
   X,
@@ -76,6 +77,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/evaluate", label: "Evaluate", icon: FlaskConical },
       { href: "/classify", label: "Scan", icon: ScanSearch },
+      { href: "/guardrails", label: "Guardrails", icon: ShieldAlert },
       { href: "/observability", label: "Observability", icon: LineChart },
     ],
   },

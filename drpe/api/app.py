@@ -16,6 +16,7 @@ from sqlalchemy.exc import OperationalError
 from drpe.adapters.memory_audit import InMemoryAuditStore
 from drpe.adapters.memory_dsar import InMemoryDsarStore
 from drpe.adapters.memory_grace_holds import InMemoryGraceHoldStore
+from drpe.adapters.memory_guardrails import InMemoryGuardrailPolicyStore
 from drpe.adapters.memory_jobs import InMemoryEnforcementJobStore
 from drpe.adapters.memory_records import InMemoryRecordSource
 from drpe.adapters.memory_store import InMemoryPolicyStore
@@ -30,6 +31,7 @@ from drpe.adapters.sqlalchemy_audit import SqlAlchemyAuditStore
 from drpe.adapters.sqlalchemy_catalog import SqlAlchemyCatalogStore
 from drpe.adapters.sqlalchemy_dsar import SqlAlchemyDsarStore
 from drpe.adapters.sqlalchemy_grace_holds import SqlAlchemyGraceHoldStore
+from drpe.adapters.sqlalchemy_guardrails import SqlAlchemyGuardrailPolicyStore
 from drpe.adapters.sqlalchemy_jobs import SqlAlchemyEnforcementJobStore
 from drpe.adapters.sqlalchemy_store import SqlAlchemyPolicyStore
 from drpe.adapters.sqlalchemy_webhooks import SqlAlchemyWebhookStore
@@ -38,6 +40,10 @@ from drpe.api.routes_dsar import router as dsar_router
 from drpe.api.routes_enforce import router as enforce_router
 from drpe.api.routes_evaluate import router as evaluate_router
 from drpe.api.routes_grace_holds import router as grace_holds_router
+from drpe.api.routes_guardrails import (
+    router as guardrails_router,
+    seed_default_guardrail_policy,
+)
 from drpe.api.routes_misc import health_router, jurisdictions_router
 from drpe.api.routes_classify import router as classify_router
 from drpe.api.routes_policies import router as policies_router
@@ -51,7 +57,7 @@ from drpe.core.classifier import ClassificationEngine
 from drpe.core.evaluator import PolicyEvaluatorEngine
 from drpe.db.session import create_db_engine, create_session_factory
 from drpe.dsl.parser import PolicyParseError, parse_directory
-from drpe.models.stored_policy import as_retention, is_classification_policy
+from drpe.models.stored_policy import as_retention, is_agent_policy, is_classification_policy
 from drpe.ports.policy_store import PolicyStore
 from drpe.scheduler.celery_app import create_celery_app
 from drpe.scheduler.runtime import build_dispatcher, build_runtime, set_enforcement_runtime
@@ -88,6 +94,8 @@ def _bootstrap_store_once(
     if force_seed or len(existing) == 0:
         _seed_from_yaml(store, path)
     for policy in store.list_policies():
+        if is_agent_policy(policy):
+            continue
         if is_classification_policy(policy):
             classifier.add_policy(policy)  # type: ignore[arg-type]
             continue
@@ -206,6 +214,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         webhook_store = SqlAlchemyWebhookStore(session_factory)
         grace_hold_store = SqlAlchemyGraceHoldStore(session_factory)
         catalog_store = SqlAlchemyCatalogStore(session_factory)
+        guardrail_policy_store = SqlAlchemyGuardrailPolicyStore(session_factory)
     else:
         job_store = InMemoryEnforcementJobStore()
         audit_store = InMemoryAuditStore()
@@ -213,6 +222,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         webhook_store = InMemoryWebhookStore()
         grace_hold_store = InMemoryGraceHoldStore()
         catalog_store = InMemoryCatalogStore()
+        guardrail_policy_store = InMemoryGuardrailPolicyStore()
+
+    seed_default_guardrail_policy(
+        guardrail_policy_store,
+        settings.guardrails_default_policy_path,
+    )
 
     record_source = InMemoryRecordSource()
     dispatcher = build_dispatcher(settings)
@@ -276,6 +291,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.grace_hold_store = grace_hold_store
     app.state.enforcement_runtime = runtime
     app.state.celery = celery
+    app.state.guardrail_policy_store = guardrail_policy_store
 
     app.include_router(policies_router, prefix="/api/v1")
     app.include_router(systems_router, prefix="/api/v1")
@@ -290,6 +306,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router, prefix="/api/v1")
     app.include_router(jurisdictions_router, prefix="/api/v1")
     app.include_router(privacy_router, prefix="/api/v1")
+    app.include_router(guardrails_router, prefix="/api/v1")
 
     return app
 

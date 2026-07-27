@@ -13,6 +13,7 @@ class PolicyStatus(str, Enum):
 class PolicyKind(str, Enum):
     RETENTION = "retention"
     CLASSIFICATION = "classification"
+    AGENT = "agent"
 
 
 class DataClassification(str, Enum):

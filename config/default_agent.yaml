@@ -1,0 +1,73 @@
+agent_policy:
+  id: pol_agent_default
+  name: Default agent guardrails
+  status: active
+  jurisdiction: GLOBAL
+  policy_kind: agent
+  scope:
+    data_types: []
+    sources: []
+  ogr_policy:
+    version: "0.1.0"
+    composition:
+      security.*:
+        strategy: deny-wins
+        on_all_failed: block
+      safety.*:
+        strategy: deny-wins
+        on_all_failed: allow
+      default:
+        strategy: deny-wins
+    config_rules:
+      egress_allowlist:
+        - localhost
+        - 127.0.0.1
+        - api.github.com
+        - "*.github.com"
+        - pypi.org
+        - files.pythonhosted.org
+        - registry.npmjs.org
+        - "*.npmjs.org"
+        - "*.supabase.co"
+        - "*.supabase.com"
+        - "*.pooler.supabase.com"
+      secret_env_markers:
+        - SECRET
+        - TOKEN
+        - AWS_
+        - PASSWORD
+        - PRIVATE_KEY
+        - API_KEY
+      command_rules:
+        - id: pipe-to-shell
+          regex: "(curl|wget|fetch)\\b[^|]*\\|\\s*(ba|z|k)?sh\\b"
+          category: security.malicious_command
+          domain: security
+          decision: block
+          score: 0.95
+          why: remote script fetched and piped directly into a shell
+        - id: rm-rf-root
+          regex: "rm\\s+-rf\\s+/(\\s|$)"
+          category: security.malicious_command
+          domain: security
+          decision: block
+          score: 1.0
+          why: destructive recursive delete of filesystem root
+        - id: pipe-to-sudo
+          regex: "\\|\\s*sudo\\b"
+          category: security.privilege_escalation
+          domain: security
+          decision: require_approval
+          score: 0.7
+          why: output piped into sudo
+        - id: remote-fetch-eval
+          regex: "\\$\\(\\s*(curl|wget)\\b"
+          category: security.malicious_command
+          domain: security
+          decision: require_approval
+          score: 0.85
+          why: remote fetch executed via command substitution
+    content_rules:
+      redact_secrets: true
+      injection_from_untrusted: block
+      injection_from_unverified: require_approval

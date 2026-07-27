@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **Valid** | **bool** |  | 
 **Policy** | Pointer to [**NullablePolicy**](Policy.md) |  | [optional] 
 **ClassificationPolicy** | Pointer to [**NullableClassificationPolicy**](ClassificationPolicy.md) |  | [optional] 
+**AgentPolicy** | Pointer to [**NullableAgentPolicy**](AgentPolicy.md) |  | [optional] 
 **PolicyKind** | Pointer to [**NullablePolicyKind**](PolicyKind.md) |  | [optional] 
 **Errors** | Pointer to **[]string** |  | [optional] 
 
@@ -119,6 +120,41 @@ HasClassificationPolicy returns a boolean if a field has been set.
 `func (o *ValidateResponse) UnsetClassificationPolicy()`
 
 UnsetClassificationPolicy ensures that no value is present for ClassificationPolicy, not even an explicit nil
+### GetAgentPolicy
+
+`func (o *ValidateResponse) GetAgentPolicy() AgentPolicy`
+
+GetAgentPolicy returns the AgentPolicy field if non-nil, zero value otherwise.
+
+### GetAgentPolicyOk
+
+`func (o *ValidateResponse) GetAgentPolicyOk() (*AgentPolicy, bool)`
+
+GetAgentPolicyOk returns a tuple with the AgentPolicy field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAgentPolicy
+
+`func (o *ValidateResponse) SetAgentPolicy(v AgentPolicy)`
+
+SetAgentPolicy sets AgentPolicy field to given value.
+
+### HasAgentPolicy
+
+`func (o *ValidateResponse) HasAgentPolicy() bool`
+
+HasAgentPolicy returns a boolean if a field has been set.
+
+### SetAgentPolicyNil
+
+`func (o *ValidateResponse) SetAgentPolicyNil(b bool)`
+
+ SetAgentPolicyNil sets the value for AgentPolicy to be an explicit nil
+
+### UnsetAgentPolicy
+`func (o *ValidateResponse) UnsetAgentPolicy()`
+
+UnsetAgentPolicy ensures that no value is present for AgentPolicy, not even an explicit nil
 ### GetPolicyKind
 
 `func (o *ValidateResponse) GetPolicyKind() PolicyKind`

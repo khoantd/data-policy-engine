@@ -1,13 +1,14 @@
-"""Serialize retention and classification policies for persistence."""
+"""Serialize retention, classification, and agent policies for persistence."""
 
 from __future__ import annotations
 
 from typing import Any
 
+from drpe.models.agent_policy import AgentPolicy
 from drpe.models.classification_policy import ClassificationPolicy
 from drpe.models.enums import DataClassification, PolicyKind
 from drpe.models.policy import Policy
-from drpe.models.stored_policy import StoredPolicy, is_classification_policy, policy_kind_of
+from drpe.models.stored_policy import StoredPolicy, policy_kind_of
 
 
 def _default_data_classification(policy: StoredPolicy) -> str:
@@ -23,6 +24,8 @@ def _default_data_classification(policy: StoredPolicy) -> str:
         }
         top = max(policy.entities, key=lambda e: rank[e.classification])
         return top.classification.value
+    if isinstance(policy, AgentPolicy):
+        return DataClassification.OPERATIONAL.value
     return policy.data_classification.value
 
 
@@ -47,6 +50,7 @@ def stored_policy_to_columns(policy: StoredPolicy) -> dict[str, Any]:
         "audit": data.get("audit") if isinstance(policy, Policy) else None,
         "entities": data.get("entities") if isinstance(policy, ClassificationPolicy) else None,
         "text_fields": data.get("text_fields") if isinstance(policy, ClassificationPolicy) else None,
+        "ogr_policy": data.get("ogr_policy") if isinstance(policy, AgentPolicy) else None,
         "reference_sources": data.get("reference_sources") or [],
     }
     return base
@@ -55,6 +59,24 @@ def stored_policy_to_columns(policy: StoredPolicy) -> dict[str, Any]:
 def row_to_stored_policy(row: Any) -> StoredPolicy:
     kind = getattr(row, "policy_kind", PolicyKind.RETENTION.value)
     reference_sources = getattr(row, "reference_sources", None) or []
+    if kind == PolicyKind.AGENT.value:
+        return AgentPolicy.model_validate(
+            {
+                "id": row.id,
+                "name": row.name,
+                "version": row.version,
+                "status": row.status,
+                "jurisdiction": row.jurisdiction,
+                "owner": row.owner,
+                "effective_from": row.effective_from,
+                "expires_at": row.expires_at,
+                "tags": row.tags or [],
+                "scope": row.scope or {},
+                "ogr_policy": getattr(row, "ogr_policy", None) or {},
+                "rules": row.rules or [],
+                "reference_sources": reference_sources,
+            }
+        )
     if kind == PolicyKind.CLASSIFICATION.value:
         return ClassificationPolicy.model_validate(
             {
@@ -98,6 +120,8 @@ def row_to_stored_policy(row: Any) -> StoredPolicy:
 
 def snapshot_to_stored_policy(snapshot: dict[str, Any]) -> StoredPolicy:
     kind = snapshot.get("policy_kind", PolicyKind.RETENTION)
+    if kind == PolicyKind.AGENT.value or "ogr_policy" in snapshot:
+        return AgentPolicy.model_validate(snapshot)
     if kind == PolicyKind.CLASSIFICATION.value or "entities" in snapshot:
         return ClassificationPolicy.model_validate(snapshot)
     return Policy.model_validate(snapshot)

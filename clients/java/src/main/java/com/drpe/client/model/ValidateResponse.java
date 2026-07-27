@@ -14,6 +14,7 @@
 package com.drpe.client.model;
 
 import java.util.Objects;
+import com.drpe.client.model.AgentPolicy;
 import com.drpe.client.model.ClassificationPolicy;
 import com.drpe.client.model.Policy;
 import com.drpe.client.model.PolicyKind;
@@ -54,7 +55,7 @@ import com.drpe.client.JSON;
 /**
  * ValidateResponse
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-25T13:38:59.026431+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-27T13:10:20.769440+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class ValidateResponse {
   public static final String SERIALIZED_NAME_VALID = "valid";
   @SerializedName(SERIALIZED_NAME_VALID)
@@ -70,6 +71,11 @@ public class ValidateResponse {
   @SerializedName(SERIALIZED_NAME_CLASSIFICATION_POLICY)
   @javax.annotation.Nullable
   private ClassificationPolicy classificationPolicy;
+
+  public static final String SERIALIZED_NAME_AGENT_POLICY = "agent_policy";
+  @SerializedName(SERIALIZED_NAME_AGENT_POLICY)
+  @javax.annotation.Nullable
+  private AgentPolicy agentPolicy;
 
   public static final String SERIALIZED_NAME_POLICY_KIND = "policy_kind";
   @SerializedName(SERIALIZED_NAME_POLICY_KIND)
@@ -141,6 +147,25 @@ public class ValidateResponse {
   }
 
 
+  public ValidateResponse agentPolicy(@javax.annotation.Nullable AgentPolicy agentPolicy) {
+    this.agentPolicy = agentPolicy;
+    return this;
+  }
+
+  /**
+   * Get agentPolicy
+   * @return agentPolicy
+   */
+  @javax.annotation.Nullable
+  public AgentPolicy getAgentPolicy() {
+    return agentPolicy;
+  }
+
+  public void setAgentPolicy(@javax.annotation.Nullable AgentPolicy agentPolicy) {
+    this.agentPolicy = agentPolicy;
+  }
+
+
   public ValidateResponse policyKind(@javax.annotation.Nullable PolicyKind policyKind) {
     this.policyKind = policyKind;
     return this;
@@ -200,6 +225,7 @@ public class ValidateResponse {
     return Objects.equals(this.valid, validateResponse.valid) &&
         Objects.equals(this.policy, validateResponse.policy) &&
         Objects.equals(this.classificationPolicy, validateResponse.classificationPolicy) &&
+        Objects.equals(this.agentPolicy, validateResponse.agentPolicy) &&
         Objects.equals(this.policyKind, validateResponse.policyKind) &&
         Objects.equals(this.errors, validateResponse.errors);
   }
@@ -210,7 +236,7 @@ public class ValidateResponse {
 
   @Override
   public int hashCode() {
-    return Objects.hash(valid, policy, classificationPolicy, policyKind, errors);
+    return Objects.hash(valid, policy, classificationPolicy, agentPolicy, policyKind, errors);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -227,6 +253,7 @@ public class ValidateResponse {
     sb.append("    valid: ").append(toIndentedString(valid)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    classificationPolicy: ").append(toIndentedString(classificationPolicy)).append("\n");
+    sb.append("    agentPolicy: ").append(toIndentedString(agentPolicy)).append("\n");
     sb.append("    policyKind: ").append(toIndentedString(policyKind)).append("\n");
     sb.append("    errors: ").append(toIndentedString(errors)).append("\n");
     sb.append("}");
@@ -250,7 +277,7 @@ public class ValidateResponse {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("valid", "policy", "classification_policy", "policy_kind", "errors"));
+    openapiFields = new HashSet<String>(Arrays.asList("valid", "policy", "classification_policy", "agent_policy", "policy_kind", "errors"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("valid"));
@@ -291,6 +318,10 @@ public class ValidateResponse {
       // validate the optional field `classification_policy`
       if (jsonObj.get("classification_policy") != null && !jsonObj.get("classification_policy").isJsonNull()) {
         ClassificationPolicy.validateJsonElement(jsonObj.get("classification_policy"));
+      }
+      // validate the optional field `agent_policy`
+      if (jsonObj.get("agent_policy") != null && !jsonObj.get("agent_policy").isJsonNull()) {
+        AgentPolicy.validateJsonElement(jsonObj.get("agent_policy"));
       }
       // validate the optional field `policy_kind`
       if (jsonObj.get("policy_kind") != null && !jsonObj.get("policy_kind").isJsonNull()) {

@@ -308,6 +308,10 @@ function isClassification(
   return policy.policy_kind === "classification" || "entities" in policy;
 }
 
+function isAgent(policy: Policy | ClassificationPolicy): boolean {
+  return policy.policy_kind === "agent" || "ogr_policy" in policy;
+}
+
 function buildDetailGraph(
   policy: Policy | ClassificationPolicy,
   maxNodes: number,
@@ -393,6 +397,27 @@ function buildDetailGraph(
         label: entity.label || entity.id,
         policyId: policy.id,
         meta: entity.classification,
+      });
+      bump(policyNode);
+      addEdge(edgeMap, policyId, id, "contains");
+    }
+  }
+
+  if (isAgent(policy) && "ogr_policy" in policy) {
+    const configRules = policy.ogr_policy?.config_rules;
+    const commandRules = Array.isArray(configRules?.command_rules)
+      ? configRules.command_rules
+      : [];
+    for (const rule of commandRules) {
+      if (!rule || typeof rule !== "object" || !("id" in rule)) continue;
+      const ruleId = String((rule as { id: unknown }).id);
+      const id = `ogr_rule:${policy.id}::${ruleId}`;
+      ensureNode(nodeMap, {
+        id,
+        kind: "rule",
+        label: ruleId,
+        policyId: policy.id,
+        meta: "ogr command rule",
       });
       bump(policyNode);
       addEdge(edgeMap, policyId, id, "contains");

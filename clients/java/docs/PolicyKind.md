@@ -9,5 +9,7 @@
 
 * `CLASSIFICATION` (value: `"classification"`)
 
+* `AGENT` (value: `"agent"`)
+
 
 

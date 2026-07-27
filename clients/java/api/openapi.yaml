@@ -2229,6 +2229,226 @@ paths:
       x-content-type: application/json
       x-accepts:
       - application/json
+  /api/v1/guardrails/status:
+    get:
+      operationId: guardrails_status_api_v1_guardrails_status_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuardrailsStatusResponse"
+          description: Successful Response
+      security:
+      - BearerAuth: []
+      summary: Guardrails Status
+      tags:
+      - guardrails
+      x-accepts:
+      - application/json
+  /api/v1/guardrails/policies:
+    get:
+      operationId: list_guardrail_policies_api_v1_guardrails_policies_get
+      parameters:
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/GuardrailPolicyResponse"
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: List Guardrail Policies
+      tags:
+      - guardrails
+      x-accepts:
+      - application/json
+    post:
+      operationId: create_guardrail_policy_api_v1_guardrails_policies_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardrailPolicyCreateRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuardrailPolicyResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Create Guardrail Policy
+      tags:
+      - guardrails
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/guardrails/policies/{policy_id}:
+    delete:
+      operationId: delete_guardrail_policy_api_v1_guardrails_policies__policy_id__delete
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Delete Guardrail Policy
+      tags:
+      - guardrails
+      x-accepts:
+      - application/json
+    get:
+      operationId: get_guardrail_policy_api_v1_guardrails_policies__policy_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuardrailPolicyResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Get Guardrail Policy
+      tags:
+      - guardrails
+      x-accepts:
+      - application/json
+    put:
+      operationId: update_guardrail_policy_api_v1_guardrails_policies__policy_id__put
+      parameters:
+      - explode: false
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          title: Policy Id
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardrailPolicyUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuardrailPolicyResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Update Guardrail Policy
+      tags:
+      - guardrails
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/guardrails/evaluate:
+    post:
+      operationId: evaluate_guard_event_api_v1_guardrails_evaluate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerdictResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      security:
+      - BearerAuth: []
+      summary: Evaluate Guard Event
+      tags:
+      - guardrails
+      x-content-type: application/json
+      x-accepts:
+      - application/json
 components:
   schemas:
     Action:
@@ -2242,6 +2462,99 @@ components:
       - flag
       title: Action
       type: string
+    AgentPolicy:
+      description: Agent safety policy backed by an OpenGuardrails document.
+      example:
+        owner: owner
+        reference_sources:
+        - snippet: ""
+          domain: ""
+          id: 1
+          title: title
+          url: url
+        - snippet: ""
+          domain: ""
+          id: 1
+          title: title
+          url: url
+        jurisdiction: jurisdiction
+        rules:
+        - ""
+        - ""
+        version: 2
+        tags:
+        - tags
+        - tags
+        policy_kind: null
+        expires_at: null
+        ogr_policy:
+          key: ""
+        scope:
+          sources:
+          - sources
+          - sources
+          exclude:
+            sources:
+            - sources
+            - sources
+            data_types:
+            - data_types
+            - data_types
+          data_types:
+          - data_types
+          - data_types
+        name: name
+        id: id
+        effective_from: null
+        status: null
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        version:
+          default: 1
+          title: Version
+          type: integer
+        status:
+          $ref: "#/components/schemas/PolicyStatus"
+        jurisdiction:
+          title: Jurisdiction
+          type: string
+        policy_kind:
+          $ref: "#/components/schemas/PolicyKind"
+        owner:
+          nullable: true
+          type: string
+        effective_from:
+          $ref: "#/components/schemas/Effective_From"
+        expires_at:
+          $ref: "#/components/schemas/Expires_At"
+        tags:
+          items:
+            type: string
+          type: array
+        scope:
+          $ref: "#/components/schemas/PolicyScope"
+        ogr_policy:
+          additionalProperties: true
+          title: Ogr Policy
+          type: object
+        rules:
+          items: {}
+          type: array
+        reference_sources:
+          items:
+            $ref: "#/components/schemas/ReferenceSource"
+          type: array
+      required:
+      - id
+      - jurisdiction
+      - name
+      - ogr_policy
+      title: AgentPolicy
     AuditConfig:
       example:
         log_evaluations: true
@@ -2420,6 +2733,26 @@ components:
       - retired
       title: CatalogStatus
       type: string
+    CategoryModel:
+      example:
+        score: 0.8008281904610115
+        domain: domain
+        id: id
+      properties:
+        id:
+          title: Id
+          type: string
+        domain:
+          title: Domain
+          type: string
+        score:
+          default: 1.0
+          title: Score
+          type: number
+      required:
+      - domain
+      - id
+      title: CategoryModel
     ClassificationAction:
       enum:
       - flag
@@ -3433,6 +3766,53 @@ components:
           nullable: true
           type: string
       title: EntityDetection
+    EvaluateRequest:
+      example:
+        policy_id: policy_id
+        event:
+          context_refs:
+          - context_refs
+          - context_refs
+          event_id: event_id
+          provenance:
+          - trust: trust
+            ref: ref
+            taint_tags:
+            - taint_tags
+            - taint_tags
+            source: source
+          - trust: trust
+            ref: ref
+            taint_tags:
+            - taint_tags
+            - taint_tags
+            source: source
+          payload:
+            key: ""
+          kind: kind
+          subject:
+            key: ""
+          ogr_version: "0.1"
+          observation_point: observation_point
+          guard_id: guard_id
+          llm_protocol: llm_protocol
+          session_id: session_id
+          timestamp: timestamp
+        policy:
+          key: ""
+      properties:
+        event:
+          $ref: "#/components/schemas/GuardEventModel"
+        policy_id:
+          nullable: true
+          type: string
+        policy:
+          additionalProperties: true
+          nullable: true
+          type: object
+      required:
+      - event
+      title: EvaluateRequest
     EvaluationRequest:
       description: Request to evaluate a record against policies.
       example:
@@ -3687,6 +4067,173 @@ components:
       - cancelled
       title: GraceHoldStatus
       type: string
+    GuardEventModel:
+      example:
+        context_refs:
+        - context_refs
+        - context_refs
+        event_id: event_id
+        provenance:
+        - trust: trust
+          ref: ref
+          taint_tags:
+          - taint_tags
+          - taint_tags
+          source: source
+        - trust: trust
+          ref: ref
+          taint_tags:
+          - taint_tags
+          - taint_tags
+          source: source
+        payload:
+          key: ""
+        kind: kind
+        subject:
+          key: ""
+        ogr_version: "0.1"
+        observation_point: observation_point
+        guard_id: guard_id
+        llm_protocol: llm_protocol
+        session_id: session_id
+        timestamp: timestamp
+      properties:
+        kind:
+          title: Kind
+          type: string
+        observation_point:
+          title: Observation Point
+          type: string
+        subject:
+          additionalProperties: true
+          title: Subject
+          type: object
+        payload:
+          additionalProperties: true
+          title: Payload
+          type: object
+        event_id:
+          title: Event Id
+          type: string
+        guard_id:
+          title: Guard Id
+          type: string
+        timestamp:
+          title: Timestamp
+          type: string
+        session_id:
+          nullable: true
+          type: string
+        llm_protocol:
+          nullable: true
+          type: string
+        context_refs:
+          items:
+            type: string
+          type: array
+        provenance:
+          items:
+            $ref: "#/components/schemas/ProvenanceModel"
+          type: array
+        ogr_version:
+          default: "0.1"
+          title: Ogr Version
+          type: string
+      required:
+      - event_id
+      - guard_id
+      - kind
+      - observation_point
+      - timestamp
+      title: GuardEventModel
+    GuardrailPolicyCreateRequest:
+      example:
+        name: name
+        policy:
+          key: ""
+      properties:
+        name:
+          maxLength: 512
+          minLength: 1
+          title: Name
+          type: string
+        policy:
+          additionalProperties: true
+          title: Policy
+          type: object
+      required:
+      - name
+      - policy
+      title: GuardrailPolicyCreateRequest
+    GuardrailPolicyResponse:
+      example:
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        name: name
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        policy:
+          key: ""
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        policy:
+          additionalProperties: true
+          title: Policy
+          type: object
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - created_at
+      - id
+      - name
+      - policy
+      - updated_at
+      title: GuardrailPolicyResponse
+    GuardrailPolicyUpdateRequest:
+      example:
+        name: name
+        policy:
+          key: ""
+      properties:
+        name:
+          maxLength: 512
+          minLength: 1
+          nullable: true
+          type: string
+        policy:
+          additionalProperties: true
+          nullable: true
+          type: object
+      title: GuardrailPolicyUpdateRequest
+    GuardrailsStatusResponse:
+      example:
+        ogr_version: ogr_version
+        available: true
+        enabled: true
+      properties:
+        available:
+          title: Available
+          type: boolean
+        enabled:
+          title: Enabled
+          type: boolean
+        ogr_version:
+          nullable: true
+          type: string
+      required:
+      - available
+      - enabled
+      title: GuardrailsStatusResponse
     HTTPValidationError:
       example:
         detail:
@@ -4146,6 +4693,7 @@ components:
       enum:
       - retention
       - classification
+      - agent
       title: PolicyKind
       type: string
     PolicyListItem:
@@ -4508,6 +5056,32 @@ components:
           nullable: true
           type: array
       title: ProcessUpdateRequest
+    ProvenanceModel:
+      example:
+        trust: trust
+        ref: ref
+        taint_tags:
+        - taint_tags
+        - taint_tags
+        source: source
+      properties:
+        source:
+          title: Source
+          type: string
+        trust:
+          title: Trust
+          type: string
+        ref:
+          nullable: true
+          type: string
+        taint_tags:
+          items:
+            type: string
+          type: array
+      required:
+      - source
+      - trust
+      title: ProvenanceModel
     ReadyResponse:
       example:
         policies_loaded: 0
@@ -4802,6 +5376,49 @@ components:
       example:
         valid: true
         policy_kind: null
+        agent_policy:
+          owner: owner
+          reference_sources:
+          - snippet: ""
+            domain: ""
+            id: 1
+            title: title
+            url: url
+          - snippet: ""
+            domain: ""
+            id: 1
+            title: title
+            url: url
+          jurisdiction: jurisdiction
+          rules:
+          - ""
+          - ""
+          version: 2
+          tags:
+          - tags
+          - tags
+          policy_kind: null
+          expires_at: null
+          ogr_policy:
+            key: ""
+          scope:
+            sources:
+            - sources
+            - sources
+            exclude:
+              sources:
+              - sources
+              - sources
+              data_types:
+              - data_types
+              - data_types
+            data_types:
+            - data_types
+            - data_types
+          name: name
+          id: id
+          effective_from: null
+          status: null
         classification_policy:
           owner: owner
           reference_sources:
@@ -5027,6 +5644,8 @@ components:
           $ref: "#/components/schemas/Policy"
         classification_policy:
           $ref: "#/components/schemas/ClassificationPolicy"
+        agent_policy:
+          $ref: "#/components/schemas/AgentPolicy"
         policy_kind:
           $ref: "#/components/schemas/PolicyKind"
         errors:
@@ -5065,6 +5684,70 @@ components:
       - msg
       - type
       title: ValidationError
+    VerdictResponse:
+      example:
+        event_id: event_id
+        reasons:
+        - reasons
+        - reasons
+        decision: decision
+        evidence:
+        - key: ""
+        - key: ""
+        provider: provider
+        confidence: 6.027456183070403
+        ogr_version: "0.1"
+        guard_id: guard_id
+        categories:
+        - score: 0.8008281904610115
+          domain: domain
+          id: id
+        - score: 0.8008281904610115
+          domain: domain
+          id: id
+        latency_ms: 1.4658129805029452
+      properties:
+        event_id:
+          title: Event Id
+          type: string
+        guard_id:
+          title: Guard Id
+          type: string
+        provider:
+          title: Provider
+          type: string
+        decision:
+          title: Decision
+          type: string
+        categories:
+          items:
+            $ref: "#/components/schemas/CategoryModel"
+          type: array
+        reasons:
+          items:
+            type: string
+          type: array
+        evidence:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+        confidence:
+          nullable: true
+          type: number
+        latency_ms:
+          nullable: true
+          type: number
+        ogr_version:
+          default: "0.1"
+          title: Ogr Version
+          type: string
+      required:
+      - decision
+      - event_id
+      - guard_id
+      - provider
+      title: VerdictResponse
     WebhookCreateRequest:
       description: POST /api/v1/webhooks body.
       example:

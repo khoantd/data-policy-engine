@@ -27,6 +27,9 @@ import {
   SystemResponse,
   ProcessResponse,
   CatalogStatus,
+  GuardrailsStatusResponse,
+  GuardrailPolicyResponse,
+  GuardrailsVerdictResponse,
 } from "@/lib/types";
 
 function apiBase(): string {
@@ -399,5 +402,48 @@ export const drpe = {
     drpeFetch<ClassificationResponse[]>("/classify/batch", {
       method: "POST",
       body: JSON.stringify({ records }),
+    }),
+
+  getGuardrailsStatus: () =>
+    drpeFetch<GuardrailsStatusResponse>("/guardrails/status"),
+  listGuardrailPolicies: (qs?: string) =>
+    drpeFetch<GuardrailPolicyResponse[]>(
+      `/guardrails/policies${qs ? `?${qs}` : ""}`,
+    ),
+  getGuardrailPolicy: (id: string) =>
+    drpeFetch<GuardrailPolicyResponse>(
+      `/guardrails/policies/${encodeURIComponent(id)}`,
+    ),
+  createGuardrailPolicy: (body: {
+    name: string;
+    policy: Record<string, unknown>;
+  }) =>
+    drpeFetch<GuardrailPolicyResponse>("/guardrails/policies", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  updateGuardrailPolicy: (
+    id: string,
+    body: Partial<{ name: string; policy: Record<string, unknown> }>,
+  ) =>
+    drpeFetch<GuardrailPolicyResponse>(
+      `/guardrails/policies/${encodeURIComponent(id)}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(body),
+      },
+    ),
+  deleteGuardrailPolicy: (id: string) =>
+    drpeFetch<void>(`/guardrails/policies/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    }),
+  evaluateGuardEvent: (body: {
+    event: Record<string, unknown>;
+    policy_id?: string;
+    policy?: Record<string, unknown>;
+  }) =>
+    drpeFetch<GuardrailsVerdictResponse>("/guardrails/evaluate", {
+      method: "POST",
+      body: JSON.stringify(body),
     }),
 };

@@ -37,6 +37,7 @@ class PolicyRow(Base):
     rules: Mapped[list[Any]] = mapped_column(JsonType, nullable=False)
     entities: Mapped[list[Any] | None] = mapped_column(JsonType, nullable=True)
     text_fields: Mapped[list[Any] | None] = mapped_column(JsonType, nullable=True)
+    ogr_policy: Mapped[dict[str, Any] | None] = mapped_column(JsonType, nullable=True)
     dsar: Mapped[dict[str, Any] | None] = mapped_column(JsonType, nullable=True)
     audit: Mapped[dict[str, Any] | None] = mapped_column(JsonType, nullable=True)
     reference_sources: Mapped[list[Any]] = mapped_column(
@@ -264,4 +265,22 @@ class PolicyProcessLinkRow(Base):
         String(255),
         ForeignKey(f"{SCHEMA}.processes.id", ondelete="CASCADE"),
         primary_key=True,
+    )
+
+
+class GuardrailPolicyRow(Base):
+    __tablename__ = "guardrail_policies"
+    __table_args__ = {"schema": SCHEMA}
+
+    id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    name: Mapped[str] = mapped_column(String(512), nullable=False)
+    policy: Mapped[dict[str, Any]] = mapped_column(JsonType, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )

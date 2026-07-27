@@ -31,7 +31,9 @@ public enum PolicyKind {
   
   RETENTION("retention"),
   
-  CLASSIFICATION("classification");
+  CLASSIFICATION("classification"),
+  
+  AGENT("agent");
 
   private String value;
 

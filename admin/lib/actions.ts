@@ -595,3 +595,81 @@ export async function classifyAction(
     return { error: errMsg(err) };
   }
 }
+
+export type GuardrailsEvaluateState = {
+  error?: string;
+  verdict?: Awaited<ReturnType<typeof drpe.evaluateGuardEvent>>;
+};
+
+export async function saveGuardrailPolicyAction(
+  _prev: { error?: string; ok?: boolean; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean; message?: string }> {
+  const policyId = String(formData.get("policy_id") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+  const policyRaw = String(formData.get("policy_json") || "").trim();
+  if (!name) return { error: "Name is required" };
+  const parsed = parseJsonObject(policyRaw, "Policy JSON");
+  if (parsed.error) return { error: parsed.error };
+  try {
+    if (policyId) {
+      await drpe.updateGuardrailPolicy(policyId, {
+        name,
+        policy: parsed.value ?? {},
+      });
+    } else {
+      await drpe.createGuardrailPolicy({
+        name,
+        policy: parsed.value ?? {},
+      });
+    }
+    revalidatePath("/guardrails");
+    return { ok: true, message: policyId ? "Policy saved" : "Policy created" };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
+export async function deleteGuardrailPolicyAction(
+  policyId: string,
+): Promise<{ error?: string }> {
+  try {
+    await drpe.deleteGuardrailPolicy(policyId);
+    revalidatePath("/guardrails");
+    return {};
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}
+
+export async function evaluateGuardEventAction(
+  _prev: GuardrailsEvaluateState | null,
+  formData: FormData,
+): Promise<GuardrailsEvaluateState> {
+  const policyId = String(formData.get("policy_id") || "").trim() || undefined;
+  const eventRaw = String(formData.get("event_json") || "").trim();
+  if (!eventRaw) return { error: "GuardEvent JSON is required" };
+  let event: Record<string, unknown>;
+  try {
+    const parsed: unknown = JSON.parse(eventRaw);
+    if (
+      parsed === null ||
+      typeof parsed !== "object" ||
+      Array.isArray(parsed)
+    ) {
+      return { error: "GuardEvent must be a JSON object" };
+    }
+    event = parsed as Record<string, unknown>;
+  } catch {
+    return { error: "GuardEvent is not valid JSON" };
+  }
+  try {
+    const verdict = await drpe.evaluateGuardEvent({
+      event,
+      policy_id: policyId,
+    });
+    return { verdict };
+  } catch (err) {
+    return { error: errMsg(err) };
+  }
+}

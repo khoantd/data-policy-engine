@@ -58,6 +58,7 @@ export function PoliciesFilter({
             <option value="">All kinds</option>
             <option value="retention">Retention</option>
             <option value="classification">Classification</option>
+            <option value="agent">Agent</option>
           </Select>
         </div>
         <div className="w-full sm:w-44">

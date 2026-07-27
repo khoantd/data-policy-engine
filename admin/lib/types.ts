@@ -51,6 +51,34 @@ export type CatalogStatus = Schemas["CatalogStatus"];
 export type SystemResponse = Schemas["SystemResponse"];
 export type ProcessResponse = Schemas["ProcessResponse"];
 
+/** OpenGuardrails plugin types (not yet in generated OpenAPI schemas). */
+export type GuardrailsStatusResponse = {
+  available: boolean;
+  enabled: boolean;
+  ogr_version: string | null;
+};
+
+export type GuardrailPolicyResponse = {
+  id: string;
+  name: string;
+  policy: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+export type GuardrailsVerdictResponse = {
+  event_id: string;
+  guard_id: string;
+  provider: string;
+  decision: string;
+  categories: Array<{ id: string; domain: string; score: number }>;
+  reasons: string[];
+  evidence: Record<string, unknown>[];
+  confidence: number | null;
+  latency_ms: number | null;
+  ogr_version: string;
+};
+
 export class DrpeApiError extends Error {
   status: number;
   detail: unknown;

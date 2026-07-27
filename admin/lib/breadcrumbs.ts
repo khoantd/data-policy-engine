@@ -16,6 +16,7 @@ const ROUTE_LABELS: Record<string, string> = {
   processes: "Processes",
   evaluate: "Evaluate",
   classify: "Scan",
+  guardrails: "Guardrails",
   observability: "Observability",
   enforce: "Enforce",
   "grace-holds": "Grace holds",

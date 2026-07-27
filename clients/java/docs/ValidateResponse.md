@@ -10,6 +10,7 @@
 |**valid** | **Boolean** |  |  |
 |**policy** | [**Policy**](Policy.md) |  |  [optional] |
 |**classificationPolicy** | [**ClassificationPolicy**](ClassificationPolicy.md) |  |  [optional] |
+|**agentPolicy** | [**AgentPolicy**](AgentPolicy.md) |  |  [optional] |
 |**policyKind** | **PolicyKind** |  |  [optional] |
 |**errors** | **List&lt;String&gt;** |  |  [optional] |
 

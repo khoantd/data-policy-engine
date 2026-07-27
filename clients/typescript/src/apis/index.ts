@@ -6,6 +6,7 @@ export * from './DsarApi';
 export * from './EnforceApi';
 export * from './EvaluateApi';
 export * from './GraceHoldsApi';
+export * from './GuardrailsApi';
 export * from './HealthApi';
 export * from './JurisdictionsApi';
 export * from './PoliciesApi';

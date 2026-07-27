@@ -221,9 +221,11 @@ policy:
 def test_list_policies(client: TestClient) -> None:
     resp = client.get("/api/v1/policies")
     assert resp.status_code == 200
-    ids = {p["id"] for p in resp.json()}
+    body = resp.json()
+    ids = {p["id"] for p in body}
+    kinds = {p["policy_kind"] for p in body}
     assert "pol_gdpr_customer" in ids
-    assert resp.json()[0]["policy_kind"] == "retention"
+    assert "retention" in kinds
 
 
 def test_validate_and_classify_classification_policy(client: TestClient) -> None:

@@ -2,7 +2,7 @@
 
 ROS Policy
 - API version: 0.1.0
-  - Build date: 2026-07-25T13:38:59.026431+07:00[Asia/Ho_Chi_Minh]
+  - Build date: 2026-07-27T13:10:20.769440+07:00[Asia/Ho_Chi_Minh]
   - Generator version: 7.14.0
 
 Define, evaluate, and enforce data retention policies
@@ -146,6 +146,13 @@ Class | Method | HTTP request | Description
 *GraceHoldsApi* | [**forceGraceHoldApiV1GraceHoldsHoldIdForcePost**](docs/GraceHoldsApi.md#forceGraceHoldApiV1GraceHoldsHoldIdForcePost) | **POST** /api/v1/grace-holds/{hold_id}/force | Force Grace Hold
 *GraceHoldsApi* | [**getGraceHoldApiV1GraceHoldsHoldIdGet**](docs/GraceHoldsApi.md#getGraceHoldApiV1GraceHoldsHoldIdGet) | **GET** /api/v1/grace-holds/{hold_id} | Get Grace Hold
 *GraceHoldsApi* | [**listGraceHoldsApiV1GraceHoldsGet**](docs/GraceHoldsApi.md#listGraceHoldsApiV1GraceHoldsGet) | **GET** /api/v1/grace-holds | List Grace Holds
+*GuardrailsApi* | [**createGuardrailPolicyApiV1GuardrailsPoliciesPost**](docs/GuardrailsApi.md#createGuardrailPolicyApiV1GuardrailsPoliciesPost) | **POST** /api/v1/guardrails/policies | Create Guardrail Policy
+*GuardrailsApi* | [**deleteGuardrailPolicyApiV1GuardrailsPoliciesPolicyIdDelete**](docs/GuardrailsApi.md#deleteGuardrailPolicyApiV1GuardrailsPoliciesPolicyIdDelete) | **DELETE** /api/v1/guardrails/policies/{policy_id} | Delete Guardrail Policy
+*GuardrailsApi* | [**evaluateGuardEventApiV1GuardrailsEvaluatePost**](docs/GuardrailsApi.md#evaluateGuardEventApiV1GuardrailsEvaluatePost) | **POST** /api/v1/guardrails/evaluate | Evaluate Guard Event
+*GuardrailsApi* | [**getGuardrailPolicyApiV1GuardrailsPoliciesPolicyIdGet**](docs/GuardrailsApi.md#getGuardrailPolicyApiV1GuardrailsPoliciesPolicyIdGet) | **GET** /api/v1/guardrails/policies/{policy_id} | Get Guardrail Policy
+*GuardrailsApi* | [**guardrailsStatusApiV1GuardrailsStatusGet**](docs/GuardrailsApi.md#guardrailsStatusApiV1GuardrailsStatusGet) | **GET** /api/v1/guardrails/status | Guardrails Status
+*GuardrailsApi* | [**listGuardrailPoliciesApiV1GuardrailsPoliciesGet**](docs/GuardrailsApi.md#listGuardrailPoliciesApiV1GuardrailsPoliciesGet) | **GET** /api/v1/guardrails/policies | List Guardrail Policies
+*GuardrailsApi* | [**updateGuardrailPolicyApiV1GuardrailsPoliciesPolicyIdPut**](docs/GuardrailsApi.md#updateGuardrailPolicyApiV1GuardrailsPoliciesPolicyIdPut) | **PUT** /api/v1/guardrails/policies/{policy_id} | Update Guardrail Policy
 *HealthApi* | [**healthApiV1HealthGet**](docs/HealthApi.md#healthApiV1HealthGet) | **GET** /api/v1/health | Health
 *HealthApi* | [**readyApiV1HealthReadyGet**](docs/HealthApi.md#readyApiV1HealthReadyGet) | **GET** /api/v1/health/ready | Ready
 *JurisdictionsApi* | [**getOneApiV1JurisdictionsCodeGet**](docs/JurisdictionsApi.md#getOneApiV1JurisdictionsCodeGet) | **GET** /api/v1/jurisdictions/{code} | Get One
@@ -194,6 +201,7 @@ Class | Method | HTTP request | Description
 ## Documentation for Models
 
  - [Action](docs/Action.md)
+ - [AgentPolicy](docs/AgentPolicy.md)
  - [AuditConfig](docs/AuditConfig.md)
  - [AuditEntry](docs/AuditEntry.md)
  - [AuditEventType](docs/AuditEventType.md)
@@ -202,6 +210,7 @@ Class | Method | HTTP request | Description
  - [CatalogLinkProcessRef](docs/CatalogLinkProcessRef.md)
  - [CatalogLinkSystemRef](docs/CatalogLinkSystemRef.md)
  - [CatalogStatus](docs/CatalogStatus.md)
+ - [CategoryModel](docs/CategoryModel.md)
  - [ClassificationAction](docs/ClassificationAction.md)
  - [ClassificationDiagnostics](docs/ClassificationDiagnostics.md)
  - [ClassificationEntity](docs/ClassificationEntity.md)
@@ -228,6 +237,7 @@ Class | Method | HTTP request | Description
  - [EnforceResponse](docs/EnforceResponse.md)
  - [EnforcementJob](docs/EnforcementJob.md)
  - [EntityDetection](docs/EntityDetection.md)
+ - [EvaluateRequest](docs/EvaluateRequest.md)
  - [EvaluationRequest](docs/EvaluationRequest.md)
  - [EvaluationResponse](docs/EvaluationResponse.md)
  - [EvaluationResultDetail](docs/EvaluationResultDetail.md)
@@ -236,6 +246,11 @@ Class | Method | HTTP request | Description
  - [GraceHold](docs/GraceHold.md)
  - [GraceHoldActionRequest](docs/GraceHoldActionRequest.md)
  - [GraceHoldStatus](docs/GraceHoldStatus.md)
+ - [GuardEventModel](docs/GuardEventModel.md)
+ - [GuardrailPolicyCreateRequest](docs/GuardrailPolicyCreateRequest.md)
+ - [GuardrailPolicyResponse](docs/GuardrailPolicyResponse.md)
+ - [GuardrailPolicyUpdateRequest](docs/GuardrailPolicyUpdateRequest.md)
+ - [GuardrailsStatusResponse](docs/GuardrailsStatusResponse.md)
  - [HTTPValidationError](docs/HTTPValidationError.md)
  - [HealthResponse](docs/HealthResponse.md)
  - [ImportRequest](docs/ImportRequest.md)
@@ -265,6 +280,7 @@ Class | Method | HTTP request | Description
  - [ProcessIdsRequest](docs/ProcessIdsRequest.md)
  - [ProcessResponse](docs/ProcessResponse.md)
  - [ProcessUpdateRequest](docs/ProcessUpdateRequest.md)
+ - [ProvenanceModel](docs/ProvenanceModel.md)
  - [ReadyResponse](docs/ReadyResponse.md)
  - [RecordRef](docs/RecordRef.md)
  - [ReferenceSource](docs/ReferenceSource.md)
@@ -280,6 +296,7 @@ Class | Method | HTTP request | Description
  - [ValidateResponse](docs/ValidateResponse.md)
  - [ValidationError](docs/ValidationError.md)
  - [ValidationErrorLocInner](docs/ValidationErrorLocInner.md)
+ - [VerdictResponse](docs/VerdictResponse.md)
  - [WebhookCreateRequest](docs/WebhookCreateRequest.md)
  - [WebhookCreateResponse](docs/WebhookCreateResponse.md)
  - [WebhookResponse](docs/WebhookResponse.md)

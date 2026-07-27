@@ -17,6 +17,99 @@ export const Action = {
 export type Action = typeof Action[keyof typeof Action];
 
 /**
+ * Agent safety policy backed by an OpenGuardrails document.
+ * @export
+ * @interface AgentPolicy
+ */
+export interface AgentPolicy {
+    /**
+     * 
+     * @type {string}
+     * @memberof AgentPolicy
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgentPolicy
+     */
+    name: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgentPolicy
+     */
+    version?: number;
+    /**
+     * 
+     * @type {PolicyStatus}
+     * @memberof AgentPolicy
+     */
+    status?: PolicyStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgentPolicy
+     */
+    jurisdiction: string;
+    /**
+     * 
+     * @type {PolicyKind}
+     * @memberof AgentPolicy
+     */
+    policyKind?: PolicyKind;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgentPolicy
+     */
+    owner?: string | null;
+    /**
+     * 
+     * @type {EffectiveFrom}
+     * @memberof AgentPolicy
+     */
+    effectiveFrom?: EffectiveFrom | null;
+    /**
+     * 
+     * @type {ExpiresAt}
+     * @memberof AgentPolicy
+     */
+    expiresAt?: ExpiresAt | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AgentPolicy
+     */
+    tags?: Array<string>;
+    /**
+     * 
+     * @type {PolicyScope}
+     * @memberof AgentPolicy
+     */
+    scope?: PolicyScope;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof AgentPolicy
+     */
+    ogrPolicy: { [key: string]: any; };
+    /**
+     * 
+     * @type {Array<any>}
+     * @memberof AgentPolicy
+     */
+    rules?: Array<any>;
+    /**
+     * 
+     * @type {Array<ReferenceSource>}
+     * @memberof AgentPolicy
+     */
+    referenceSources?: Array<ReferenceSource>;
+}
+
+
+/**
  * 
  * @export
  * @interface AuditConfig
@@ -214,6 +307,31 @@ export const CatalogStatus = {
 } as const;
 export type CatalogStatus = typeof CatalogStatus[keyof typeof CatalogStatus];
 
+/**
+ * 
+ * @export
+ * @interface CategoryModel
+ */
+export interface CategoryModel {
+    /**
+     * 
+     * @type {string}
+     * @memberof CategoryModel
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CategoryModel
+     */
+    domain: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CategoryModel
+     */
+    score?: number;
+}
 
 /**
  * 
@@ -1168,6 +1286,31 @@ export interface EntityDetection {
     catalogRef?: string | null;
 }
 /**
+ * 
+ * @export
+ * @interface EvaluateRequest
+ */
+export interface EvaluateRequest {
+    /**
+     * 
+     * @type {GuardEventModel}
+     * @memberof EvaluateRequest
+     */
+    event: GuardEventModel;
+    /**
+     * 
+     * @type {string}
+     * @memberof EvaluateRequest
+     */
+    policyId?: string | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof EvaluateRequest
+     */
+    policy?: { [key: string]: any; } | null;
+}
+/**
  * Request to evaluate a record against policies.
  * @export
  * @interface EvaluationRequest
@@ -1497,6 +1640,185 @@ export const GraceHoldStatus = {
 } as const;
 export type GraceHoldStatus = typeof GraceHoldStatus[keyof typeof GraceHoldStatus];
 
+/**
+ * 
+ * @export
+ * @interface GuardEventModel
+ */
+export interface GuardEventModel {
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardEventModel
+     */
+    kind: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardEventModel
+     */
+    observationPoint: string;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof GuardEventModel
+     */
+    subject?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof GuardEventModel
+     */
+    payload?: { [key: string]: any; };
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardEventModel
+     */
+    eventId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardEventModel
+     */
+    guardId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardEventModel
+     */
+    timestamp: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardEventModel
+     */
+    sessionId?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardEventModel
+     */
+    llmProtocol?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GuardEventModel
+     */
+    contextRefs?: Array<string>;
+    /**
+     * 
+     * @type {Array<ProvenanceModel>}
+     * @memberof GuardEventModel
+     */
+    provenance?: Array<ProvenanceModel>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardEventModel
+     */
+    ogrVersion?: string;
+}
+/**
+ * 
+ * @export
+ * @interface GuardrailPolicyCreateRequest
+ */
+export interface GuardrailPolicyCreateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardrailPolicyCreateRequest
+     */
+    name: string;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof GuardrailPolicyCreateRequest
+     */
+    policy: { [key: string]: any; };
+}
+/**
+ * 
+ * @export
+ * @interface GuardrailPolicyResponse
+ */
+export interface GuardrailPolicyResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardrailPolicyResponse
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardrailPolicyResponse
+     */
+    name: string;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof GuardrailPolicyResponse
+     */
+    policy: { [key: string]: any; };
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardrailPolicyResponse
+     */
+    createdAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardrailPolicyResponse
+     */
+    updatedAt: string;
+}
+/**
+ * 
+ * @export
+ * @interface GuardrailPolicyUpdateRequest
+ */
+export interface GuardrailPolicyUpdateRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardrailPolicyUpdateRequest
+     */
+    name?: string | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof GuardrailPolicyUpdateRequest
+     */
+    policy?: { [key: string]: any; } | null;
+}
+/**
+ * 
+ * @export
+ * @interface GuardrailsStatusResponse
+ */
+export interface GuardrailsStatusResponse {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GuardrailsStatusResponse
+     */
+    available: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GuardrailsStatusResponse
+     */
+    enabled: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof GuardrailsStatusResponse
+     */
+    ogrVersion?: string | null;
+}
 /**
  * 
  * @export
@@ -1957,7 +2279,8 @@ export interface PolicyIdsRequest {
  */
 export const PolicyKind = {
     Retention: 'retention',
-    Classification: 'classification'
+    Classification: 'classification',
+    Agent: 'agent'
 } as const;
 export type PolicyKind = typeof PolicyKind[keyof typeof PolicyKind];
 
@@ -2389,6 +2712,37 @@ export interface ProcessUpdateRequest {
 /**
  * 
  * @export
+ * @interface ProvenanceModel
+ */
+export interface ProvenanceModel {
+    /**
+     * 
+     * @type {string}
+     * @memberof ProvenanceModel
+     */
+    source: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProvenanceModel
+     */
+    trust: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProvenanceModel
+     */
+    ref?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ProvenanceModel
+     */
+    taintTags?: Array<string>;
+}
+/**
+ * 
+ * @export
  * @interface ReadyResponse
  */
 export interface ReadyResponse {
@@ -2760,6 +3114,12 @@ export interface ValidateResponse {
     classificationPolicy?: ClassificationPolicy | null;
     /**
      * 
+     * @type {AgentPolicy}
+     * @memberof ValidateResponse
+     */
+    agentPolicy?: AgentPolicy | null;
+    /**
+     * 
      * @type {PolicyKind}
      * @memberof ValidateResponse
      */
@@ -2816,6 +3176,73 @@ export interface ValidationError {
  * @interface ValidationErrorLocInner
  */
 export interface ValidationErrorLocInner {
+}
+/**
+ * 
+ * @export
+ * @interface VerdictResponse
+ */
+export interface VerdictResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof VerdictResponse
+     */
+    eventId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VerdictResponse
+     */
+    guardId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VerdictResponse
+     */
+    provider: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VerdictResponse
+     */
+    decision: string;
+    /**
+     * 
+     * @type {Array<CategoryModel>}
+     * @memberof VerdictResponse
+     */
+    categories?: Array<CategoryModel>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof VerdictResponse
+     */
+    reasons?: Array<string>;
+    /**
+     * 
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof VerdictResponse
+     */
+    evidence?: Array<{ [key: string]: any; }>;
+    /**
+     * 
+     * @type {number}
+     * @memberof VerdictResponse
+     */
+    confidence?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof VerdictResponse
+     */
+    latencyMs?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof VerdictResponse
+     */
+    ogrVersion?: string;
 }
 /**
  * POST /api/v1/webhooks body.

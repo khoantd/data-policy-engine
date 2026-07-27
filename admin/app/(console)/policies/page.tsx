@@ -18,9 +18,13 @@ import {
 import { PoliciesFilter } from "@/components/policies-filter";
 
 function kindBadgeClass(kind: string): string {
-  return kind === "classification"
-    ? "border-accent/50 text-accent"
-    : "border-secondary/40 text-secondary";
+  if (kind === "classification") {
+    return "border-accent/50 text-accent";
+  }
+  if (kind === "agent") {
+    return "border-primary/40 text-primary";
+  }
+  return "border-secondary/40 text-secondary";
 }
 
 export default async function PoliciesPage({
@@ -61,7 +65,7 @@ export default async function PoliciesPage({
     <>
       <PageHeader
         title="Policies"
-        description="Manage retention and classification policy definitions, versions, and rollbacks."
+        description="Manage retention, classification, and agent safety policy definitions, versions, and rollbacks."
         breadcrumbs={buildBreadcrumbs("/policies")}
         actions={
           <Link href="/policies/import">

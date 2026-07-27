@@ -79,6 +79,14 @@ const POLICY_KIND_META: Record<
     placeholder:
       "e.g. GDPR PII detection for customer profiles: flag SPII (national ID, health) and review PII email/phone…",
   },
+  agent: {
+    label: "Agent safety policy",
+    hint: "LLM and tool-call guardrails evaluated via OpenGuardrails",
+    disclaimer:
+      "Agent policies embed an OpenGuardrails document — review command_rules and content_rules before activating. Evaluate with POST /api/v1/guardrails/evaluate.",
+    placeholder:
+      "e.g. Block pipe-to-shell, flag secret file reads, require approval for sudo pipes…",
+  },
 };
 
 const ENTITY_CATEGORY_META: Record<
@@ -436,7 +444,7 @@ export function PolicyImportAssist({
                 aria-labelledby="policy-kind-label"
                 className="flex flex-wrap gap-2"
               >
-                {(["retention", "classification"] as const).map((kind) => (
+                {(["retention", "classification", "agent"] as const).map((kind) => (
                   <Button
                     key={kind}
                     type="button"
@@ -551,7 +559,7 @@ export function PolicyImportAssist({
                   ))}
                 </div>
               </div>
-            ) : (
+            ) : policyKind === "classification" ? (
               <div className="flex flex-col gap-2">
                 <span
                   id="entity-category-label"
@@ -584,6 +592,12 @@ export function PolicyImportAssist({
                   ))}
                 </div>
               </div>
+            ) : (
+              <p className="text-xs text-muted-fg">
+                Agent policies use an embedded OpenGuardrails document. After
+                import, evaluate GuardEvents via the Guardrails API or console
+                playground.
+              </p>
             )}
 
             <Textarea
@@ -719,7 +733,9 @@ export function PolicyImportAssist({
           title={
             policyKind === "classification"
               ? "Classification policy YAML"
-              : "Retention policy YAML"
+              : policyKind === "agent"
+                ? "Agent safety policy YAML"
+                : "Retention policy YAML"
           }
           className="motion-safe:transition-shadow"
         >

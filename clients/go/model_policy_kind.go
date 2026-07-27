@@ -22,12 +22,14 @@ type PolicyKind string
 const (
 	RETENTION PolicyKind = "retention"
 	CLASSIFICATION PolicyKind = "classification"
+	AGENT PolicyKind = "agent"
 )
 
 // All allowed values of PolicyKind enum
 var AllowedPolicyKindEnumValues = []PolicyKind{
 	"retention",
 	"classification",
+	"agent",
 }
 
 func (v *PolicyKind) UnmarshalJSON(src []byte) error {

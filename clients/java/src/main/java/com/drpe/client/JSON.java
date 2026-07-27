@@ -96,12 +96,14 @@ public class JSON {
         gsonBuilder.registerTypeAdapter(OffsetDateTime.class, offsetDateTimeTypeAdapter);
         gsonBuilder.registerTypeAdapter(LocalDate.class, localDateTypeAdapter);
         gsonBuilder.registerTypeAdapter(byte[].class, byteArrayAdapter);
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.AgentPolicy.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.AuditConfig.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.AuditEntry.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.BatchClassificationRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.BatchEvaluateRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.CatalogLinkProcessRef.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.CatalogLinkSystemRef.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.CategoryModel.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ClassificationDiagnostics.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ClassificationEntity.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ClassificationPolicy.CustomTypeAdapterFactory());
@@ -124,6 +126,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.EnforceResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.EnforcementJob.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.EntityDetection.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.EvaluateRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.EvaluationRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.EvaluationResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.EvaluationResultDetail.CustomTypeAdapterFactory());
@@ -131,6 +134,11 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.FieldCondition.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.GraceHold.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.GraceHoldActionRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.GuardEventModel.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.GuardrailPolicyCreateRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.GuardrailPolicyResponse.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.GuardrailPolicyUpdateRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.GuardrailsStatusResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.HTTPValidationError.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.HealthResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ImportRequest.CustomTypeAdapterFactory());
@@ -155,6 +163,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ProcessIdsRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ProcessResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ProcessUpdateRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ProvenanceModel.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ReadyResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.RecordRef.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ReferenceSource.CustomTypeAdapterFactory());
@@ -169,6 +178,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ValidateResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ValidationError.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.ValidationErrorLocInner.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.VerdictResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.WebhookCreateRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.WebhookCreateResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.drpe.client.model.WebhookResponse.CustomTypeAdapterFactory());

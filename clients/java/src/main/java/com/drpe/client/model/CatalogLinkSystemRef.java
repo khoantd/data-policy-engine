@@ -49,7 +49,7 @@ import com.drpe.client.JSON;
 /**
  * Lean system ref for fleet graph / bulk catalog links.
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-25T13:38:59.026431+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-07-27T13:10:20.769440+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.14.0")
 public class CatalogLinkSystemRef {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)

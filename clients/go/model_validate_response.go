@@ -24,6 +24,7 @@ type ValidateResponse struct {
 	Valid bool `json:"valid"`
 	Policy NullablePolicy `json:"policy,omitempty"`
 	ClassificationPolicy NullableClassificationPolicy `json:"classification_policy,omitempty"`
+	AgentPolicy NullableAgentPolicy `json:"agent_policy,omitempty"`
 	PolicyKind NullablePolicyKind `json:"policy_kind,omitempty"`
 	Errors []string `json:"errors,omitempty"`
 }
@@ -156,6 +157,48 @@ func (o *ValidateResponse) UnsetClassificationPolicy() {
 	o.ClassificationPolicy.Unset()
 }
 
+// GetAgentPolicy returns the AgentPolicy field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *ValidateResponse) GetAgentPolicy() AgentPolicy {
+	if o == nil || IsNil(o.AgentPolicy.Get()) {
+		var ret AgentPolicy
+		return ret
+	}
+	return *o.AgentPolicy.Get()
+}
+
+// GetAgentPolicyOk returns a tuple with the AgentPolicy field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ValidateResponse) GetAgentPolicyOk() (*AgentPolicy, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.AgentPolicy.Get(), o.AgentPolicy.IsSet()
+}
+
+// HasAgentPolicy returns a boolean if a field has been set.
+func (o *ValidateResponse) HasAgentPolicy() bool {
+	if o != nil && o.AgentPolicy.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetAgentPolicy gets a reference to the given NullableAgentPolicy and assigns it to the AgentPolicy field.
+func (o *ValidateResponse) SetAgentPolicy(v AgentPolicy) {
+	o.AgentPolicy.Set(&v)
+}
+// SetAgentPolicyNil sets the value for AgentPolicy to be an explicit nil
+func (o *ValidateResponse) SetAgentPolicyNil() {
+	o.AgentPolicy.Set(nil)
+}
+
+// UnsetAgentPolicy ensures that no value is present for AgentPolicy, not even an explicit nil
+func (o *ValidateResponse) UnsetAgentPolicy() {
+	o.AgentPolicy.Unset()
+}
+
 // GetPolicyKind returns the PolicyKind field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *ValidateResponse) GetPolicyKind() PolicyKind {
 	if o == nil || IsNil(o.PolicyKind.Get()) {
@@ -246,6 +289,9 @@ func (o ValidateResponse) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ClassificationPolicy.IsSet() {
 		toSerialize["classification_policy"] = o.ClassificationPolicy.Get()
+	}
+	if o.AgentPolicy.IsSet() {
+		toSerialize["agent_policy"] = o.AgentPolicy.Get()
 	}
 	if o.PolicyKind.IsSet() {
 		toSerialize["policy_kind"] = o.PolicyKind.Get()

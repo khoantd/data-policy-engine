@@ -24,11 +24,18 @@ from drpe.api.schemas import (
 )
 from drpe.core.policy_diff import diff_policies
 from drpe.dsl.parser import PolicyParseError, parse_yaml
+from drpe.models.agent_policy import AgentDocument, AgentPolicy
 from drpe.models.classification_policy import ClassificationDocument, ClassificationPolicy
 from drpe.models.enums import PolicyKind
 from drpe.models.policy import Policy, PolicyDocument, ReferenceSource
 from drpe.models.process import ProcessIdsRequest, ProcessResponse
-from drpe.models.stored_policy import StoredPolicy, as_retention, is_classification_policy, policy_kind_of
+from drpe.models.stored_policy import (
+    StoredPolicy,
+    as_retention,
+    is_agent_policy,
+    is_classification_policy,
+    policy_kind_of,
+)
 from drpe.models.system import SystemIdsRequest, SystemResponse
 from drpe.ports.catalog_store import CatalogStore
 
@@ -64,10 +71,14 @@ def _policy_from_body(body: PolicyCreateRequest | ValidateRequest) -> StoredPoli
     if body.yaml:
         return parse_yaml(body.yaml)
     if body.policy is not None:
+        if "agent_policy" in body.policy:
+            return AgentDocument.model_validate(body.policy).agent_policy
         if "classification_policy" in body.policy:
             return ClassificationDocument.model_validate(body.policy).classification_policy
         if "policy" in body.policy:
             return PolicyDocument.model_validate(body.policy).policy
+        if "ogr_policy" in body.policy:
+            return AgentPolicy.model_validate(body.policy)
         if "entities" in body.policy:
             return ClassificationPolicy.model_validate(body.policy)
         return Policy.model_validate(body.policy)
@@ -77,6 +88,26 @@ def _policy_from_body(body: PolicyCreateRequest | ValidateRequest) -> StoredPoli
 def _to_list_item(policy: StoredPolicy) -> PolicyListItem:
     kind = policy_kind_of(policy)
     exclude = policy.scope.exclude
+    if is_agent_policy(policy):
+        assert isinstance(policy, AgentPolicy)
+        command_rules = (
+            policy.ogr_policy.get("config_rules", {}).get("command_rules", [])
+            if isinstance(policy.ogr_policy.get("config_rules"), dict)
+            else []
+        )
+        return PolicyListItem(
+            id=policy.id,
+            name=policy.name,
+            version=policy.version,
+            status=policy.status,
+            jurisdiction=policy.jurisdiction,
+            policy_kind=kind,
+            scope_data_types=list(policy.scope.data_types),
+            scope_sources=list(policy.scope.sources),
+            excluded_data_types=list(exclude.data_types) if exclude else [],
+            excluded_sources=list(exclude.sources) if exclude else [],
+            rule_count=len(command_rules),
+        )
     if is_classification_policy(policy):
         assert isinstance(policy, ClassificationPolicy)
         return PolicyListItem(
@@ -116,6 +147,8 @@ def _register_policy(
     engine: EngineDep,
     classifier: ClassifierDep,
 ) -> None:
+    if is_agent_policy(stored):
+        return
     if is_classification_policy(stored):
         classifier.add_policy(stored)  # type: ignore[arg-type]
     else:
@@ -129,6 +162,12 @@ def validate_policy(_: AuthDep, body: ValidateRequest) -> ValidateResponse:
     try:
         policy = _policy_from_body(body)
         kind = policy_kind_of(policy)
+        if is_agent_policy(policy):
+            return ValidateResponse(
+                valid=True,
+                agent_policy=policy,  # type: ignore[arg-type]
+                policy_kind=kind,
+            )
         if is_classification_policy(policy):
             return ValidateResponse(
                 valid=True,
@@ -353,6 +392,11 @@ def diff_policy_versions(
     if from_pol is None or to_pol is None:
         raise HTTPException(status_code=404, detail="version not found")
     if is_classification_policy(from_pol) or is_classification_policy(to_pol):
+        raise HTTPException(
+            status_code=400,
+            detail="policy diff is only supported for retention policies",
+        )
+    if is_agent_policy(from_pol) or is_agent_policy(to_pol):
         raise HTTPException(
             status_code=400,
             detail="policy diff is only supported for retention policies",

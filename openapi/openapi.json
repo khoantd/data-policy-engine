@@ -3401,6 +3401,327 @@
           }
         ]
       }
+    },
+    "/api/v1/guardrails/status": {
+      "get": {
+        "tags": [
+          "guardrails"
+        ],
+        "summary": "Guardrails Status",
+        "operationId": "guardrails_status_api_v1_guardrails_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuardrailsStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/guardrails/policies": {
+      "get": {
+        "tags": [
+          "guardrails"
+        ],
+        "summary": "List Guardrail Policies",
+        "operationId": "list_guardrail_policies_api_v1_guardrails_policies_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GuardrailPolicyResponse"
+                  },
+                  "title": "Response List Guardrail Policies Api V1 Guardrails Policies Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "guardrails"
+        ],
+        "summary": "Create Guardrail Policy",
+        "operationId": "create_guardrail_policy_api_v1_guardrails_policies_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardrailPolicyCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuardrailPolicyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guardrails/policies/{policy_id}": {
+      "get": {
+        "tags": [
+          "guardrails"
+        ],
+        "summary": "Get Guardrail Policy",
+        "operationId": "get_guardrail_policy_api_v1_guardrails_policies__policy_id__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuardrailPolicyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "guardrails"
+        ],
+        "summary": "Update Guardrail Policy",
+        "operationId": "update_guardrail_policy_api_v1_guardrails_policies__policy_id__put",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardrailPolicyUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuardrailPolicyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "guardrails"
+        ],
+        "summary": "Delete Guardrail Policy",
+        "operationId": "delete_guardrail_policy_api_v1_guardrails_policies__policy_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guardrails/evaluate": {
+      "post": {
+        "tags": [
+          "guardrails"
+        ],
+        "summary": "Evaluate Guard Event",
+        "operationId": "evaluate_guard_event_api_v1_guardrails_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerdictResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -3417,6 +3738,112 @@
           "flag"
         ],
         "title": "Action"
+      },
+      "AgentPolicy": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "default": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/PolicyStatus",
+            "default": "draft"
+          },
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
+          "policy_kind": {
+            "$ref": "#/components/schemas/PolicyKind",
+            "default": "agent"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "effective_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PolicyScope"
+          },
+          "ogr_policy": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Ogr Policy"
+          },
+          "rules": {
+            "items": {},
+            "type": "array",
+            "title": "Rules"
+          },
+          "reference_sources": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceSource"
+            },
+            "type": "array",
+            "title": "Reference Sources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "jurisdiction",
+          "ogr_policy"
+        ],
+        "title": "AgentPolicy",
+        "description": "Agent safety policy backed by an OpenGuardrails document."
       },
       "AuditConfig": {
         "properties": {
@@ -3653,6 +4080,29 @@
           "retired"
         ],
         "title": "CatalogStatus"
+      },
+      "CategoryModel": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "default": 1.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "domain"
+        ],
+        "title": "CategoryModel"
       },
       "ClassificationAction": {
         "type": "string",
@@ -4751,6 +5201,41 @@
         "title": "EntityDetection",
         "description": "How to detect an entity in record metadata or text."
       },
+      "EvaluateRequest": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/GuardEventModel"
+          },
+          "policy_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Id"
+          },
+          "policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event"
+        ],
+        "title": "EvaluateRequest"
+      },
       "EvaluationRequest": {
         "properties": {
           "data_type": {
@@ -5134,6 +5619,207 @@
           "cancelled"
         ],
         "title": "GraceHoldStatus"
+      },
+      "GuardEventModel": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "observation_point": {
+            "type": "string",
+            "title": "Observation Point"
+          },
+          "subject": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Subject"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "guard_id": {
+            "type": "string",
+            "title": "Guard Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "llm_protocol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Llm Protocol"
+          },
+          "context_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Context Refs"
+          },
+          "provenance": {
+            "items": {
+              "$ref": "#/components/schemas/ProvenanceModel"
+            },
+            "type": "array",
+            "title": "Provenance"
+          },
+          "ogr_version": {
+            "type": "string",
+            "title": "Ogr Version",
+            "default": "0.1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "observation_point",
+          "event_id",
+          "guard_id",
+          "timestamp"
+        ],
+        "title": "GuardEventModel"
+      },
+      "GuardrailPolicyCreateRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "policy": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Policy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "policy"
+        ],
+        "title": "GuardrailPolicyCreateRequest"
+      },
+      "GuardrailPolicyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "policy": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Policy"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "policy",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "GuardrailPolicyResponse"
+      },
+      "GuardrailPolicyUpdateRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy"
+          }
+        },
+        "type": "object",
+        "title": "GuardrailPolicyUpdateRequest"
+      },
+      "GuardrailsStatusResponse": {
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "ogr_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ogr Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "available",
+          "enabled"
+        ],
+        "title": "GuardrailsStatusResponse"
       },
       "HTTPValidationError": {
         "properties": {
@@ -5633,7 +6319,8 @@
         "type": "string",
         "enum": [
           "retention",
-          "classification"
+          "classification",
+          "agent"
         ],
         "title": "PolicyKind"
       },
@@ -6154,6 +6841,42 @@
         "title": "ProcessUpdateRequest",
         "description": "PATCH /api/v1/processes/{id} body."
       },
+      "ProvenanceModel": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "trust": {
+            "type": "string",
+            "title": "Trust"
+          },
+          "ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref"
+          },
+          "taint_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Taint Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "trust"
+        ],
+        "title": "ProvenanceModel"
+      },
       "ReadyResponse": {
         "properties": {
           "status": {
@@ -6612,6 +7335,16 @@
               }
             ]
           },
+          "agent_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "policy_kind": {
             "anyOf": [
               {
@@ -6675,6 +7408,83 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerdictResponse": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "guard_id": {
+            "type": "string",
+            "title": "Guard Id"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "decision": {
+            "type": "string",
+            "title": "Decision"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryModel"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "ogr_version": {
+            "type": "string",
+            "title": "Ogr Version",
+            "default": "0.1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "guard_id",
+          "provider",
+          "decision"
+        ],
+        "title": "VerdictResponse"
       },
       "WebhookCreateRequest": {
         "properties": {

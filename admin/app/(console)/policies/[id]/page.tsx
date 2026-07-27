@@ -76,17 +76,27 @@ export default async function PolicyDetailPage({
     );
   }
 
-  const initialYaml = yamlDump(
-    { policy: policyForYamlDump(policy) },
-    { lineWidth: 100, noRefs: true, sortKeys: false },
-  );
+  const yamlRoot =
+    policy.policy_kind === "agent"
+      ? { agent_policy: policyForYamlDump(policy) }
+      : policy.policy_kind === "classification"
+        ? { classification_policy: policyForYamlDump(policy) }
+        : { policy: policyForYamlDump(policy) };
+
+  const initialYaml = yamlDump(yamlRoot, {
+    lineWidth: 100,
+    noRefs: true,
+    sortKeys: false,
+  });
 
   const kindLabel =
-    policy.policy_kind === "classification" && "entities" in policy
-      ? `${policy.entities.length} entities`
-      : "data_classification" in policy
-        ? policy.data_classification
-        : policy.policy_kind;
+    policy.policy_kind === "agent" && "ogr_policy" in policy
+      ? "OGR guardrails document"
+      : policy.policy_kind === "classification" && "entities" in policy
+        ? `${policy.entities.length} entities`
+        : "data_classification" in policy
+          ? policy.data_classification
+          : policy.policy_kind;
 
   const referenceSources = policy.reference_sources ?? [];
   const catalogLinks = {

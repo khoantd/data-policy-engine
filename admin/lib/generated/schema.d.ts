@@ -788,6 +788,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/guardrails/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Guardrails Status */
+        get: operations["guardrails_status_api_v1_guardrails_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/guardrails/policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Guardrail Policies */
+        get: operations["list_guardrail_policies_api_v1_guardrails_policies_get"];
+        put?: never;
+        /** Create Guardrail Policy */
+        post: operations["create_guardrail_policy_api_v1_guardrails_policies_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/guardrails/policies/{policy_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Guardrail Policy */
+        get: operations["get_guardrail_policy_api_v1_guardrails_policies__policy_id__get"];
+        /** Update Guardrail Policy */
+        put: operations["update_guardrail_policy_api_v1_guardrails_policies__policy_id__put"];
+        post?: never;
+        /** Delete Guardrail Policy */
+        delete: operations["delete_guardrail_policy_api_v1_guardrails_policies__policy_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/guardrails/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Evaluate Guard Event */
+        post: operations["evaluate_guard_event_api_v1_guardrails_evaluate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -797,6 +868,44 @@ export interface components {
          * @enum {string}
          */
         Action: "retain" | "archive" | "anonymize" | "pseudonymize" | "delete" | "notify" | "flag";
+        /**
+         * AgentPolicy
+         * @description Agent safety policy backed by an OpenGuardrails document.
+         */
+        AgentPolicy: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+            /** @default draft */
+            status: components["schemas"]["PolicyStatus"];
+            /** Jurisdiction */
+            jurisdiction: string;
+            /** @default agent */
+            policy_kind: components["schemas"]["PolicyKind"];
+            /** Owner */
+            owner?: string | null;
+            /** Effective From */
+            effective_from?: string | null;
+            /** Expires At */
+            expires_at?: string | null;
+            /** Tags */
+            tags?: string[];
+            scope?: components["schemas"]["PolicyScope"];
+            /** Ogr Policy */
+            ogr_policy: {
+                [key: string]: unknown;
+            };
+            /** Rules */
+            rules?: unknown[];
+            /** Reference Sources */
+            reference_sources?: components["schemas"]["ReferenceSource"][];
+        };
         /** AuditConfig */
         AuditConfig: {
             /**
@@ -886,6 +995,18 @@ export interface components {
          * @enum {string}
          */
         CatalogStatus: "active" | "retired";
+        /** CategoryModel */
+        CategoryModel: {
+            /** Id */
+            id: string;
+            /** Domain */
+            domain: string;
+            /**
+             * Score
+             * @default 1
+             */
+            score: number;
+        };
         /**
          * ClassificationAction
          * @enum {string}
@@ -1262,6 +1383,16 @@ export interface components {
             /** Catalog Ref */
             catalog_ref?: string | null;
         };
+        /** EvaluateRequest */
+        EvaluateRequest: {
+            event: components["schemas"]["GuardEventModel"];
+            /** Policy Id */
+            policy_id?: string | null;
+            /** Policy */
+            policy?: {
+                [key: string]: unknown;
+            } | null;
+        };
         /**
          * EvaluationRequest
          * @description Request to evaluate a record against policies.
@@ -1395,6 +1526,88 @@ export interface components {
          * @enum {string}
          */
         GraceHoldStatus: "active" | "dispatched" | "forced" | "cancelled";
+        /** GuardEventModel */
+        GuardEventModel: {
+            /** Kind */
+            kind: string;
+            /** Observation Point */
+            observation_point: string;
+            /** Subject */
+            subject?: {
+                [key: string]: unknown;
+            };
+            /** Payload */
+            payload?: {
+                [key: string]: unknown;
+            };
+            /** Event Id */
+            event_id: string;
+            /** Guard Id */
+            guard_id: string;
+            /** Timestamp */
+            timestamp: string;
+            /** Session Id */
+            session_id?: string | null;
+            /** Llm Protocol */
+            llm_protocol?: string | null;
+            /** Context Refs */
+            context_refs?: string[];
+            /** Provenance */
+            provenance?: components["schemas"]["ProvenanceModel"][];
+            /**
+             * Ogr Version
+             * @default 0.1
+             */
+            ogr_version: string;
+        };
+        /** GuardrailPolicyCreateRequest */
+        GuardrailPolicyCreateRequest: {
+            /** Name */
+            name: string;
+            /** Policy */
+            policy: {
+                [key: string]: unknown;
+            };
+        };
+        /** GuardrailPolicyResponse */
+        GuardrailPolicyResponse: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Policy */
+            policy: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** GuardrailPolicyUpdateRequest */
+        GuardrailPolicyUpdateRequest: {
+            /** Name */
+            name?: string | null;
+            /** Policy */
+            policy?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /** GuardrailsStatusResponse */
+        GuardrailsStatusResponse: {
+            /** Available */
+            available: boolean;
+            /** Enabled */
+            enabled: boolean;
+            /** Ogr Version */
+            ogr_version?: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1595,7 +1808,7 @@ export interface components {
          * PolicyKind
          * @enum {string}
          */
-        PolicyKind: "retention" | "classification";
+        PolicyKind: "retention" | "classification" | "agent";
         /** PolicyListItem */
         PolicyListItem: {
             /** Id */
@@ -1761,6 +1974,17 @@ export interface components {
             /** Tags */
             tags?: string[] | null;
         };
+        /** ProvenanceModel */
+        ProvenanceModel: {
+            /** Source */
+            source: string;
+            /** Trust */
+            trust: string;
+            /** Ref */
+            ref?: string | null;
+            /** Taint Tags */
+            taint_tags?: string[];
+        };
         /** ReadyResponse */
         ReadyResponse: {
             /** Status */
@@ -1925,6 +2149,7 @@ export interface components {
             valid: boolean;
             policy?: components["schemas"]["Policy"] | null;
             classification_policy?: components["schemas"]["ClassificationPolicy"] | null;
+            agent_policy?: components["schemas"]["AgentPolicy"] | null;
             policy_kind?: components["schemas"]["PolicyKind"] | null;
             /** Errors */
             errors?: string[];
@@ -1941,6 +2166,34 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VerdictResponse */
+        VerdictResponse: {
+            /** Event Id */
+            event_id: string;
+            /** Guard Id */
+            guard_id: string;
+            /** Provider */
+            provider: string;
+            /** Decision */
+            decision: string;
+            /** Categories */
+            categories?: components["schemas"]["CategoryModel"][];
+            /** Reasons */
+            reasons?: string[];
+            /** Evidence */
+            evidence?: {
+                [key: string]: unknown;
+            }[];
+            /** Confidence */
+            confidence?: number | null;
+            /** Latency Ms */
+            latency_ms?: number | null;
+            /**
+             * Ogr Version
+             * @default 0.1
+             */
+            ogr_version: string;
         };
         /**
          * WebhookCreateRequest
@@ -4005,6 +4258,219 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnmaskResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    guardrails_status_api_v1_guardrails_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuardrailsStatusResponse"];
+                };
+            };
+        };
+    };
+    list_guardrail_policies_api_v1_guardrails_policies_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuardrailPolicyResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_guardrail_policy_api_v1_guardrails_policies_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuardrailPolicyCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuardrailPolicyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_guardrail_policy_api_v1_guardrails_policies__policy_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuardrailPolicyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_guardrail_policy_api_v1_guardrails_policies__policy_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuardrailPolicyUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuardrailPolicyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_guardrail_policy_api_v1_guardrails_policies__policy_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evaluate_guard_event_api_v1_guardrails_evaluate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EvaluateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerdictResponse"];
                 };
             };
             /** @description Validation Error */

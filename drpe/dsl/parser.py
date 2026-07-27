@@ -8,6 +8,7 @@ from typing import Any
 import yaml
 from pydantic import ValidationError
 
+from drpe.models.agent_policy import AgentDocument, AgentPolicy
 from drpe.models.classification_policy import (
     ClassificationDocument,
     ClassificationPolicy,
@@ -25,6 +26,16 @@ class PolicyParseError(Exception):
 
 
 def _parse_root_mapping(data: dict[str, Any]) -> StoredPolicy:
+    if "agent_policy" in data:
+        try:
+            doc = AgentDocument.model_validate(data)
+        except ValidationError as exc:
+            raise PolicyParseError(
+                f"agent policy validation failed: {exc}",
+                errors=exc.errors(),
+            ) from exc
+        return doc.agent_policy
+
     if "classification_policy" in data:
         try:
             doc = ClassificationDocument.model_validate(data)
@@ -77,6 +88,15 @@ def parse_classification_yaml(content: str | bytes) -> ClassificationPolicy:
     if not isinstance(policy, ClassificationPolicy):
         raise PolicyParseError(
             "expected classification policy document (classification_policy: root)"
+        )
+    return policy
+
+
+def parse_agent_yaml(content: str | bytes) -> AgentPolicy:
+    policy = parse_yaml(content)
+    if not isinstance(policy, AgentPolicy):
+        raise PolicyParseError(
+            "expected agent policy document (agent_policy: root)"
         )
     return policy
 

@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     privalyse_allow_list: str = ""
     privacy_mapping_ttl_seconds: int = 300
 
+    guardrails_enabled: bool = True
+    guardrails_default_policy_path: str | None = "config/guardrails/default.policy.json"
+
     @property
     def privalyse_languages_list(self) -> list[str]:
         if not self.privalyse_languages.strip():

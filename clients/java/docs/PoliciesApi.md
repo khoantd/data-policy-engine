@@ -674,7 +674,7 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **statusFilter** | **String**|  | [optional] |
-| **policyKind** | [**PolicyKind**](.md)|  | [optional] [enum: retention, classification] |
+| **policyKind** | [**PolicyKind**](.md)|  | [optional] [enum: retention, classification, agent] |
 
 ### Return type
 

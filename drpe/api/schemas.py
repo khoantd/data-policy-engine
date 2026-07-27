@@ -6,6 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from drpe.models.agent_policy import AgentPolicy
 from drpe.models.classification_policy import ClassificationPolicy, ClassificationRequest
 from drpe.models.enums import PolicyKind, PolicyStatus
 from drpe.models.policy import EvaluationRequest, Policy, ReferenceSource
@@ -47,6 +48,7 @@ class ValidateResponse(BaseModel):
     valid: bool
     policy: Policy | None = None
     classification_policy: ClassificationPolicy | None = None
+    agent_policy: AgentPolicy | None = None
     policy_kind: PolicyKind | None = None
     errors: list[str] = Field(default_factory=list)
 

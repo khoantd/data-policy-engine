@@ -1,6 +1,7 @@
 from drpe.ports.action_dispatcher import ActionDispatcher
 from drpe.ports.audit_store import AuditStore
 from drpe.ports.dsar_store import DsarRequestStore
+from drpe.ports.guardrail_policy_store import GuardrailPolicyStore
 from drpe.ports.job_store import EnforcementJobStore
 from drpe.ports.policy_store import PolicyStore
 from drpe.ports.record_source import RecordSource
@@ -12,6 +13,7 @@ __all__ = [
     "AuditStore",
     "DsarRequestStore",
     "EnforcementJobStore",
+    "GuardrailPolicyStore",
     "PolicyStore",
     "RecordSource",
     "WebhookSender",
