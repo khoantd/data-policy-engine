@@ -93,4 +93,11 @@ views {
     include *
     autoLayout TopBottom
   }
+
+view drpeContainersOverview of drpe {
+    title 'ROS Policy Containers & External'
+    include *
+    include -> *
+    autoLayout TopBottom
+  }
 }
