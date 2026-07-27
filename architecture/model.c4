@@ -100,4 +100,10 @@ view drpeContainersOverview of drpe {
     include -> *
     autoLayout TopBottom
   }
+
+view rosPolicyComponentView of drpe {
+    title 'ROS Policy Components'
+    include core.*
+    autoLayout LeftRight
+  }
 }
