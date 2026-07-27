@@ -1,122 +1,96 @@
 specification {
-  element actor
+  element actor { style { shape person; color amber } }
   element system
   element container
+  element container_ext
+  element container_db
   element component
-  element db
+
   tag external
+  tag critical
 }
 
 model {
-  admin = actor 'Policy Admin'
-  dpo = actor 'DPO / Compliance'
-  apps = system 'Integrating apps' #external
-  llm = system 'LiteLLM' #external
-  ogr = system 'OpenGuardrails' #external
-  hooks = system 'Downstream webhooks' #external
+  admin = actor 'Policy Admin' 'Authors policies, runs evaluate/classify/guardrails playgrounds'
+  dpo   = actor 'DPO / Compliance' 'Reviews audit, DSAR, grace holds'
 
-  drpe = system 'ROS Policy'
+  drpe = system 'ROS Policy' 'Retention, classification, and agent guardrails engine + Admin'
 
-  adminConsole = container 'Admin Console' 'Next.js App Router' {
-    metadata { owner 'platform-team' }
-  }
-  api = container 'REST API' 'FastAPI' '/api/v1' {
-    metadata { owner 'platform-team' }
-  }
-  sdk = container 'Python SDK' 'drpe package' {
-    metadata { owner 'platform-team' }
-  }
-  core = container 'Engine Core' 'Python' {
-    metadata { owner 'platform-team' }
+  apps = system 'Integrating Apps' 'CRM / ERP / data platform' { #external }
+  llm  = system 'LiteLLM' 'Optional AI assist for Admin import/samples' { #external }
+  ogr  = system 'OpenGuardrails' 'Optional runtime for GuardEvent evaluation' { #external }
+  hooks = system 'Downstream Webhooks' 'Receive enforcement actions' { #external }
 
-    dslParser = component 'DSL Parser' 'YAML → Policy Pydantic' {
-      metadata { owner 'platform-team' }
-    }
-    evaluator = component 'Evaluator' 'Rule matching' {
-      metadata { owner 'platform-team' }
-    }
-    classifier = component 'Classifier' 'Entity detection' {
-      metadata { owner 'platform-team' }
-    }
-    conflictResolver = component 'Conflict Resolver' 'Resolve overlapping rules' {
-      metadata { owner 'platform-team' }
-    }
-    jurisdiction = component 'Jurisdiction' 'Metadata' {
-      metadata { owner 'platform-team' }
-    }
-    policyDiff = component 'Policy Diff' 'Structural diff' {
-      metadata { owner 'platform-team' }
-    }
-    enforcement = component 'Enforcement' 'Scan & dispatch' {
-      metadata { owner 'platform-team' }
-    }
-    dsarService = component 'DSAR Service' 'Access/erasure' {
-      metadata { owner 'platform-team' }
-    }
-    guardrailsComp = component 'Guardrails' 'OpenGuardrails runtime' {
-      metadata { owner 'platform-team' }
-    }
-    privacyComp = component 'Privacy' 'PII mask' {
-      metadata { owner 'platform-team' }
-    }
+  adminConsole = container 'Admin Console' 'Next.js App Router' 'BFF, playgrounds, policy import AI' {
+    metadata { owner 'ops-team' }
   }
-  scheduler = container 'Scheduler' 'Celery' {
-    metadata { owner 'platform-team' }
+  api = container 'REST API' 'FastAPI' '/api/v1 policy, evaluate, classify, guardrails, enforce, DSAR…' {
+    metadata { owner 'api-team' }
   }
-  db = container 'PostgreSQL' 'Supabase / local' {
-    metadata { owner 'infra-team' }
+  sdk = container 'Python SDK' 'drpe package' 'Remote client + embedded evaluator' {
+    metadata { owner 'client-team' }
   }
-  cache = container 'Redis' 'Cache + broker' {
-    metadata { owner 'infra-team' }
+  core = container 'Engine Core' 'Python' 'DSL, evaluate, classify, guardrails, enforce, DSAR' {
+    metadata { owner 'engine-team' }
   }
-  ogrRuntime = container 'OpenGuardrails Runtime' 'Python package' {
-    metadata { owner 'platform-team' }
+  sched = container 'Scheduler' 'Celery' 'Periodic + queued enforcement' {
+    metadata { owner 'worker-team' }
+  }
+  db = container_db 'PostgreSQL' 'Supabase / local' 'drpe schema' {
+    metadata { owner 'db-team' }
+  }
+  cache = container_ext 'Redis' 'Cache + broker' 'Policy cache, gen stamp, Celery' {
+    metadata { owner 'cache-team' }
+  }
+  ogrRuntime = container 'OpenGuardrails Runtime' 'Python package' 'Optional GuardEvent runtime' {
+    metadata { owner 'guardrails-team' }
   }
 
-  // Core relationships
-  admin -> api 'DRPE_API_URL + Bearer key'
-  dpo -> api 'Audit / DSAR / grace holds'
-  apps -> api 'SDK or REST /api/v1'
+  dslParser = component 'DSL Parser' 'drpe/dsl/parser.py' 'YAML → Pydantic Policy'
+  evaluator = component 'Evaluator' 'drpe/core/evaluator.py' 'Match scope + rules'
+  classifier = component 'Classifier' 'drpe/core/classifier.py' 'Entity detection vs classification policies'
+  conflictResolver = component 'Conflict Resolver' 'drpe/core/conflict.py' 'Surface overlapping matches'
+  jurisdictions = component 'Jurisdictions' 'drpe/core/jurisdictions.py' 'Built-in jurisdiction metadata'
+  policyDiff = component 'Policy Diff' 'drpe/core/policy_diff.py' 'Structural version diff'
+  enforcement = component 'Enforcement' 'drpe/core/enforcement.py' 'Scan records, grace, dispatch, audit'
+  dsarService = component 'DSAR Service' 'drpe/core/dsar.py' 'Sync access/erasure workflows'
+  guardrails = component 'Guardrails' 'drpe/guardrails/' 'Optional OpenGuardrails runtime wrapper + detectors'
+  privacy = component 'Privacy' 'drpe/privacy/' 'Optional PII mask for AI / privacy APIs'
+
+  adminConsole -> api 'DRPE_API_URL + Bearer key'
   sdk -> api 'HTTP'
   sdk -> core 'Embedded mode'
   api -> core 'In-process'
   api -> db 'SQLAlchemy'
   api -> cache 'Optional CachingPolicyStore'
-  api -> llm 'Admin BFF only (masked prompts)'
-  api -> ogr 'Guardrails evaluation when installed'
-  api -> hooks 'Action dispatch'
-  core -> ogr 'Optional runtime adapter'
-  scheduler -> core 'EnforcementRunner'
-  scheduler -> db 'Jobs + audit'
-  scheduler -> cache 'Broker / backend'
+  core -> ogrRuntime 'Optional runtime adapter'
+  sched -> core 'EnforcementRunner'
+  sched -> db 'Jobs + audit'
+  sched -> cache 'Broker / backend'
 
-  // API internal component delegations
-  api -> dslParser 'Parser for YAML policies'
-  api -> evaluator 'Delegates to evaluator'
-  api -> classifier 'Delegates to classifier'
-  api -> enforcement 'Triggers enforcement'
-  api -> dsarService 'Provides DSAR endpoints'
+  apps -> drpe 'SDK or REST /api/v1'
+  llm  -> drpe 'Admin BFF only (masked prompts)'
+  ogr  -> drpe 'Guardrails evaluation when installed'
+  hooks -> drpe 'Action dispatch'
 }
 
 views {
   view index {
-    title 'ROS Policy Architecture Landscape'
+    title 'ROS Policy Architecture'
+    description 'High‑level view of ROS Policy system'
     include *
     autoLayout LeftRight
   }
 
-  view drpeContext of drpe {
-    title 'ROS Policy — System Context'
+  view drpeContainers of drpe {
+    title 'ROS Policy Containers'
     include *
-  }
-
-  view containers of drpe {
-    title 'ROS Policy — Containers'
-    include *
+    autoLayout TopBottom
   }
 
   view coreComponents of core {
     title 'Engine Core Components'
     include *
+    autoLayout TopBottom
   }
 }
