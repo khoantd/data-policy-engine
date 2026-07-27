@@ -9,6 +9,7 @@ export type PolicyKind = Schemas["PolicyKind"];
 export type Policy = Schemas["Policy"];
 export type PolicyListItem = Schemas["PolicyListItem"];
 export type ClassificationPolicy = Schemas["ClassificationPolicy"];
+export type AgentPolicy = Schemas["AgentPolicy"];
 export type ReferenceSource = Schemas["ReferenceSource"];
 export type ClassificationRequest = Schemas["ClassificationRequest"];
 export type ClassificationResponse = Schemas["ClassificationResponse"];

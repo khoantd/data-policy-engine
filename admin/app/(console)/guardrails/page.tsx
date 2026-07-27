@@ -1,32 +1,44 @@
 import { drpe } from "@/lib/drpe-client";
 import { buildBreadcrumbs } from "@/lib/breadcrumbs";
+import { parsePolicySearchParam } from "@/lib/guardrails-playground";
 import { GuardrailsConsole } from "@/components/guardrails-console";
-import {
-  ContentCard,
-  ErrorAlert,
-  PageHeader,
-} from "@/components/ui/layout";
+import { ErrorAlert, PageHeader } from "@/components/ui/layout";
 import type {
   GuardrailPolicyResponse,
   GuardrailsStatusResponse,
+  PolicyListItem,
 } from "@/lib/types";
 
-export default async function GuardrailsPage() {
+export default async function GuardrailsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    policy?: string | string[];
+  }>;
+}) {
+  const params = await searchParams;
+  const initialPolicyId = parsePolicySearchParam(params.policy);
+
   let error: string | null = null;
   let status: GuardrailsStatusResponse = {
     available: false,
     enabled: true,
     ogr_version: null,
   };
-  let policies: GuardrailPolicyResponse[] = [];
+  let agentPolicies: PolicyListItem[] = [];
+  let scratchPolicies: GuardrailPolicyResponse[] = [];
 
   try {
-    const [statusRes, policyRes] = await Promise.all([
+    const [statusRes, agents, scratch] = await Promise.all([
       drpe.getGuardrailsStatus(),
-      drpe.listGuardrailPolicies("limit=100"),
+      drpe.listPolicies("active", "agent").catch(() => [] as PolicyListItem[]),
+      drpe
+        .listGuardrailPolicies("limit=100")
+        .catch(() => [] as GuardrailPolicyResponse[]),
     ]);
     status = statusRes;
-    policies = policyRes;
+    agentPolicies = agents.filter((p) => p.policy_kind === "agent");
+    scratchPolicies = scratch;
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load guardrails";
   }
@@ -35,15 +47,16 @@ export default async function GuardrailsPage() {
     <>
       <PageHeader
         title="Guardrails"
-        description="OpenGuardrails policies for agent safety — evaluate GuardEvents and manage deployer-owned OGR policy JSON. Lifecycle agent policies live under Policies (Kind: Agent)."
+        description="Playground for agent safety policies — pick an active agent policy (or scratch OGR doc), load a GuardEvent sample, and scan for allow / block / require_approval verdicts. Lifecycle policies are authored under Policies → Kind: Agent."
         breadcrumbs={buildBreadcrumbs("/guardrails")}
       />
       {error && <ErrorAlert message={error} />}
-      <ContentCard>
-        <div className="p-4 md:p-5">
-          <GuardrailsConsole status={status} policies={policies} />
-        </div>
-      </ContentCard>
+      <GuardrailsConsole
+        status={status}
+        agentPolicies={agentPolicies}
+        scratchPolicies={scratchPolicies}
+        initialPolicyId={initialPolicyId}
+      />
     </>
   );
 }

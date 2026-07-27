@@ -1,10 +1,13 @@
 /** Build a structural policy graph (definition attributes, not audit hits). */
 
 import type {
+  AgentPolicy,
   ClassificationPolicy,
   Policy,
   PolicyListItem,
 } from "@/lib/types";
+
+type AnyPolicy = Policy | ClassificationPolicy | AgentPolicy;
 
 export type StructureGraphMode = "fleet" | "detail";
 
@@ -303,17 +306,17 @@ function buildFleetGraph(
 }
 
 function isClassification(
-  policy: Policy | ClassificationPolicy,
+  policy: AnyPolicy,
 ): policy is ClassificationPolicy {
   return policy.policy_kind === "classification" || "entities" in policy;
 }
 
-function isAgent(policy: Policy | ClassificationPolicy): boolean {
+function isAgent(policy: AnyPolicy): policy is AgentPolicy {
   return policy.policy_kind === "agent" || "ogr_policy" in policy;
 }
 
 function buildDetailGraph(
-  policy: Policy | ClassificationPolicy,
+  policy: AnyPolicy,
   maxNodes: number,
   catalogLinks?: PolicyCatalogLinks,
 ): StructureGraph {
@@ -374,13 +377,16 @@ function buildDetailGraph(
   }
 
   for (const rule of policy.rules ?? []) {
-    const id = `rule:${policy.id}::${rule.id}`;
+    if (!rule || typeof rule !== "object" || !("id" in rule)) continue;
+    const ruleObj = rule as { id: unknown; action?: unknown };
+    const ruleId = String(ruleObj.id);
+    const id = `rule:${policy.id}::${ruleId}`;
     const action =
-      "action" in rule ? String(rule.action) : undefined;
+      ruleObj.action != null ? String(ruleObj.action) : undefined;
     ensureNode(nodeMap, {
       id,
       kind: "rule",
-      label: rule.id,
+      label: ruleId,
       policyId: policy.id,
       meta: action,
     });
@@ -403,8 +409,12 @@ function buildDetailGraph(
     }
   }
 
-  if (isAgent(policy) && "ogr_policy" in policy) {
-    const configRules = policy.ogr_policy?.config_rules;
+  if (isAgent(policy)) {
+    const ogr = policy.ogr_policy as Record<string, unknown> | undefined;
+    const configRules =
+      ogr?.config_rules && typeof ogr.config_rules === "object"
+        ? (ogr.config_rules as Record<string, unknown>)
+        : null;
     const commandRules = Array.isArray(configRules?.command_rules)
       ? configRules.command_rules
       : [];
@@ -483,7 +493,7 @@ export type BuildFleetInput = {
 
 export type BuildDetailInput = {
   mode: "detail";
-  policy: Policy | ClassificationPolicy;
+  policy: AnyPolicy;
   maxNodes?: number;
   catalogLinks?: PolicyCatalogLinks;
 };

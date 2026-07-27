@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { dump as yamlDump } from "js-yaml";
+import { ShieldAlert } from "lucide-react";
 import { drpe } from "@/lib/drpe-client";
 import { DrpeApiError, PolicyStatus } from "@/lib/types";
 import { buildBreadcrumbs } from "@/lib/breadcrumbs";
+import { guardrailsPlaygroundHref } from "@/lib/guardrails-playground";
 import { policyForYamlDump } from "@/lib/reference-sources";
 import { PolicyYamlEditor } from "@/components/policy-forms";
 import { PolicyStatusActions } from "@/components/policy-status-actions";
@@ -129,6 +131,32 @@ export default async function PolicyDetailPage({
         policyId={policy.id}
         currentStatus={policy.status as PolicyStatus}
       />
+      {policy.policy_kind === "agent" && (
+        <div className="mb-4 flex flex-col gap-2 rounded-md border border-border bg-muted/30 p-3">
+          <p className="text-xs font-medium text-foreground">
+            Try in playground
+          </p>
+          <p className="text-xs text-muted-fg">
+            Open Guardrails with this agent policy preselected to scan
+            GuardEvents (allow / block / require_approval).
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={guardrailsPlaygroundHref(policy.id)}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm font-medium text-foreground motion-safe:transition-colors motion-safe:duration-150 hover:bg-muted"
+            >
+              <ShieldAlert className="size-3.5" aria-hidden />
+              Try guardrails
+            </Link>
+          </div>
+          {policy.status !== "active" && (
+            <p className="text-xs text-accent" role="status">
+              Activate this policy before scanning — the API rejects non-active
+              agent policies.
+            </p>
+          )}
+        </div>
+      )}
       <div className="mb-4 flex flex-wrap gap-3 text-sm text-muted-fg">
         <span>
           Version{" "}

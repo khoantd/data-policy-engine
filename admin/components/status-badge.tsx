@@ -15,14 +15,18 @@ export function StatusBadge({
     s === "ready" ||
     s === "ok" ||
     s === "retain" ||
-    s === "definitive"
+    s === "definitive" ||
+    s === "allow" ||
+    s === "pass"
       ? "bg-success/10 text-success border-success/30"
       : s === "failed" ||
           s === "denied" ||
           s === "deprecated" ||
           s === "cancelled" ||
           s === "delete" ||
-          s === "anonymize"
+          s === "anonymize" ||
+          s === "block" ||
+          s === "deny"
         ? "bg-destructive/10 text-destructive border-destructive/30"
         : s === "archived" || s === "retired"
           ? "bg-muted text-muted-fg border-border"
@@ -35,7 +39,9 @@ export function StatusBadge({
             s === "notify" ||
             s === "flag" ||
             s === "pseudonymize" ||
-            s === "none"
+            s === "none" ||
+            s === "require_approval" ||
+            s === "review"
           ? "bg-accent/10 text-warning border-accent/30"
           : "bg-muted text-muted-fg border-border";
 
