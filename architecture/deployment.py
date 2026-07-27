@@ -1,59 +1,72 @@
 from diagrams import Diagram, Cluster
-from diagrams.c4 import Container, Database, SystemBoundary, Person, System, Relationship
+from diagrams.aws.compute import ECS, EKS
+from diagrams.aws.network import VPC, ALB
+from diagrams.aws.mobile import APIGateway
+from diagrams.aws.database import RDS, ElastiCache
+from diagrams.aws.security import IAM
+from diagrams.aws.general import Users, Client
 
 with Diagram("Data Policy Engine Deployment", show=False, filename="deployment", direction="TB"):
+    # VPC and security
+    vpc = VPC("VPC")
+    iam = IAM("IAM Roles")
 
-    # Actors
-    admin = Person("Policy Admin")
-    dpo = Person("DPO / Compliance")
+    # External actors
+    admin = Users("Policy Admin")
+    dpo = Users("DPO / Compliance")
+    external_apps = Users("External Apps")
+    external_llm = Client("LiteLLM")
+    external_ogr = Client("OpenGuardrails")
+    external_hooks = Client("Webhooks")
 
-    # External systems
-    externalApps = System("Integrating Apps")
-    externalLLM = System("LiteLLM")
-    externalOGR = System("OpenGuardrails")
-    externalHooks = System("Downstream Webhooks")
+    # Gateway and load balancer
+    api_gateway = APIGateway("API Gateway")
+    alb = ALB("ALB")
 
-    # Deployment environment
-    with Cluster("Environment: prod") as prod:
-        with Cluster("Region: eu-west-1") as euWest1:
-            with Cluster("Kubernetes Cluster") as k8s:
+    # Kubernetes cluster
+    eks_cluster = EKS("EKS Cluster")
 
-                # Runtime components
-                adminConsole = Container("Admin Console")
-                api = Container("REST API")
-                sdk = Container("Python SDK")
-                coreEngine = Container("Engine Core")
-                scheduler = Container("Scheduler")
-                cache = Container("Redis Cache + Broker")
-                guardrailsRuntime = Container("OpenGuardrails Runtime")
-                db = Database("PostgreSQL")
+    # Connect external actors to API entry
+    admin >> api_gateway
+    dpo >> api_gateway
+    external_apps >> api_gateway
+    api_gateway >> alb >> eks_cluster
 
-                # System boundary node for logical grouping
-                drpeSystem = System("ROS Policy System")
+    # Connect cluster and services inside VPC
+    vpc >> eks_cluster
+    vpc >> iam
+    vpc >> RDS("PostgreSQL")
+    vpc >> ElastiCache("Redis")
 
-                # Internal relationships
-                api >> Relationship("In-process") >> coreEngine
-                api >> Relationship("SQLAlchemy") >> db
-                api >> Relationship("Optional Caching") >> cache
-                coreEngine >> Relationship("Runtime Adapter") >> guardrailsRuntime
-                scheduler >> Relationship("Enforcement Runner") >> coreEngine
-                scheduler >> Relationship("Jobs + audit") >> db
-                scheduler >> Relationship("Broker / backend") >> cache
-                coreEngine >> Relationship("Read/Write audit logs") >> db
+    # Services deployed in the EKS cluster
+    with Cluster("EKS Cluster"):
+        admin_console = ECS("Admin Console")
+        api = ECS("API")
+        core_engine = ECS("Engine Core")
+        scheduler = ECS("Scheduler")
+        guardrails_runtime = ECS("Guardrails Runtime")
+        cache = ElastiCache("Redis")
+        db = RDS("PostgreSQL")
 
-                # External interactions
-                admin >> Relationship("Accesses") >> adminConsole
-                admin >> Relationship("Calls") >> api
-                dpo >> Relationship("Audit/DSAR") >> drpeSystem
-                externalApps >> Relationship("Uses API") >> api
-                externalLLM >> Relationship("Provides AI") >> drpeSystem
-                externalOGR >> Relationship("Guardrails Evaluation") >> drpeSystem
-                externalHooks >> Relationship("Receives Actions") >> drpeSystem
-                drpeSystem >> Relationship("Contains") >> coreEngine
-                drpeSystem >> Relationship("Contains") >> api
-                drpeSystem >> Relationship("Contains") >> adminConsole
-                drpeSystem >> Relationship("Contains") >> sdk
-                drpeSystem >> Relationship("Contains") >> scheduler
-                drpeSystem >> Relationship("Contains") >> cache
-                drpeSystem >> Relationship("Contains") >> guardrailsRuntime
-                drpeSystem >> Relationship("Contains") >> db
+    # IAM to services
+    iam >> admin_console
+    iam >> api
+    iam >> core_engine
+    iam >> scheduler
+    iam >> guardrails_runtime
+    iam >> cache
+    iam >> db
+
+    # Internal service communication
+    api >> core_engine
+    core_engine >> db
+    core_engine >> guardrails_runtime
+    api >> cache
+    scheduler >> core_engine
+    scheduler >> db
+    scheduler >> cache
+
+    # External services accessed by API
+    api >> external_llm
+    api >> external_ogr
+    api >> external_hooks
