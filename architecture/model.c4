@@ -172,7 +172,9 @@ deployment view staging {
 
 deployment view prodAncestors {
     title 'Production Deployment — Full Hierarchy'
-    includeAncestors: true
+    include prod
+    include prod.euWest1
+    include prod.euWest1.cluster
     include prod.euWest1.cluster.**
     autoLayout TopBottom
   }
