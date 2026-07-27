@@ -10,6 +10,7 @@ specification {
     notation 'Service / Application'
     technology 'N/A'
   }
+  element component
   element db {
     style {
       shape storage
@@ -38,67 +39,66 @@ model {
     #external
   }
 
-  // ROS Policy system
-  system drpe 'ROS Policy' 'Retention, classification, and agent guardrails engine + Admin'
-
-  // Containers inside ROS Policy
-  container adminConsole 'Admin Console' 'Next.js App Router' {
-    technology 'Next.js 14'
-    metadata {
-      owner 'platform-team'
+  // ROS Policy system — containers/components nested under the system
+  system drpe 'ROS Policy' 'Retention, classification, and agent guardrails engine + Admin' {
+    container adminConsole 'Admin Console' 'Next.js App Router' {
+      technology 'Next.js 14'
+      metadata {
+        owner 'platform-team'
+      }
     }
-  }
-  container api 'REST API' 'FastAPI' {
-    technology 'FastAPI'
-    metadata {
-      owner 'platform-team'
+    container api 'REST API' 'FastAPI' {
+      technology 'FastAPI'
+      metadata {
+        owner 'platform-team'
+      }
     }
-  }
-  container sdk 'Python SDK' 'drpe package' {
-    technology 'Python 3.12'
-    metadata {
-      owner 'platform-team'
+    container sdk 'Python SDK' 'drpe package' {
+      technology 'Python 3.12'
+      metadata {
+        owner 'platform-team'
+      }
     }
-  }
-  container core 'Engine Core' 'Python' {
-    technology 'Python 3.12'
-    metadata {
-      owner 'platform-team'
+    container core 'Engine Core' 'Python' {
+      technology 'Python 3.12'
+      metadata {
+        owner 'platform-team'
+      }
+      // Core components
+      component dslParser 'DSL Parser' 'YAML → Policy objects' {}
+      component evaluator 'Evaluator' 'Match scope + rules' {}
+      component classifier 'Classifier' 'Entity detection vs classification policies' {}
+      component conflictResolver 'Conflict Resolver' 'Surface overlapping matches' {}
+      component jurisdictions 'Jurisdictions' 'Built-in jurisdiction metadata' {}
+      component policyDiff 'Policy Diff' 'Structural version diff' {}
+      component enforcement 'Enforcement' 'Scan records, grace, dispatch, audit' {}
+      component dsarService 'DSAR Service' 'Sync access/erasure workflows' {}
+      component guardrails 'Guardrails' 'Optional OpenGuardrails runtime wrapper' {}
+      component privacy 'Privacy' 'Optional PII mask for AI / privacy APIs' {}
     }
-    // Core components
-    component dslParser 'DSL Parser' 'YAML → Policy objects' {}
-    component evaluator 'Evaluator' 'Match scope + rules' {}
-    component classifier 'Classifier' 'Entity detection vs classification policies' {}
-    component conflictResolver 'Conflict Resolver' 'Surface overlapping matches' {}
-    component jurisdictions 'Jurisdictions' 'Built-in jurisdiction metadata' {}
-    component policyDiff 'Policy Diff' 'Structural version diff' {}
-    component enforcement 'Enforcement' 'Scan records, grace, dispatch, audit' {}
-    component dsarService 'DSAR Service' 'Sync access/erasure workflows' {}
-    component guardrails 'Guardrails' 'Optional OpenGuardrails runtime wrapper' {}
-    component privacy 'Privacy' 'Optional PII mask for AI / privacy APIs' {}
-  }
-  container scheduler 'Scheduler' 'Celery' {
-    technology 'Celery'
-    metadata {
-      owner 'platform-team'
+    container scheduler 'Scheduler' 'Celery' {
+      technology 'Celery'
+      metadata {
+        owner 'platform-team'
+      }
     }
-  }
-  db db 'PostgreSQL' 'Supabase / local' {
-    technology 'PostgreSQL 16'
-    metadata {
-      owner 'platform-team'
+    db db 'PostgreSQL' 'Supabase / local' {
+      technology 'PostgreSQL 16'
+      metadata {
+        owner 'platform-team'
+      }
     }
-  }
-  container cache 'Redis' 'Cache + broker' {
-    technology 'Redis'
-    metadata {
-      owner 'platform-team'
+    container cache 'Redis' 'Cache + broker' {
+      technology 'Redis'
+      metadata {
+        owner 'platform-team'
+      }
     }
-  }
-  container ogrRuntime 'OpenGuardrails Runtime' 'Python package' {
-    technology 'OpenGuardrails'
-    metadata {
-      owner 'platform-team'
+    container ogrRuntime 'OpenGuardrails Runtime' 'Python package' {
+      technology 'OpenGuardrails'
+      metadata {
+        owner 'platform-team'
+      }
     }
   }
 
@@ -111,17 +111,17 @@ model {
   drpe -> ogr 'Guardrails evaluation when installed'
   drpe -> hooks 'Action dispatch'
 
-  // Containers
-  adminConsole -> api 'DRPE_API_URL + Bearer key'
-  sdk -> api 'HTTP'
-  sdk -> core 'Embedded mode'
-  api -> core 'In-process'
-  api -> db 'SQLAlchemy'
-  api -> cache 'Optional CachingPolicyStore'
-  core -> ogrRuntime 'Optional runtime adapter'
-  scheduler -> core 'EnforcementRunner'
-  scheduler -> db 'Jobs + audit'
-  scheduler -> cache 'Broker / backend'
+  // Containers (FQN under drpe)
+  drpe.adminConsole -> drpe.api 'DRPE_API_URL + Bearer key'
+  drpe.sdk -> drpe.api 'HTTP'
+  drpe.sdk -> drpe.core 'Embedded mode'
+  drpe.api -> drpe.core 'In-process'
+  drpe.api -> drpe.db 'SQLAlchemy'
+  drpe.api -> drpe.cache 'Optional CachingPolicyStore'
+  drpe.core -> drpe.ogrRuntime 'Optional runtime adapter'
+  drpe.scheduler -> drpe.core 'EnforcementRunner'
+  drpe.scheduler -> drpe.db 'Jobs + audit'
+  drpe.scheduler -> drpe.cache 'Broker / backend'
 }
 
 views {
@@ -141,8 +141,8 @@ views {
   view api of drpe.api {
     title 'REST API – Internal Dependencies'
     include *
-    include -> db
-    include -> cache
+    include -> drpe.db
+    include -> drpe.cache
     autoLayout LeftRight
   }
 
