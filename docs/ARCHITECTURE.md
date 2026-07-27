@@ -1,7 +1,7 @@
 # ROS Policy — Architecture
 
 > Product display name: **ROS Policy**. Technical package/env remain `drpe` / `DRPE_*`.
-> Updated: 2026-07-24
+> Updated: 2026-07-27
 
 ## 1. System Overview
 
@@ -15,6 +15,7 @@ ROS Policy is a **standalone retention & classification policy engine** that app
 6. **Version** policies with full history, structural diff, and rollback-as-new-version
 7. **Govern** systems & processes (RoPA-style catalog) linked to policies (metadata only)
 8. **Operate** via Admin UI (Next.js BFF) over the same `/api/v1` surface
+9. **Guard** agent / LLM workflows with optional OpenGuardrails-backed agent policies and GuardEvent evaluation
 
 ### Architecture Style: Hexagonal (Ports & Adapters)
 
@@ -27,17 +28,20 @@ The engine is usable as a **REST API** (remote) and a **Python SDK** (in-process
 │  │ DSL Parser │ │ Evaluator  │ │ Classifier │ │ Policy Diff   │ │
 │  └────────────┘ └────────────┘ └────────────┘ └───────────────┘ │
 │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌───────────────┐ │
-│  │ Enforcement│ │ DSAR Svc   │ │ Jurisdiction│ │ Conflict Res. │ │
+│  │ Enforcement│ │ DSAR Svc   │ │ Guardrails │ │ Conflict Res. │ │
 │  └────────────┘ └────────────┘ └────────────┘ └───────────────┘ │
+│  ┌────────────┐                                                 │
+│  │ Jurisdiction│                                                │
+│  └────────────┘                                                 │
 ├──────────────────────────────────────────────────────────────────┤
 │                             Ports                                │
 │  PolicyStore · AuditStore · JobStore · DsarStore · WebhookStore  │
-│  GraceHoldStore · CatalogStore · RecordSource · ActionDispatcher │
-│  WebhookSender                                                   │
+│  GraceHoldStore · CatalogStore · GuardrailPolicyStore            │
+│  RecordSource · ActionDispatcher · WebhookSender                 │
 ├──────────────────────────────────────────────────────────────────┤
 │                            Adapters                              │
 │  InMemory* · SqlAlchemy* · CachingPolicyStore (Redis)            │
-│  HttpWebhook · ActionDispatchers · FastAPI · Python SDK · Celery │
+│  OpenGuardrails runtime · HttpWebhook · FastAPI · SDK · Celery   │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -57,6 +61,7 @@ flowchart TB
     FastAPI["FastAPI<br/>/api/v1"]
     Engine["PolicyEvaluatorEngine"]
     Classifier["ClassificationEngine"]
+    Guardrails["Guardrails service<br/>OpenGuardrails runtime"]
   end
 
   subgraph workers [Optional workers]
@@ -70,6 +75,7 @@ flowchart TB
   end
 
   subgraph external [External]
+    OGR["OpenGuardrails<br/>optional runtime package"]
     LiteLLM["LiteLLM<br/>Admin AI assist only"]
     WebhookTgt["Webhook targets<br/>DRPE_WEBHOOK_URL"]
   end
@@ -81,8 +87,10 @@ flowchart TB
   HTTP --> FastAPI
   FastAPI --> Engine
   FastAPI --> Classifier
+  FastAPI --> Guardrails
   FastAPI --> PG
   FastAPI --> Redis
+  Guardrails --> OGR
   CeleryW --> Engine
   CeleryW --> PG
   CeleryW --> Redis
@@ -92,10 +100,10 @@ flowchart TB
 
 | Process | Role |
 |---------|------|
-| **API** (`uvicorn drpe.api.app:app`) | Policy CRUD, evaluate, classify, DSAR, webhooks, audit reads, catalog |
+| **API** (`uvicorn drpe.api.app:app`) | Policy CRUD, evaluate, classify, guardrails, DSAR, webhooks, audit reads, catalog |
 | **Celery worker** | Runs queued `POST /enforce` jobs via `EnforcementRunner` |
 | **Celery beat** | Periodic `scan_due_policies` when broker is configured |
-| **Admin** (`admin/`) | Ops console; holds API key in httpOnly cookie; AI via Admin BFF only |
+| **Admin** (`admin/`) | Ops console; holds API key in httpOnly cookie; includes evaluate/classify/guardrails playgrounds; AI via Admin BFF only |
 
 ---
 
@@ -107,19 +115,21 @@ flowchart TB
 C4Context
     title ROS Policy — System Context
 
-    Person(admin, "Policy Admin", "Authors policies, runs evaluate/classify playgrounds")
+    Person(admin, "Policy Admin", "Authors policies, runs evaluate/classify/guardrails playgrounds")
     Person(dpo, "DPO / Compliance", "Reviews audit, DSAR, grace holds")
 
-    System(drpe, "ROS Policy", "Retention & classification policy engine + Admin")
+    System(drpe, "ROS Policy", "Retention, classification, and agent guardrails engine + Admin")
 
     System_Ext(apps, "Integrating apps", "CRM / ERP / data platform")
     System_Ext(llm, "LiteLLM", "Optional AI assist for Admin import/samples")
+    System_Ext(ogr, "OpenGuardrails", "Optional runtime for GuardEvent evaluation")
     System_Ext(hooks, "Downstream webhooks", "Receive enforcement actions")
 
     Rel(admin, drpe, "Admin UI + API key")
     Rel(dpo, drpe, "Audit / DSAR / grace holds")
     Rel(apps, drpe, "SDK or REST /api/v1")
     Rel(drpe, llm, "Admin BFF only (masked prompts)")
+    Rel(drpe, ogr, "Guardrails evaluation when installed")
     Rel(drpe, hooks, "Action dispatch")
 ```
 
@@ -130,12 +140,13 @@ C4Container
     title ROS Policy — Containers
 
     Container(admin, "Admin Console", "Next.js App Router", "BFF, playgrounds, policy import AI")
-    Container(api, "REST API", "FastAPI", "/api/v1 policy, evaluate, classify, enforce, DSAR…")
+    Container(api, "REST API", "FastAPI", "/api/v1 policy, evaluate, classify, guardrails, enforce, DSAR…")
     Container(sdk, "Python SDK", "drpe package", "Remote client + embedded evaluator")
-    Container(core, "Engine Core", "Python", "DSL, evaluate, classify, enforce, DSAR")
+    Container(core, "Engine Core", "Python", "DSL, evaluate, classify, guardrails, enforce, DSAR")
     Container(sched, "Scheduler", "Celery", "Periodic + queued enforcement")
     ContainerDb(db, "PostgreSQL", "Supabase / local", "drpe schema")
     Container(cache, "Redis", "Cache + broker", "Policy cache, gen stamp, Celery")
+    Container_Ext(ogr, "OpenGuardrails Runtime", "Python package", "Optional GuardEvent runtime")
 
     Rel(admin, api, "DRPE_API_URL + Bearer key")
     Rel(sdk, api, "HTTP")
@@ -143,6 +154,7 @@ C4Container
     Rel(api, core, "In-process")
     Rel(api, db, "SQLAlchemy")
     Rel(api, cache, "Optional CachingPolicyStore")
+    Rel(core, ogr, "Optional runtime adapter")
     Rel(sched, core, "EnforcementRunner")
     Rel(sched, db, "Jobs + audit")
     Rel(sched, cache, "Broker / backend")
@@ -160,6 +172,7 @@ C4Container
 | Policy diff | `drpe/core/policy_diff.py` | Structural version diff |
 | Enforcement | `drpe/core/enforcement.py` | Scan records, grace, dispatch, audit |
 | DSAR service | `drpe/core/dsar.py` | Sync access/erasure workflows |
+| Guardrails | `drpe/guardrails/` | Optional OpenGuardrails runtime wrapper + DRPE detectors |
 | Privacy | `drpe/privacy/` | Optional PII mask for AI / privacy APIs |
 
 ---
@@ -172,11 +185,12 @@ C4Container
 | `drpe/dsl/` | YAML policy parser |
 | `drpe/core/` | Evaluator, classifier, enforcement, DSAR, operators |
 | `drpe/api/` | FastAPI `create_app()`, routes, settings, deps |
+| `drpe/guardrails/` | OpenGuardrails availability, runtime factory, detectors, evaluate service |
 | `drpe/sdk/` | `DRPEClient`, embedded `PolicyEvaluator`, `@enforce` |
 | `drpe/ports/` | Protocols (stores, RecordSource, dispatchers) |
 | `drpe/adapters/` | In-memory, SQLAlchemy, Redis cache, HTTP webhook |
 | `drpe/db/` | ORM rows, session helpers |
-| `drpe/migrations/` | Alembic versions `001`–`009` |
+| `drpe/migrations/` | Alembic versions `001`–`011` |
 | `drpe/scheduler/` | Celery app, tasks, enforcement runtime |
 | `drpe/privacy/` | Masking / privacy helpers |
 | `admin/` | Next.js ops console (BFF over `/api/v1`) |
@@ -200,7 +214,9 @@ C4Container
 1. `DATABASE_URL` set → SQLAlchemy stores; else in-memory stores
 2. `REDIS_URL` / `DRPE_REDIS_URL` set → wrap policy store with `CachingPolicyStore` + engine generation sync
 3. Seed YAML from `DRPE_POLICIES_DIR` (default `config/`) when store empty, or when `DRPE_SEED_YAML=true` / in-memory mode
-4. Celery broker: `CELERY_BROKER_URL` or `REDIS_URL`; eager/`memory://` when unset (`DRPE_CELERY_EAGER`)
+4. Guardrails scratch documents use `GuardrailPolicyStore`; seed `config/guardrails/default.policy.json` when that store is empty
+5. `GUARDRAILS_ENABLED` toggles runtime access; missing `openguardrails` leaves the API surface up but `/guardrails/evaluate` returns unavailable
+6. Celery broker: `CELERY_BROKER_URL` or `REDIS_URL`; eager/`memory://` when unset (`DRPE_CELERY_EAGER`)
 
 ---
 
@@ -218,6 +234,7 @@ Browser → Next.js middleware (session cookie)
 | Auth | Login sets httpOnly cookie with API key; middleware guards console |
 | Data access | Server-side `DRPE_API_URL` + Bearer key; no key in browser JS |
 | AI assist | BFF routes: `policy-suggest`, `classify-sample`, `evaluate-sample` |
+| Guardrails UX | `/guardrails` loads runtime status, active agent policies, and scratch OGR docs; deep-link via `?policy=` |
 | Design | `admin/design-system/` (Fira Sans/Code, blue/amber) |
 | OpenAPI types | `admin/lib/generated/schema.d.ts` via `npm run openapi` |
 
@@ -229,6 +246,7 @@ Browser → Next.js middleware (session cookie)
 | `/policies`, `/policies/[id]`, `/policies/import`, `/policies/graph` | CRUD, versions, AI import, structure graph |
 | `/systems`, `/processes` | Governance catalog + policy links |
 | `/evaluate`, `/classify` | Playgrounds (dry-run default for evaluate) |
+| `/guardrails` | Agent safety playground; evaluate GuardEvents against active agent policies or scratch OGR docs |
 | `/enforce`, `/grace-holds` | Jobs + grace hold actions |
 | `/dsar`, `/audit`, `/webhooks` | Requests, audit trail, webhook CRUD |
 | `/insights`, `/observability` | Relation graph / LangSmith traces (when configured) |
@@ -258,6 +276,7 @@ Optional Bearer **`DRPE_API_KEY`**. If unset, API is open (dev/test). Full OAuth
 | `/health` | `routes_misc.py` | Liveness / readiness (DB + Redis PING) |
 | `/jurisdictions` | `routes_misc.py` | Built-in jurisdiction list |
 | `/privacy` | `routes_privacy.py` | Mask / privacy helpers |
+| `/guardrails` | `routes_guardrails.py` | Runtime status, scratch OGR CRUD, GuardEvent evaluate |
 
 Interactive docs: `http://localhost:8000/docs`. Contract: `openapi/openapi.json`.
 
@@ -327,15 +346,19 @@ policy:
 
 `retain`, `archive`, `anonymize`, `pseudonymize`, `delete`, `notify`, `flag`
 
-Policies also support **`policy_kind`**: retention vs classification (migration `005`). Classification policies use entities / text fields rather than retention actions.
+Policies also support **`policy_kind`**: retention, classification, or agent. Classification policies use entities / text fields rather than retention actions.
+
+Agent policies are first-class records in the main `policies` store. They use the `agent_policy:` YAML root and carry an embedded **`ogr_policy`** JSON document for OpenGuardrails evaluation. Agent policy lifecycle (draft/active/deprecated, versions, activate) is shared with other policy kinds, but execution happens through `POST /api/v1/guardrails/evaluate`, not `/evaluate` or `/classify`.
 
 Optional **`reference_sources`** (AI provenance URLs) are metadata on the policy — not part of the YAML DSL scope and not used for matching (migration `008`).
+
+Scratch / raw OGR documents are also supported under `/api/v1/guardrails/policies`; these live outside the main policy lifecycle and are mainly used for playground / authoring workflows.
 
 ---
 
 ## 8. Persistence
 
-**Schema:** `drpe` (Postgres / Supabase). Migrations: `alembic upgrade head` through `009_systems_processes`.
+**Schema:** `drpe` (Postgres / Supabase). Migrations: `alembic upgrade head` through `011_agent_ogr_policy`.
 
 | Table | Purpose |
 |-------|---------|
@@ -346,7 +369,10 @@ Optional **`reference_sources`** (AI provenance URLs) are metadata on the policy
 | `dsar_requests` | Access/erasure requests + outcomes |
 | `webhooks` | Registered endpoints + events + secret |
 | `grace_holds` | Pending grace-period holds |
+| `guardrail_policies` | Scratch OpenGuardrails JSON documents for `/guardrails/policies` |
 | `systems` / `processes` (+ link tables) | Governance catalog; many-to-many policy links |
+
+`policies.ogr_policy` (migration `011`) stores the OpenGuardrails JSON document for `PolicyKind.agent` rows.
 
 ### Redis (optional)
 
@@ -364,6 +390,8 @@ Pool caps: `DRPE_REDIS_MAX_CONNECTIONS` (default 20), Celery `DRPE_CELERY_BROKER
 - **Activate = rollback-as-new-version** — never rewrite `policy_versions` history
 - **Soft deprecate** policies; catalog links cleared on deprecate/delete
 - **Systems/Processes** are governance metadata only — they do **not** change evaluate/classify matching (Admin can seed `source` from `source_key` for UX)
+- **Guardrails availability is soft** — if disabled or `openguardrails` is not installed, status reports unavailable and evaluation returns `503`
+- **Agent guardrails use the main policy store** — only scratch OGR docs use `guardrail_policies`
 - **Webhook fan-out** to registered rows is deferred; live dispatch still uses `DRPE_WEBHOOK_URL`
 
 ---
@@ -386,6 +414,27 @@ Without a worker (and without eager mode), jobs remain `queued`.
 ### DSAR
 
 Synchronous `DsarService`: collect records (inline + `RecordSource` matching `record_id` / `metadata.subject_id`), apply policy DSAR rights/exceptions, dispatch erasure via `ActionDispatcher`, audit immediately.
+
+### Guardrails
+
+`POST /guardrails/evaluate` accepts either:
+
+- `policy_id` for an **active agent policy** in the main `policies` store (`ogr_policy` is resolved server-side), or
+- an inline / scratch OGR policy document.
+
+Flow:
+
+```
+Admin/API caller
+  → routes_guardrails.py
+  → resolve active agent policy or scratch OGR document
+  → drpe.guardrails.service.evaluate_event()
+  → runtime_factory.build_runtime()
+  → OpenGuardrails runtime.evaluate(GuardEvent)
+  → VerdictResponse (allow / block / require_approval + reasons/categories/evidence)
+```
+
+If the runtime is disabled or the optional dependency is missing, `/guardrails/status` still works but evaluate returns `503`.
 
 ---
 
@@ -418,7 +467,7 @@ result = evaluator.classify(data_type="customer_profile", metadata={...})
 | Compliance | Immutable audit, jurisdictions, DSAR, grace holds |
 | Reliability | Store fallbacks, Redis read fall-through, Celery retries |
 | Performance | Redis policy cache, batch evaluate/classify, Admin lazy loads |
-| Extensibility | YAML DSL, pluggable RecordSource / ActionDispatcher |
+| Extensibility | YAML DSL, pluggable RecordSource / ActionDispatcher, optional OpenGuardrails adapter |
 | Security | Optional API key, CORS (`DRPE_CORS_ORIGINS`), no secrets in SESSION/docs; AI prompts masked when privacy stack installed |
 | Operability | `/health`, `/health/ready`, structured Admin observability |
 

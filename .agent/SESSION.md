@@ -31,6 +31,8 @@ Ship optional OpenGuardrails Guardrails plugin for DRPE (API + admin); agent pol
   - Deep link `?policy=` + policy detail “Try guardrails”
   - Scratch OGR docs moved to secondary `<details>`
   - Helpers + vitest: `admin/lib/guardrails-playground.ts`
+- **Architecture docs refresh (2026-07-27)**
+  - `docs/ARCHITECTURE.md` now reflects Guardrails runtime, `/guardrails` API/admin surface, agent `ogr_policy`, and migrations `010` / `011`
 
 ## In progress
 
