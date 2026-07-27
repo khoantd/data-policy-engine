@@ -1,141 +1,113 @@
 specification {
-  element actor
+  element actor {
+    style { shape person; color amber }
+  }
   element system
-  element systemExt
-  element container
-  element containerExt
-  element containerDb
+  element container {
+    technology 'N/A'
+  }
   element component
+  element containerDb {
+    style { shape storage; icon tech:postgresql }
+  }
+  tag external
+  tag critical
 }
 
 model {
-  admin = actor 'Policy Admin' {
-    description 'Authors policies, runs evaluate/classify/guardrails playgrounds'
+  // Actors
+  admin = actor 'Admin' 'Policy Admin'
+  dpo = actor 'DPO' 'Data Protection Officer'
+
+  // External Systems
+  apps = system 'Apps' 'Integrating applications' {
+    #external
   }
-  dpo = actor 'DPO / Compliance' {
-    description 'Reviews audit, DSAR, grace holds'
+  llm = system 'LiteLLM' 'Optional AI assist' {
+    #external
   }
-
-  drpe = system 'ROS Policy' {
-    description 'Retention, classification, and agent guardrails engine + Admin'
-    metadata { owner 'drpe-team' }
-
-    adminConsole = container 'Admin Console' {
-      description 'Next.js App Router, BFF, playgrounds, policy import AI'
-      technology 'Next.js 14'
-      metadata { owner 'drpe-team' }
-    }
-    api = container 'REST API' {
-      description 'FastAPI /api/v1 policy, evaluate, classify, guardrails, enforce, DSAR…'
-      technology 'FastAPI'
-      metadata { owner 'drpe-team' }
-    }
-    sdk = container 'Python SDK' {
-      description 'drpe package, remote client + embedded evaluator'
-      technology 'Python'
-      metadata { owner 'drpe-team' }
-    }
-    core = container 'Engine Core' {
-      description 'Python: DSL, evaluate, classify, guardrails, enforce, DSAR'
-      technology 'Python'
-      metadata { owner 'drpe-team' }
-
-      dslParser = component 'DSL Parser' {
-        description 'YAML → Pydantic Policy / classification policy'
-      }
-      evaluator = component 'Evaluator' {
-        description 'Match scope + rules; lowest priority wins'
-      }
-      classifier = component 'Classifier' {
-        description 'Entity detection vs classification policies'
-      }
-      conflictResolver = component 'Conflict Resolver' {
-        description 'Surface overlapping matches'
-      }
-      jurisdictions = component 'Jurisdictions' {
-        description 'Built‑in jurisdiction metadata'
-      }
-      policyDiff = component 'Policy Diff' {
-        description 'Structural version diff'
-      }
-      enforcement = component 'Enforcement' {
-        description 'Scan records, grace, dispatch, audit'
-      }
-      dsarService = component 'DSAR Service' {
-        description 'Sync access/erasure workflows'
-      }
-      guardrails = component 'Guardrails' {
-        description 'Optional OpenGuardrails runtime wrapper + detectors'
-      }
-      privacy = component 'Privacy' {
-        description 'Optional PII mask for AI / privacy APIs'
-      }
-    }
-    scheduler = container 'Scheduler' {
-      description 'Celery periodic + queued enforcement'
-      technology 'Celery'
-      metadata { owner 'drpe-team' }
-    }
-    db = containerDb 'PostgreSQL' {
-      description 'Supabase / local, drpe schema'
-      technology 'PostgreSQL'
-      metadata { owner 'drpe-team' }
-    }
-    cache = container 'Redis' {
-      description 'Cache + broker, policy cache, Celery'
-      technology 'Redis'
-      metadata { owner 'drpe-team' }
-    }
-    ogrRuntime = containerExt 'OpenGuardrails Runtime' {
-      description 'Python package, optional GuardEvent runtime'
-      technology 'Python'
-      metadata { owner 'drpe-team' }
-    }
-
-    drpeExtApps = systemExt 'Integrating Apps' {
-      description 'CRM / ERP / data platform'
-      technology 'External'
-    }
-    drpeExtLLM = systemExt 'LiteLLM' {
-      description 'Optional AI assist for Admin import/samples'
-      technology 'External'
-    }
-    drpeExtOGR = systemExt 'OpenGuardrails' {
-      description 'Optional runtime for GuardEvent evaluation'
-      technology 'External'
-    }
-    drpeExtHooks = systemExt 'Downstream Webhooks' {
-      description 'Receive enforcement actions'
-      technology 'External'
-    }
+  ogr = system 'OpenGuardrails' 'Optional runtime' {
+    #external
+  }
+  hooks = system 'Webhooks' 'Downstream webhook targets' {
+    #external
   }
 
-  /* Relationships – System context level */
-  admin -> drpe.adminConsole 'Admin UI + API key'
+  // Core System
+  drpe = system 'ROS Policy' 'Retention & classification policy engine + Admin' {
+    #critical
+
+    // Containers
+    adminConsole = container 'Admin Console' 'Next.js App Router' {
+      metadata { owner 'platform-team' }
+    }
+    api = container 'REST API' 'FastAPI' {
+      metadata { owner 'platform-team' }
+    }
+    sdk = container 'Python SDK' 'drpe package' {
+      metadata { owner 'platform-team' }
+    }
+    core = container 'Engine Core' 'Python' {
+      metadata { owner 'platform-team' }
+    }
+    scheduler = container 'Scheduler' 'Celery' {
+      metadata { owner 'platform-team' }
+    }
+    db = containerDb 'PostgreSQL' 'Supabase / local' {
+      metadata { owner 'platform-team' }
+    }
+    cache = container 'Redis' 'Cache + broker' {
+      metadata { owner 'platform-team' }
+    }
+    ogrRuntime = container 'OpenGuardrails Runtime' 'Python package' {
+      metadata { owner 'platform-team' }
+    }
+
+    // Components within Engine Core
+    coreDSLParser = component 'DSL Parser' 'drpe/dsl/parser.py'
+    coreEvaluator = component 'Evaluator' 'drpe/core/evaluator.py'
+    coreClassifier = component 'Classifier' 'drpe/core/classifier.py'
+    coreConflictResolver = component 'Conflict Resolver' 'drpe/core/conflict.py'
+    coreJurisdictions = component 'Jurisdictions' 'drpe/core/jurisdictions.py'
+    corePolicyDiff = component 'Policy Diff' 'drpe/core/policy_diff.py'
+    coreEnforcement = component 'Enforcement' 'drpe/core/enforcement.py'
+    coreDSAR = component 'DSAR Service' 'drpe/core/dsar.py'
+    coreGuardrails = component 'Guardrails' 'drpe/guardrails/'
+    corePrivacy = component 'Privacy' 'drpe/privacy/'
+  }
+
+  // Relationships
+  // System Context
+  admin -> drpe 'Admin UI + API key'
   dpo -> drpe 'Audit / DSAR / grace holds'
-  drpe.drpeExtApps -> drpe 'SDK or REST /api/v1'
-  drpe -> drpeExtLLM 'Admin BFF only (masked prompts)'
-  drpe -> drpeExtOGR 'Guardrails evaluation when installed'
-  drpe -> drpeExtHooks 'Action dispatch'
+  apps -> drpe 'SDK or REST /api/v1'
+  drpe -> llm 'Admin BFF only (masked prompts)'
+  drpe -> ogr 'Guardrails evaluation when installed'
+  drpe -> hooks 'Action dispatch'
 
-  /* Container interactions */
-  drpe.adminConsole -> drpe.api 'DRPE_API_URL + Bearer key'
-  drpe.adminConsole -> drpeExtLLM 'AI suggest / samples'
-  drpe.sdk -> drpe.api 'HTTP'
-  drpe.sdk -> drpe.core 'Embedded mode'
-  drpe.api -> drpe.core 'In-process'
-  drpe.api -> drpe.db 'SQLAlchemy'
-  drpe.api -> drpe.cache 'Optional CachingPolicyStore'
-  drpe.core -> drpe.ogrRuntime 'Optional runtime adapter'
-  drpe.scheduler -> drpe.core 'EnforcementRunner'
-  drpe.scheduler -> drpe.db 'Jobs + audit'
-  drpe.scheduler -> drpe.cache 'Broker / backend'
+  // Container Context
+  adminConsole -> api 'DRPE_API_URL + Bearer key'
+  sdk -> api 'HTTP'
+  sdk -> core 'Embedded mode'
+  api -> core 'In-process'
+  api -> db 'SQLAlchemy'
+  api -> cache 'Optional CachingPolicyStore'
+  core -> ogrRuntime 'Optional runtime adapter'
+  scheduler -> core 'EnforcementRunner'
+  scheduler -> db 'Jobs + audit'
+  scheduler -> cache 'Broker / backend'
+
+  // Core Components
+  core -> db 'Data persistence'
+  core -> cache 'Cache usage'
+  coreEnforcement -> db 'Audit logs'
+  coreEnforcement -> cache 'Broker'
+  coreGuardrails -> ogrRuntime 'Runtime adapter'
 }
 
 views {
   view index {
-    title 'ROS Policy – Landscape'
-    description 'Top‑level view of the ROS Policy system and its ecosystem'
+    title 'ROS Policy — Landscape'
     include *
     autoLayout LeftRight
   }
@@ -143,25 +115,37 @@ views {
   view drpeContext of drpe {
     title 'ROS Policy — System Context'
     include *
-    include drpe -> drpeExtLLM
-    include drpe -> drpeExtOGR
-    include drpe -> drpeExtHooks
-    include drpe -> drpeExtApps
+    include -> apps
+    include -> llm
+    include -> ogr
+    include -> hooks
   }
 
-  view apiInternals of drpe.api {
-    title 'REST API – Internal Dependencies'
+  view drpeContainers of drpe {
+    title 'ROS Policy — Containers'
     include *
-    include drpe.api -> drpe.core
-    include drpe.api -> drpe.db
-    include drpe.api -> drpe.cache
+    include adminConsole
+    include api
+    include sdk
+    include core
+    include scheduler
+    include db
+    include cache
+    include ogrRuntime
   }
 
-  view schedulerContext of drpe.scheduler {
-    title 'Scheduler – Worker & Beat'
+  view coreComponents of drpe.core {
+    title 'ROS Policy — Engine Core Components'
     include *
-    include drpe.scheduler -> drpe.core
-    include drpe.scheduler -> drpe.db
-    include drpe.scheduler -> drpe.cache
+    include coreDSLParser
+    include coreEvaluator
+    include coreClassifier
+    include coreConflictResolver
+    include coreJurisdictions
+    include corePolicyDiff
+    include coreEnforcement
+    include coreDSAR
+    include coreGuardrails
+    include corePrivacy
   }
 }
