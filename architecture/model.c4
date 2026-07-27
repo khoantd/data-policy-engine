@@ -158,22 +158,22 @@ views {
     api -> cache 'Cache policy'
   }
 
-deployment view prod of prod {
+deployment view prod {
     title 'Production Deployment'
-    include *
+    include prod.**
     autoLayout TopBottom
   }
 
-deployment view staging of staging {
+deployment view staging {
     title 'Staging Deployment'
-    include *
+    include staging.**
     autoLayout TopBottom
   }
 
-deployment view prodAncestors of prod.euWest1.cluster {
+deployment view prodAncestors {
     title 'Production Deployment — Full Hierarchy'
-    include *
     includeAncestors: true
+    include prod.euWest1.cluster.**
     autoLayout TopBottom
   }
 
