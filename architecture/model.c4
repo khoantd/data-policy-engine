@@ -53,24 +53,20 @@ model {
     metadata { owner 'platform-team' }
   }
 
-  externalApps = system 'Integrating apps' 'CRM / ERP / data platform' {
+  externalApps = system 'Integrating apps' 'CRM / ERP / data platform' { #external
     metadata { owner 'platform-team' }
-    #external
   }
 
-  externalLLM = system 'LiteLLM' 'Optional AI assist for Admin import/samples' {
+  externalLLM = system 'LiteLLM' 'Optional AI assist for Admin import/samples' { #external
     metadata { owner 'platform-team' }
-    #external
   }
 
-  externalOGR = system 'OpenGuardrails' 'Optional runtime for GuardEvent evaluation' {
+  externalOGR = system 'OpenGuardrails' 'Optional runtime for GuardEvent evaluation' { #external
     metadata { owner 'platform-team' }
-    #external
   }
 
-  externalHooks = system 'Downstream webhooks' 'Receive enforcement actions' {
+  externalHooks = system 'Downstream webhooks' 'Receive enforcement actions' { #external
     metadata { owner 'platform-team' }
-    #external
   }
 
   admin -> drpe 'Admin UI + API key'
