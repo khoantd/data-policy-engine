@@ -101,12 +101,6 @@ view drpeContainersOverview of drpe {
     autoLayout TopBottom
   }
 
-view rosPolicyComponentView of drpe {
-    title 'ROS Policy Components'
-    include core.*
-    autoLayout LeftRight
-  }
-
 view rosPolicyComponentsView of drpe {
     title 'ROS Policy Components'
     include adminConsole
