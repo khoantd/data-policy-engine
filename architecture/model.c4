@@ -12,6 +12,12 @@ specification {
   }
   tag external
   tag critical
+
+deploymentNode environment
+deploymentNode region
+deploymentNode kubernetes
+deploymentNode namespace
+deploymentNode managed
 }
 
 model {
@@ -105,6 +111,75 @@ model {
   coreGuardrails -> ogrRuntime 'Runtime adapter'
 }
 
+deployment {
+environment prod {
+    region eu-west-1 {
+      kubernetes cluster {
+        namespace apiNs {
+          apiPod = instanceOf drpe.api {
+            metadata { replicas '3'; zone 'public' }
+          }
+        }
+        namespace coreNs {
+          corePod = instanceOf drpe.core {
+            metadata { zone 'public' }
+          }
+        }
+        namespace workerNs {
+          schedulerPod = instanceOf drpe.scheduler {
+            metadata { zone 'public' }
+          }
+        }
+        namespace dbNs {
+          dbInstance = instanceOf drpe.db {
+            metadata { zone 'public' }
+          }
+        }
+        namespace cacheNs {
+          cacheInstance = instanceOf drpe.cache {
+            metadata { zone 'public' }
+          }
+        }
+      }
+      managed rds {
+        instanceOf drpe.db {
+          metadata { zone 'public' }
+        }
+      }
+      managed elasticache {
+        instanceOf drpe.cache {
+          metadata { zone 'public' }
+        }
+      }
+    }
+    region us-east-1 {
+      kubernetes cluster {
+        namespace apiNs {
+          apiPod = instanceOf drpe.api
+        }
+        namespace coreNs {
+          corePod = instanceOf drpe.core
+        }
+        namespace workerNs {
+          schedulerPod = instanceOf drpe.scheduler
+        }
+        namespace dbNs {
+          dbInstance = instanceOf drpe.db
+        }
+        namespace cacheNs {
+          cacheInstance = instanceOf drpe.cache
+        }
+      }
+      managed rds {
+        instanceOf drpe.db
+      }
+      managed elasticache {
+        instanceOf drpe.cache
+      }
+    }
+  }
+}
+
 views {
   view index {
     title 'ROS Policy — Landscape'
@@ -147,5 +222,12 @@ views {
     include coreDSAR
     include coreGuardrails
     include corePrivacy
+  }
+
+deployment view prod {
+    title 'ROS Policy — Production Deployment'
+    include *
+    autoLayout TopBottom
+    includeAncestors true
   }
 }
