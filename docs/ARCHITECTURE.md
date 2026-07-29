@@ -5,7 +5,7 @@
 
 ## 1. System Overview
 
-ROS Policy is a **standalone retention & classification policy engine** that applications integrate with to:
+ROS Policy is a **standalone retention &amp; classification policy engine** that applications integrate with to:
 
 1. **Define** retention and classification policies via a YAML DSL
 2. **Evaluate** whether a record should be retained, archived, anonymized, deleted, etc.
@@ -13,11 +13,11 @@ ROS Policy is a **standalone retention & classification policy engine** that app
 4. **Enforce** policies via scheduled Celery scans + webhook / action dispatch
 5. **Audit** enforcement and DSAR outcomes with an append-only trail
 6. **Version** policies with full history, structural diff, and rollback-as-new-version
-7. **Govern** systems & processes (RoPA-style catalog) linked to policies (metadata only)
+7. **Govern** systems &amp; processes (RoPA-style catalog) linked to policies (metadata only)
 8. **Operate** via Admin UI (Next.js BFF) over the same `/api/v1` surface
 9. **Guard** agent / LLM workflows with optional OpenGuardrails-backed agent policies and GuardEvent evaluation
 
-### Architecture Style: Hexagonal (Ports & Adapters)
+### Architecture Style: Hexagonal (Ports &amp; Adapters)
 
 The engine is usable as a **REST API** (remote) and a **Python SDK** (in-process). Core evaluation/classification stays independent of transport and storage.
 
@@ -98,13 +98,6 @@ flowchart TB
   CeleryW --> WebhookTgt
 ```
 
-| Process | Role |
-|---------|------|
-| **API** (`uvicorn drpe.api.app:app`) | Policy CRUD, evaluate, classify, guardrails, DSAR, webhooks, audit reads, catalog |
-| **Celery worker** | Runs queued `POST /enforce` jobs via `EnforcementRunner` |
-| **Celery beat** | Periodic `scan_due_policies` when broker is configured |
-| **Admin** (`admin/`) | Ops console; holds API key in httpOnly cookie; includes evaluate/classify/guardrails playgrounds; AI via Admin BFF only |
-
 ---
 
 ## 3. C4 Views
@@ -162,52 +155,11 @@ C4Container
 
 ### Level 3 — Engine Components
 
-| Component | Package path | Responsibility |
-|-----------|--------------|----------------|
-| DSL Parser | `drpe/dsl/parser.py` | YAML → Pydantic `Policy` / classification policy |
-| Evaluator | `drpe/core/evaluator.py` | Match scope + rules; lowest `priority` wins |
-| Classifier | `drpe/core/classifier.py` | Entity detection vs classification policies |
-| Conflict resolver | `drpe/core/conflict.py` | Surface overlapping matches |
-| Jurisdictions | `drpe/core/jurisdictions.py` | Built-in jurisdiction metadata |
-| Policy diff | `drpe/core/policy_diff.py` | Structural version diff |
-| Enforcement | `drpe/core/enforcement.py` | Scan records, grace, dispatch, audit |
-| DSAR service | `drpe/core/dsar.py` | Sync access/erasure workflows |
-| Guardrails | `drpe/guardrails/` | Optional OpenGuardrails runtime wrapper + DRPE detectors |
-| Privacy | `drpe/privacy/` | Optional PII mask for AI / privacy APIs |
-
 ---
 
 ## 4. Repository Layout
 
-| Path | Purpose |
-|------|---------|
-| `drpe/models/` | Domain models (Policy, DSAR, audit, systems/processes, …) |
-| `drpe/dsl/` | YAML policy parser |
-| `drpe/core/` | Evaluator, classifier, enforcement, DSAR, operators |
-| `drpe/api/` | FastAPI `create_app()`, routes, settings, deps |
-| `drpe/guardrails/` | OpenGuardrails availability, runtime factory, detectors, evaluate service |
-| `drpe/sdk/` | `DRPEClient`, embedded `PolicyEvaluator`, `@enforce` |
-| `drpe/ports/` | Protocols (stores, RecordSource, dispatchers) |
-| `drpe/adapters/` | In-memory, SQLAlchemy, Redis cache, HTTP webhook |
-| `drpe/db/` | ORM rows, session helpers |
-| `drpe/migrations/` | Alembic versions `001`–`011` |
-| `drpe/scheduler/` | Celery app, tasks, enforcement runtime |
-| `drpe/privacy/` | Masking / privacy helpers |
-| `admin/` | Next.js ops console (BFF over `/api/v1`) |
-| `config/` | Example YAML policies |
-| `openapi/` | Committed OpenAPI schema |
-| `clients/` | Generated TypeScript / Go / Java clients |
-| `docs/ARCHITECTURE.md` | This document |
-
 ### Entry points
-
-| Entry | How |
-|-------|-----|
-| API ASGI | `uvicorn drpe.api.app:app` → `create_app()` |
-| Celery | `celery -A drpe.scheduler.celery_app.celery_app worker\|beat` |
-| Admin | `cd admin && npm run dev` (port 3000) |
-| SDK remote | `from drpe import DRPEClient` |
-| SDK embedded | `from drpe import PolicyEvaluator` |
 
 ### Store wiring (`create_app`)
 
@@ -229,27 +181,7 @@ Browser → Next.js middleware (session cookie)
        → admin/app/api/ai/* → LiteLLM (optional; never auto-imports)
 ```
 
-| Concern | Implementation |
-|---------|----------------|
-| Auth | Login sets httpOnly cookie with API key; middleware guards console |
-| Data access | Server-side `DRPE_API_URL` + Bearer key; no key in browser JS |
-| AI assist | BFF routes: `policy-suggest`, `classify-sample`, `evaluate-sample` |
-| Guardrails UX | `/guardrails` loads runtime status, active agent policies, and scratch OGR docs; deep-link via `?policy=` |
-| Design | `admin/design-system/` (Fira Sans/Code, blue/amber) |
-| OpenAPI types | `admin/lib/generated/schema.d.ts` via `npm run openapi` |
-
 ### Console surfaces
-
-| Route | Purpose |
-|-------|---------|
-| `/` | Overview metrics / attention |
-| `/policies`, `/policies/[id]`, `/policies/import`, `/policies/graph` | CRUD, versions, AI import, structure graph |
-| `/systems`, `/processes` | Governance catalog + policy links |
-| `/evaluate`, `/classify` | Playgrounds (dry-run default for evaluate) |
-| `/guardrails` | Agent safety playground; evaluate GuardEvents against active agent policies or scratch OGR docs |
-| `/enforce`, `/grace-holds` | Jobs + grace hold actions |
-| `/dsar`, `/audit`, `/webhooks` | Requests, audit trail, webhook CRUD |
-| `/insights`, `/observability` | Relation graph / LangSmith traces (when configured) |
 
 ---
 
@@ -260,23 +192,6 @@ Browser → Next.js middleware (session cookie)
 Optional Bearer **`DRPE_API_KEY`**. If unset, API is open (dev/test). Full OAuth2/JWT scopes are deferred.
 
 ### Route modules
-
-| Prefix | Module | Notes |
-|--------|--------|-------|
-| `/policies` | `routes_policies.py` | CRUD, validate, import, versions, activate, diff |
-| `/systems` | `routes_systems.py` | Governance catalog |
-| `/processes` | `routes_processes.py` | Governance catalog |
-| `/classify` | `routes_classify.py` | Single/batch classify + diagnostics |
-| `/evaluate` | `routes_evaluate.py` | Single/batch/dry-run |
-| `/enforce` | `routes_enforce.py` | Trigger job + list/get jobs |
-| `/grace-holds` | `routes_grace_holds.py` | List + approve/cancel style actions |
-| `/dsar` | `routes_dsar.py` | Access/erasure + list/get (sync) |
-| `/webhooks` | `routes_webhooks.py` | Registration CRUD |
-| `/audit` | `routes_audit.py` | Query append-only logs |
-| `/health` | `routes_misc.py` | Liveness / readiness (DB + Redis PING) |
-| `/jurisdictions` | `routes_misc.py` | Built-in jurisdiction list |
-| `/privacy` | `routes_privacy.py` | Mask / privacy helpers |
-| `/guardrails` | `routes_guardrails.py` | Runtime status, scratch OGR CRUD, GuardEvent evaluate |
 
 Interactive docs: `http://localhost:8000/docs`. Contract: `openapi/openapi.json`.
 
@@ -360,27 +275,9 @@ Scratch / raw OGR documents are also supported under `/api/v1/guardrails/policie
 
 **Schema:** `drpe` (Postgres / Supabase). Migrations: `alembic upgrade head` through `011_agent_ogr_policy`.
 
-| Table | Purpose |
-|-------|---------|
-| `policies` | Current policy head (JSONB rules/scope/tags/dsar/audit/reference_sources) |
-| `policy_versions` | Immutable full JSON snapshots per version |
-| `audit_logs` | Append-only enforcement / DSAR events (**not** an HTTP access log) |
-| `enforcement_jobs` | Scheduled/API-triggered scan jobs + progress |
-| `dsar_requests` | Access/erasure requests + outcomes |
-| `webhooks` | Registered endpoints + events + secret |
-| `grace_holds` | Pending grace-period holds |
-| `guardrail_policies` | Scratch OpenGuardrails JSON documents for `/guardrails/policies` |
-| `systems` / `processes` (+ link tables) | Governance catalog; many-to-many policy links |
-
 `policies.ogr_policy` (migration `011`) stores the OpenGuardrails JSON document for `PolicyKind.agent` rows.
 
 ### Redis (optional)
-
-| Key pattern | Purpose |
-|-------------|---------|
-| `{prefix}:policy:{id}` | Cached policy JSON (TTL) |
-| `{prefix}:policies:ids` | Id list for unfiltered list |
-| `{prefix}:policies:gen` | Generation counter for multi-worker engine reload |
 
 Pool caps: `DRPE_REDIS_MAX_CONNECTIONS` (default 20), Celery `DRPE_CELERY_BROKER_POOL_LIMIT`.
 
@@ -396,7 +293,7 @@ Pool caps: `DRPE_REDIS_MAX_CONNECTIONS` (default 20), Celery `DRPE_CELERY_BROKER
 
 ---
 
-## 9. Enforcement & DSAR flows
+## 9. Enforcement &amp; DSAR flows
 
 ### Enforcement
 
@@ -462,15 +359,6 @@ result = evaluator.classify(data_type="customer_profile", metadata={...})
 
 ## 11. Quality attributes
 
-| Attribute | How addressed |
-|-----------|---------------|
-| Compliance | Immutable audit, jurisdictions, DSAR, grace holds |
-| Reliability | Store fallbacks, Redis read fall-through, Celery retries |
-| Performance | Redis policy cache, batch evaluate/classify, Admin lazy loads |
-| Extensibility | YAML DSL, pluggable RecordSource / ActionDispatcher, optional OpenGuardrails adapter |
-| Security | Optional API key, CORS (`DRPE_CORS_ORIGINS`), no secrets in SESSION/docs; AI prompts masked when privacy stack installed |
-| Operability | `/health`, `/health/ready`, structured Admin observability |
-
 ---
 
 ## 12. Non-goals / deferred
@@ -481,3 +369,25 @@ result = evaluator.classify(data_type="customer_profile", metadata={...})
 - Catalog `source_key` automatically matching evaluate `scope.sources`
 - Cross-region replication / streaming evaluation
 - Engine does **not** delete customer data itself — it decides **what** to do; integrators execute via webhooks/handlers
+
+
+
+\`\`\`adl
+
+DESCRIPTION Ticketing domain isolation
+
+DEFINE SYSTEM Sysops Squad AS sysops
+
+  DEFINE DOMAIN Ticketing AS ticketing
+
+  DEFINE DOMAIN Survey AS survey
+
+ASSERT(ticketing has NO DEPENDENCY on {survey})
+
+FOREACH $C IN COMPONENTS DO
+
+  ASSERT($C has NO DEPENDENCY on ticketing)
+
+END
+
+\`\`\`
