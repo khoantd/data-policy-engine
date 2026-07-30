@@ -1,77 +1,59 @@
-variable "kubeconfig_path" {
-  description = "Path to the kubeconfig file for cluster access"
-  type        = string
-}
-
-variable "namespace" {
-  description = "Kubernetes namespace for the application stack"
-  type        = string
-  default     = "drpe"
-}
-
-variable "environment" {
-  description = "Deployment environment (e.g., prod, staging)"
-  type        = string
-  default     = "prod"
-}
-
 variable "region" {
-  description = "Geographic region of the cluster"
+  description = "AWS region where resources will be deployed"
   type        = string
   default     = "eu-west-1"
 }
 
-variable "cluster_name" {
-  description = "Name of the Kubernetes cluster"
+variable "cluster_name_prefix" {
+  description = "Prefix used for EKS cluster names"
   type        = string
-  default     = "k8s-cluster"
+  default     = "drpe"
 }
 
-# Container image variables
-variable "image_admin_console" {
-  description = "Docker image for the Admin Console"
+variable "node_instance_type" {
+  description = "EC2 instance type for EKS worker nodes"
   type        = string
-  default     = "registry.local/admin-console:latest"
+  default     = "t3.medium"
 }
 
-variable "image_api" {
-  description = "Docker image for the REST API"
-  type        = string
-  default     = "registry.local/api:latest"
+variable "node_desired_capacity" {
+  description = "Desired number of worker nodes"
+  type        = number
+  default     = 2
 }
 
-variable "image_sdk" {
-  description = "Docker image for the Python SDK"
+variable "db_instance_class" {
+  description = "RDS PostgreSQL instance class"
   type        = string
-  default     = "registry.local/sdk:latest"
+  default     = "db.t3.micro"
 }
 
-variable "image_core_engine" {
-  description = "Docker image for the Engine Core"
+variable "redis_node_type" {
+  description = "ElastiCache Redis node type"
   type        = string
-  default     = "registry.local/core-engine:latest"
+  default     = "cache.t3.micro"
 }
 
-variable "image_scheduler" {
-  description = "Docker image for the Scheduler"
+variable "db_name" {
+  description = "Database name for PostgreSQL"
   type        = string
-  default     = "registry.local/scheduler:latest"
+  default     = "drpe_db"
 }
 
-variable "image_cache" {
-  description = "Docker image for the Redis cache"
+variable "db_username" {
+  description = "Master username for PostgreSQL"
   type        = string
-  default     = "redis:7"
+  default     = "drpe_user"
 }
 
-variable "image_guardrails_runtime" {
-  description = "Docker image for the OpenGuardrails Runtime"
+variable "db_password" {
+  description = "Master password for PostgreSQL (sensitive)"
   type        = string
-  default     = "registry.local/guardrails-runtime:latest"
+  sensitive   = true
 }
 
-variable "image_db" {
-  description = "Docker image for PostgreSQL"
+variable "redis_cluster_id" {
+  description = "ElastiCache Redis cluster ID"
   type        = string
-  default     = "postgres:15"
+  default     = "drpe-redis"
 }

@@ -1,558 +1,146 @@
-# Namespace
-resource "kubernetes_namespace" "drpe" {
-  metadata {
-    name = var.namespace
+#############################
+# IAM Role for EKS Cluster
+#############################
+resource "aws_iam_role" "eks_cluster_role" {
+  name = "${var.cluster_name_prefix}-eks-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = { Service = "eks.amazonaws.com" }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_role_attachment" {
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+#############################
+# EKS Cluster - Production
+#############################
+resource "aws_eks_cluster" "prod" {
+  name     = "${var.cluster_name_prefix}-prod"
+  role_arn = aws_iam_role.eks_cluster_role.arn
+
+  vpc_config {
+    subnet_ids = var.prod_subnet_ids
+  }
+
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster_role_attachment]
+}
+
+resource "aws_eks_node_group" "prod" {
+  cluster_name    = aws_eks_cluster.prod.name
+  node_group_name = "${var.cluster_name_prefix}-prod-ng"
+  node_role_arn   = aws_iam_role.eks_cluster_role.arn
+
+  scaling_config {
+    desired_size = var.node_desired_capacity
+    max_size     = var.node_desired_capacity
+    min_size     = 1
+  }
+
+  instance_types = [var.node_instance_type]
+
+  vpc_config {
+    subnet_ids = var.prod_subnet_ids
   }
 }
 
-# Helper for service names
-locals {
-  services = {
-    admin_console        = "admin-console-service"
-    api                  = "api-service"
-    sdk                  = "sdk-service"
-    core_engine          = "core-engine-service"
-    scheduler            = "scheduler-service"
-    cache                = "cache-service"
-    guardrails_runtime   = "guardrails-runtime-service"
-    db                   = "db-service"
+#############################
+# RDS PostgreSQL - Production
+#############################
+resource "aws_db_instance" "prod" {
+  identifier              = "${var.cluster_name_prefix}-prod-db"
+  engine                  = "postgres"
+  instance_class          = var.db_instance_class
+  allocated_storage       = 20
+  db_subnet_group_name    = var.prod_db_subnet_group
+  vpc_security_group_ids = [var.prod_security_group_id]
+
+  username = var.db_username
+  password = var.db_password
+  name     = var.db_name
+
+  skip_final_snapshot = true
+}
+
+#############################
+# ElastiCache Redis - Production
+#############################
+resource "aws_elasticache_cluster" "prod" {
+  cluster_id           = "${var.cluster_name_prefix}-prod-redis"
+  engine               = "redis"
+  node_type            = var.redis_node_type
+  num_cache_nodes      = 1
+  subnet_group_name    = var.prod_redis_subnet_group
+  security_group_ids   = [var.prod_security_group_id]
+}
+
+#############################
+# EKS Cluster - Staging
+#############################
+resource "aws_eks_cluster" "staging" {
+  name     = "${var.cluster_name_prefix}-staging"
+  role_arn = aws_iam_role.eks_cluster_role.arn
+
+  vpc_config {
+    subnet_ids = var.staging_subnet_ids
+  }
+
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster_role_attachment]
+}
+
+resource "aws_eks_node_group" "staging" {
+  cluster_name    = aws_eks_cluster.staging.name
+  node_group_name = "${var.cluster_name_prefix}-staging-ng"
+  node_role_arn   = aws_iam_role.eks_cluster_role.arn
+
+  scaling_config {
+    desired_size = var.node_desired_capacity
+    max_size     = var.node_desired_capacity
+    min_size     = 1
+  }
+
+  instance_types = [var.node_instance_type]
+
+  vpc_config {
+    subnet_ids = var.staging_subnet_ids
   }
 }
 
-# Deployments & Services
+#############################
+# RDS PostgreSQL - Staging
+#############################
+resource "aws_db_instance" "staging" {
+  identifier              = "${var.cluster_name_prefix}-staging-db"
+  engine                  = "postgres"
+  instance_class          = var.db_instance_class
+  allocated_storage       = 20
+  db_subnet_group_name    = var.staging_db_subnet_group
+  vpc_security_group_ids = [var.staging_security_group_id]
 
-# Admin Console
-resource "kubernetes_deployment" "admin_console" {
-  metadata {
-    name      = "admin-console"
-    namespace = var.namespace
-    labels = {
-      app = "admin-console"
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "admin-console"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "admin-console"
-        }
-      }
-      spec {
-        container {
-          name  = "admin-console"
-          image = var.image_admin_console
+  username = var.db_username
+  password = var.db_password
+  name     = var.db_name
 
-          port {
-            container_port = 3000
-          }
-
-          env {
-            name  = "DRPE_API_URL"
-            value = "http://${local.services.api}.${var.namespace}.svc.cluster.local:80"
-          }
-        }
-      }
-    }
-  }
+  skip_final_snapshot = true
 }
 
-resource "kubernetes_service" "admin_console" {
-  metadata {
-    name      = local.services.admin_console
-    namespace = var.namespace
-    labels = {
-      app = "admin-console"
-    }
-  }
-  spec {
-    selector = {
-      app = "admin-console"
-    }
-    port {
-      protocol = "TCP"
-      port     = 80
-      target_port = 3000
-    }
-    type = "ClusterIP"
-  }
-}
-
-# REST API
-resource "kubernetes_deployment" "api" {
-  metadata {
-    name      = "api"
-    namespace = var.namespace
-    labels = {
-      app = "api"
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "api"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "api"
-        }
-      }
-      spec {
-        container {
-          name  = "api"
-          image = var.image_api
-
-          port {
-            container_port = 8000
-          }
-
-          env {
-            name  = "POSTGRES_HOST"
-            value = "${local.services.db}.${var.namespace}.svc.cluster.local"
-          }
-
-          env {
-            name  = "REDIS_HOST"
-            value = "${local.services.cache}.${var.namespace}.svc.cluster.local"
-          }
-
-          env {
-            name  = "GUARDRAILS_RUNTIME_HOST"
-            value = "${local.services.guardrails_runtime}.${var.namespace}.svc.cluster.local"
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "api" {
-  metadata {
-    name      = local.services.api
-    namespace = var.namespace
-    labels = {
-      app = "api"
-    }
-  }
-  spec {
-    selector = {
-      app = "api"
-    }
-    port {
-      protocol = "TCP"
-      port     = 80
-      target_port = 8000
-    }
-    type = "ClusterIP"
-  }
-}
-
-# Python SDK
-resource "kubernetes_deployment" "sdk" {
-  metadata {
-    name      = "sdk"
-    namespace = var.namespace
-    labels = {
-      app = "sdk"
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "sdk"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "sdk"
-        }
-      }
-      spec {
-        container {
-          name  = "sdk"
-          image = var.image_sdk
-
-          port {
-            container_port = 5000
-          }
-
-          env {
-            name  = "API_URL"
-            value = "http://${local.services.api}.${var.namespace}.svc.cluster.local:80"
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "sdk" {
-  metadata {
-    name      = local.services.sdk
-    namespace = var.namespace
-    labels = {
-      app = "sdk"
-    }
-  }
-  spec {
-    selector = {
-      app = "sdk"
-    }
-    port {
-      protocol = "TCP"
-      port     = 80
-      target_port = 5000
-    }
-    type = "ClusterIP"
-  }
-}
-
-# Engine Core
-resource "kubernetes_deployment" "core_engine" {
-  metadata {
-    name      = "core-engine"
-    namespace = var.namespace
-    labels = {
-      app = "core-engine"
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "core-engine"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "core-engine"
-        }
-      }
-      spec {
-        container {
-          name  = "core-engine"
-          image = var.image_core_engine
-
-          port {
-            container_port = 9000
-          }
-
-          env {
-            name  = "POSTGRES_HOST"
-            value = "${local.services.db}.${var.namespace}.svc.cluster.local"
-          }
-
-          env {
-            name  = "REDIS_HOST"
-            value = "${local.services.cache}.${var.namespace}.svc.cluster.local"
-          }
-
-          env {
-            name  = "GUARDRAILS_RUNTIME_HOST"
-            value = "${local.services.guardrails_runtime}.${var.namespace}.svc.cluster.local"
-          }
-
-          env {
-            name  = "API_URL"
-            value = "http://${local.services.api}.${var.namespace}.svc.cluster.local:80"
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "core_engine" {
-  metadata {
-    name      = local.services.core_engine
-    namespace = var.namespace
-    labels = {
-      app = "core-engine"
-    }
-  }
-  spec {
-    selector = {
-      app = "core-engine"
-    }
-    port {
-      protocol = "TCP"
-      port     = 80
-      target_port = 9000
-    }
-    type = "ClusterIP"
-  }
-}
-
-# Scheduler
-resource "kubernetes_deployment" "scheduler" {
-  metadata {
-    name      = "scheduler"
-    namespace = var.namespace
-    labels = {
-      app = "scheduler"
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "scheduler"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "scheduler"
-        }
-      }
-      spec {
-        container {
-          name  = "scheduler"
-          image = var.image_scheduler
-
-          port {
-            container_port = 8001
-          }
-
-          env {
-            name  = "CORE_ENGINE_HOST"
-            value = "${local.services.core_engine}.${var.namespace}.svc.cluster.local"
-          }
-
-          env {
-            name  = "REDIS_HOST"
-            value = "${local.services.cache}.${var.namespace}.svc.cluster.local"
-          }
-
-          env {
-            name  = "DB_HOST"
-            value = "${local.services.db}.${var.namespace}.svc.cluster.local"
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "scheduler" {
-  metadata {
-    name      = local.services.scheduler
-    namespace = var.namespace
-    labels = {
-      app = "scheduler"
-    }
-  }
-  spec {
-    selector = {
-      app = "scheduler"
-    }
-    port {
-      protocol = "TCP"
-      port     = 80
-      target_port = 8001
-    }
-    type = "ClusterIP"
-  }
-}
-
-# Redis Cache
-resource "kubernetes_deployment" "cache" {
-  metadata {
-    name      = "cache"
-    namespace = var.namespace
-    labels = {
-      app = "cache"
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "cache"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "cache"
-        }
-      }
-      spec {
-        container {
-          name  = "cache"
-          image = var.image_cache
-
-          port {
-            container_port = 6379
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "cache" {
-  metadata {
-    name      = local.services.cache
-    namespace = var.namespace
-    labels = {
-      app = "cache"
-    }
-  }
-  spec {
-    selector = {
-      app = "cache"
-    }
-    port {
-      protocol = "TCP"
-      port     = 80
-      target_port = 6379
-    }
-    type = "ClusterIP"
-  }
-}
-
-# OpenGuardrails Runtime
-resource "kubernetes_deployment" "guardrails_runtime" {
-  metadata {
-    name      = "guardrails-runtime"
-    namespace = var.namespace
-    labels = {
-      app = "guardrails-runtime"
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "guardrails-runtime"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "guardrails-runtime"
-        }
-      }
-      spec {
-        container {
-          name  = "guardrails-runtime"
-          image = var.image_guardrails_runtime
-
-          port {
-            container_port = 9100
-          }
-
-          env {
-            name  = "API_URL"
-            value = "http://${local.services.api}.${var.namespace}.svc.cluster.local:80"
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "guardrails_runtime" {
-  metadata {
-    name      = local.services.guardrails_runtime
-    namespace = var.namespace
-    labels = {
-      app = "guardrails-runtime"
-    }
-  }
-  spec {
-    selector = {
-      app = "guardrails-runtime"
-    }
-    port {
-      protocol = "TCP"
-      port     = 80
-      target_port = 9100
-    }
-    type = "ClusterIP"
-  }
-}
-
-# PostgreSQL
-resource "kubernetes_deployment" "db" {
-  metadata {
-    name      = "db"
-    namespace = var.namespace
-    labels = {
-      app = "db"
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "db"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "db"
-        }
-      }
-      spec {
-        container {
-          name  = "db"
-          image = var.image_db
-
-          env {
-            name  = "POSTGRES_PASSWORD"
-            value = "change-me"
-          }
-
-          env {
-            name  = "POSTGRES_DB"
-            value = "drpe"
-          }
-
-          env {
-            name  = "POSTGRES_USER"
-            value = "drpe"
-          }
-
-          port {
-            container_port = 5432
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "db" {
-  metadata {
-    name      = local.services.db
-    namespace = var.namespace
-    labels = {
-      app = "db"
-    }
-  }
-  spec {
-    selector = {
-      app = "db"
-    }
-    port {
-      protocol = "TCP"
-      port     = 80
-      target_port = 5432
-    }
-    type = "ClusterIP"
-  }
+#############################
+# ElastiCache Redis - Staging
+#############################
+resource "aws_elasticache_cluster" "staging" {
+  cluster_id           = "${var.cluster_name_prefix}-staging-redis"
+  engine               = "redis"
+  node_type            = var.redis_node_type
+  num_cache_nodes      = 1
+  subnet_group_name    = var.staging_redis_subnet_group
+  security_group_ids   = [var.staging_security_group_id]
 }

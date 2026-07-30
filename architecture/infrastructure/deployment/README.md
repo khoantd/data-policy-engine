@@ -1,11 +1,16 @@
-# Data Policy Engine – Terraform Deployment
+# Data Policy Engine – AWS Terraform Setup
 
-This repository contains a minimal OpenTofu/Terraform configuration to deploy the Data Policy Engine stack on an on‑prem Kubernetes cluster.
+This repository contains a Terraform configuration that provisions the core infrastructure
+required for the Data Policy Engine (DRPE) on AWS.  
+The stack is split into **production** and **staging** environments, each with:
+
+- EKS cluster
+- Managed PostgreSQL (RDS) instance
+- ElastiCache Redis cluster
 
 ## Prerequisites
 
-- An operational Kubernetes cluster (e.g., k3s, minikube, or any on‑prem distribution).
-- `kubectl` configured to point at the target cluster.
-- `tofu` or `terraform` CLI installed (v1.5+).
+- [Terraform 1.5+](https://www.terraform.io/downloads) or [OpenTofu 1.6+](https://opentofu.org/)
+- AWS credentials with permissions to create EKS, RDS, ElastiCache, IAM, and networking resources
 
-## Usage
+## Quick Start
