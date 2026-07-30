@@ -1,82 +1,77 @@
-variable "region" {
-  description = "AWS region where resources will be provisioned"
+variable "kubeconfig_path" {
+  description = "Path to the kubeconfig file for cluster access"
   type        = string
 }
 
-variable "environment" {
-  description = "Deployment environment (e.g., prod or staging)"
-  type        = string
-  default     = "prod"
-}
-
-variable "vpc_id" {
-  description = "Existing VPC ID to deploy resources into"
-  type        = string
-}
-
-variable "subnet_ids" {
-  description = "List of subnet IDs for the ECS cluster"
-  type        = list(string)
-}
-
-variable "db_username" {
-  description = "Database username for PostgreSQL"
-  type        = string
-}
-
-variable "db_password_secret_arn" {
-  description = "ARN of AWS Secrets Manager secret containing DB password"
-  type        = string
-}
-
-variable "cache_password_secret_arn" {
-  description = "ARN of AWS Secrets Manager secret containing Redis password"
-  type        = string
-}
-
-variable "image_admin_console" {
-  description = "ECR image URI for Admin Console"
-  type        = string
-}
-
-variable "image_api" {
-  description = "ECR image URI for REST API"
-  type        = string
-}
-
-variable "image_sdk" {
-  description = "ECR image URI for Python SDK (embedded mode)"
-  type        = string
-}
-
-variable "image_core_engine" {
-  description = "ECR image URI for Engine Core"
-  type        = string
-}
-
-variable "image_scheduler" {
-  description = "ECR image URI for Scheduler"
-  type        = string
-}
-
-variable "image_guardrails_runtime" {
-  description = "ECR image URI for OpenGuardrails Runtime"
-  type        = string
-}
-
-variable "image_cache" {
-  description = "ECR image URI for Redis (optional; could be managed service)"
-  type        = string
-}
-
-variable "db_name" {
-  description = "Name of the PostgreSQL database"
+variable "namespace" {
+  description = "Kubernetes namespace for the application stack"
   type        = string
   default     = "drpe"
 }
 
-variable "cache_cluster_name" {
-  description = "Name of the ElastiCache Redis cluster"
+variable "environment" {
+  description = "Deployment environment (e.g., prod, staging)"
   type        = string
-  default     = "drpe-redis"
+  default     = "prod"
+}
+
+variable "region" {
+  description = "Geographic region of the cluster"
+  type        = string
+  default     = "eu-west-1"
+}
+
+variable "cluster_name" {
+  description = "Name of the Kubernetes cluster"
+  type        = string
+  default     = "k8s-cluster"
+}
+
+# Container image variables
+variable "image_admin_console" {
+  description = "Docker image for the Admin Console"
+  type        = string
+  default     = "registry.local/admin-console:latest"
+}
+
+variable "image_api" {
+  description = "Docker image for the REST API"
+  type        = string
+  default     = "registry.local/api:latest"
+}
+
+variable "image_sdk" {
+  description = "Docker image for the Python SDK"
+  type        = string
+  default     = "registry.local/sdk:latest"
+}
+
+variable "image_core_engine" {
+  description = "Docker image for the Engine Core"
+  type        = string
+  default     = "registry.local/core-engine:latest"
+}
+
+variable "image_scheduler" {
+  description = "Docker image for the Scheduler"
+  type        = string
+  default     = "registry.local/scheduler:latest"
+}
+
+variable "image_cache" {
+  description = "Docker image for the Redis cache"
+  type        = string
+  default     = "redis:7"
+}
+
+variable "image_guardrails_runtime" {
+  description = "Docker image for the OpenGuardrails Runtime"
+  type        = string
+  default     = "registry.local/guardrails-runtime:latest"
+}
+
+variable "image_db" {
+  description = "Docker image for PostgreSQL"
+  type        = string
+  default     = "postgres:15"
 }
