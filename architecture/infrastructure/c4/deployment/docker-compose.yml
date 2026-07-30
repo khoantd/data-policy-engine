@@ -1,0 +1,133 @@
+services:
+  admin-console:
+    image: node:20-slim
+    container_name: admin-console
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev"
+    volumes:
+      - ./admin-console:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_LLM_URL=${NEXT_PUBLIC_LLM_URL}
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  api:
+    image: python:3.12-slim
+    container_name: api
+    working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./api:/app
+      - /app/venv
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - LLM_URL=${LLM_URL}
+      - OGR_URL=${OGR_URL}
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+
+  sdk:
+    image: python:3.12-slim
+    container_name: sdk
+    working_dir: /app
+    command: python -m http.server 5000
+    volumes:
+      - ./sdk:/app
+    environment:
+      - DRPE_API_URL=${DRPE_API_URL}
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  core-engine:
+    image: python:3.12-slim
+    container_name: core-engine
+    working_dir: /app
+    command: python engine.py
+    volumes:
+      - ./core-engine:/app
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - OGR_ENABLED=${OGR_ENABLED}
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - cache
+      - guardrails-runtime
+    restart: unless-stopped
+
+  scheduler:
+    image: python:3.12-slim
+    container_name: scheduler
+    working_dir: /app
+    command: celery -A scheduler worker --loglevel=info
+    volumes:
+      - ./scheduler:/app
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+
+  cache:
+    image: redis:7.2
+    container_name: cache
+    volumes:
+      - cache-data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  guardrails-runtime:
+    image: python:3.12-slim
+    container_name: guardrails-runtime
+    working_dir: /app
+    command: python runtime.py
+    volumes:
+      - ./guardrails-runtime:/app
+    environment:
+      - LOG_LEVEL=${GRAILS_LOG_LEVEL}
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:15.7
+    container_name: db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  cache-data:
